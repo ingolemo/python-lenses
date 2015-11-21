@@ -42,21 +42,21 @@ class Lens:
     'A no-frills lens class. serves as the backbone of the lenses library'
 
     def __init__(self, getter_func, setter_func):
-        self._get = getter_func
-        self._set = setter_func
+        self.get = getter_func
+        self.set = setter_func
 
-    def __getattr__(self, name):
+    def get_attr(self, name):
         return Lens(
-            lambda item: getattr(self._get(item), name),
-            lambda item, a: self._set(
+            lambda item: getattr(self.get(item), name),
+            lambda item, a: self.set(
                 item,
-                _rich_setter(self._get(item), 'setattr', name, a))
+                _rich_setter(self.get(item), 'setattr', name, a))
         )
 
-    def __getitem__(self, name):
+    def get_item(self, name):
         return Lens(
-            lambda item: self._get(item)[name],
-            lambda item, a: self._set(
+            lambda item: self.get(item)[name],
+            lambda item, a: self.set(
                 item,
-                _rich_setter(self._get(item), 'setitem', name, a))
+                _rich_setter(self.get(item), 'setitem', name, a))
         )

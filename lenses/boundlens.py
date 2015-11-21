@@ -20,11 +20,11 @@ class BoundLens:
 
     def get(self):
         'get the item via the lens'
-        return self.lens._get(self.item)
+        return self.lens.get(self.item)
 
     def set(self, newvalue):
         'set the item via the lens'
-        return self.lens._set(self.item, newvalue)
+        return self.lens.set(self.item, newvalue)
 
     def modify(self, func):
         'apply a function to the item via the lens'
@@ -37,10 +37,10 @@ class BoundLens:
         return self.set(getattr(self.get(), method_name)(*args, *kwargs))
 
     def __getattr__(self, name):
-        return BoundLens(self.item, getattr(self.lens, name))
+        return BoundLens(self.item, self.lens.get_attr(name))
 
     def __getitem__(self, name):
-        return BoundLens(self.item, self.lens[name],)
+        return BoundLens(self.item, self.lens.get_item(name),)
 
     # __new__
     # __init__
