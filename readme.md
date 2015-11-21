@@ -120,3 +120,4 @@ take a rather large amount of plumbing to achieve.
 * add decent api for unbound lenses
 * document unbound lenses
 * add lens combinators
+* allow lenses to manipulate multiple objects
