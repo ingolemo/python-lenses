@@ -12,7 +12,7 @@ data-structures without mutating them.
 For most users, the lenses library exports only one thing worth knowing
 about; a `lens` function:
 
-	from lenses import lens
+	>>> from lenses import lens
 
 If you have a large data structure that you want to manipulate, you can
 pass it to this function and you will receive a BoundLens, which is a
