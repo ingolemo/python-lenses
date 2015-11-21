@@ -64,8 +64,8 @@ data changed. tuples and namedtuples are supported out of the box.
 	...         return 'MyClass(' + repr(self.attr) + ')'
 	...
 	>>> data = (0, MyClass({'first': 'hello', 'second': 'world'}))
-	>>> lens(data)[1].attr['first'].set('goodbye)
-	(0, MyClass({'first': 'goodbye', 'second': 'world'}))
+	>>> lens(data)[1].attr['first'].set('goodbye')
+	(0, MyClass({'second': 'world', 'first': 'goodbye'}))
 
 If you wish to apply a function using a lens you can use the `modify`
 method:
@@ -96,8 +96,8 @@ games:
 	>>> Level = namedtuple('Level', 'map enemies')
 	>>> Enemy = namedtuple('Enemy', 'x y')
 	>>> 
-	>>> oldstate = GameState({
-	...     1: World(..., ...)
+	>>> old_state = GameState({
+	...     1: World(..., ...),
 	...     2: World({
 	...         1: Level({}, {
 	...             'goomba1': Enemy(100, 45),
