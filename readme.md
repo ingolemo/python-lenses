@@ -1,7 +1,9 @@
 # Lenses
 
 Lenses is a python library that helps you to manipulate large
-data-structures without mutating them.
+data-structures without mutating them. It is inspired by the lenses in
+Haskell, although it's much less principled and the api is more suitable
+for python.
 
 ## Installation
 
