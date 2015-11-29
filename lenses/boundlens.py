@@ -1,6 +1,7 @@
 def _carry_op(name):
     def operation(self, *args, **kwargs):
         return self.modify(lambda a: getattr(a, name)(*args, **kwargs))
+
     operation.__name__ = name
     return operation
 
@@ -14,9 +15,8 @@ class BoundLens:
         self.lens = sublens
 
     def __repr__(self):
-        return '{}({!r}, {!r})'.format(
-            self.__class__.__qualname__,
-            self.item, self.lens)
+        return '{}({!r}, {!r})'.format(self.__class__.__qualname__, self.item,
+                                       self.lens)
 
     def get(self):
         'get the item via the lens'
@@ -34,13 +34,13 @@ class BoundLens:
         '''call a method on the item via the lens.
 
         the method should return a new item.'''
-        return self.set(getattr(self.get(), method_name)(*args, *kwargs))
+        return self.set(getattr(self.get(), method_name)(*args, **kwargs))
 
     def __getattr__(self, name):
         return BoundLens(self.item, self.lens.get_attr(name))
 
     def __getitem__(self, name):
-        return BoundLens(self.item, self.lens.get_item(name),)
+        return BoundLens(self.item, self.lens.get_item(name))
 
     # __new__
     # __init__

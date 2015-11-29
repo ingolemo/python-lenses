@@ -1,4 +1,3 @@
-
 import collections
 
 import pytest
@@ -36,7 +35,6 @@ def test_dict_lens():
 
 def test_custom_class_lens():
     class C:
-
         def __init__(self, a, b):
             self.a = a
             self.b = b
@@ -56,7 +54,6 @@ def test_no_setter():
 
 def test_lens_setter():
     class C:
-
         def __init__(self, a, b):
             self.a = a
             self.b = b
@@ -91,6 +88,14 @@ def test_modify():
 
 def test_call_method():
     assert lens('hello').call_method('upper') == 'HELLO'
+
+
+def test_call_method_args():
+    assert lens('h').call_method('center', 5) == '  h  '
+
+
+def test_call_method_kwargs():
+    assert lens('h').call_method('encode', encoding='utf-8') == b'h'
 
 
 def test_adding_lens():
