@@ -1,5 +1,6 @@
 from .boundlens import BoundLens
 from .lens import Lens, setter
+from .functor import fmap
 
 
 def lens(obj=None):
@@ -9,8 +10,9 @@ def lens(obj=None):
     when called with an argument it returns an empty BoundLens.
     '''
     if obj is None:
-        return Lens(
-            lambda item: item,
-            lambda item, newvalue: newvalue
-        )
+        trivial_lens = Lens(lambda fn, state: fmap(
+            fn(state),
+            lambda newvalue: newvalue
+        ))
+        return trivial_lens
     return BoundLens(obj, lens())

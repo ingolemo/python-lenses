@@ -1,6 +1,8 @@
 import functools
 import copy
 
+from . import functor
+
 
 def _rich_setter(self, kind, key, value):
     try:
@@ -41,22 +43,21 @@ def _(self, kind, key, value):
 class Lens:
     'A no-frills lens class. serves as the backbone of the lenses library'
 
-    def __init__(self, getter_func, setter_func):
-        self.get = getter_func
-        self.set = setter_func
+    def __init__(self, func):
+        # func :: (a -> f a) -> s -> f s
+        self.func = func
 
-    def get_attr(self, name):
-        return Lens(
-            lambda item: getattr(self.get(item), name),
-            lambda item, a: self.set(
-                item,
-                _rich_setter(self.get(item), 'setattr', name, a))
-        )
+    def get(self, state):
+        return self.func(lambda a: functor.Const(a), state).item
 
-    def get_item(self, name):
-        return Lens(
-            lambda item: self.get(item)[name],
-            lambda item, a: self.set(
-                item,
-                _rich_setter(self.get(item), 'setitem', name, a))
-        )
+    def modify(self, state, fn):
+        return self.func(lambda a: functor.Identity(fn(a)), state).item
+
+    def set(self, state, newitem):
+        return self.func(lambda a: functor.Identity(newitem), state).item
+
+    def compose(self, other):
+        def new_func(fn, state):
+            return self.func((lambda state2: other.func(fn, state2)), state)
+
+        return Lens(new_func)

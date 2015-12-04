@@ -1,3 +1,7 @@
+from . import lens
+from . import functor
+
+
 def _carry_op(name):
     def operation(self, *args, **kwargs):
         return self.modify(lambda a: getattr(a, name)(*args, **kwargs))
@@ -28,7 +32,7 @@ class BoundLens:
 
     def modify(self, func):
         'apply a function to the item via the lens'
-        return self.set(func(self.get()))
+        return self.lens.modify(self.item, func)
 
     def call_method(self, method_name, *args, **kwargs):
         '''call a method on the item via the lens.
@@ -37,10 +41,24 @@ class BoundLens:
         return self.set(getattr(self.get(), method_name)(*args, **kwargs))
 
     def __getattr__(self, name):
-        return BoundLens(self.item, self.lens.get_attr(name))
+        newlens = self.lens.compose(lens.Lens(
+            lambda fn, state: functor.fmap(
+                fn(getattr(state, name)),
+                lambda newvalue:
+                    lens._rich_setter(state, 'setattr', name, newvalue)
+            )
+        ))
+        return BoundLens(self.item, newlens)
 
     def __getitem__(self, name):
-        return BoundLens(self.item, self.lens.get_item(name))
+        newlens = self.lens.compose(lens.Lens(
+            lambda fn, state: functor.fmap(
+                fn(state[name]),
+                lambda newvalue:
+                    lens._rich_setter(state, 'setitem', name, newvalue)
+            )
+        ))
+        return BoundLens(self.item, newlens)
 
     # __new__
     # __init__
