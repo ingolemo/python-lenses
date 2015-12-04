@@ -1,0 +1,8 @@
+[run]
+branch=true
+
+[report]
+#fail_under=90
+include=lenses/*
+show_missing=true
+skip_covered=true
