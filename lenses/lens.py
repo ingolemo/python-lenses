@@ -57,10 +57,8 @@ class Lens:
     def compose(self, other):
         '''Composes another lens with this one.
 
-        The order of composition is technically backwards from what it
-        should be. The operator is more useful and conceptually simpler
-        this way around. The `other` lens is used to refine the `self`
-        lens. The following two pieces of code should be equivalent:
+        The `other` lens is used to refine the `self` lens. The
+        following two pieces of code should be equivalent:
 
             self.compose(other).get(state)
 
