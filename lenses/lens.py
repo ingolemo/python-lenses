@@ -76,6 +76,14 @@ class Lens:
     def __init__(self, func):
         self.func = func
 
+    @classmethod
+    def trivial(cls):
+        'Returns a trivial lens that magnifies to the whole state.'
+        return Lens(lambda fn, state: functor.fmap(
+            fn(state),
+            lambda newvalue: newvalue
+        ))
+
     def get(self, state):
         'Returns the value this lens is magnified on.'
         return self.func(lambda a: functor.Const(a), state).item
