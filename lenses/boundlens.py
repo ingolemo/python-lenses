@@ -1,5 +1,8 @@
+import operator
+
 from . import lens
 from . import functor
+from .setter import magic_set
 
 
 def _carry_op(name):
@@ -8,6 +11,15 @@ def _carry_op(name):
 
     operation.__name__ = name
     return operation
+
+
+def magic_set_lens(name, method, getter):
+    return lens.Lens(
+        lambda fn, state: functor.fmap(
+            fn(getter(state, name)),
+            lambda newvalue: magic_set(state, method, name, newvalue)
+        )
+    )
 
 
 class BoundLens:
@@ -41,23 +53,12 @@ class BoundLens:
         return self.set(getattr(self.get(), method_name)(*args, **kwargs))
 
     def __getattr__(self, name):
-        newlens = self.lens.compose(lens.Lens(
-            lambda fn, state: functor.fmap(
-                fn(getattr(state, name)),
-                lambda newvalue:
-                    lens._rich_setter(state, 'setattr', name, newvalue)
-            )
-        ))
+        newlens = self.lens.compose(magic_set_lens(name, 'setattr', getattr))
         return BoundLens(self.item, newlens)
 
     def __getitem__(self, name):
-        newlens = self.lens.compose(lens.Lens(
-            lambda fn, state: functor.fmap(
-                fn(state[name]),
-                lambda newvalue:
-                    lens._rich_setter(state, 'setitem', name, newvalue)
-            )
-        ))
+        newlens = self.lens.compose(magic_set_lens(name, 'setitem',
+                                                   operator.getitem))
         return BoundLens(self.item, newlens)
 
     # __new__
