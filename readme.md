@@ -121,6 +121,16 @@ second world has been moved across by one pixel without any of the
 objects in the original state being mutated. Without lenses this would
 take a rather large amount of plumbing to achieve.
 
+Note that the lens does not make a deep copy of the entire state.
+Objects in the state that do not need to change are reused and no new
+copies are made. This makes lenses more memory efficient than using
+`copy.deepcopy` for sufficiently large states:
+
+	>>> old_state.worlds[1] is new_state.worlds[1]
+	True
+	>>> old_state.worlds[2] is new_state.worlds[2]
+	False
+
 ## TODO
 
 * add decent api for unbound lenses
