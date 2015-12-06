@@ -40,6 +40,17 @@ def _(self, kind, key, value):
                             for field, item in zip(self._fields, self)))
 
 
+def make_lens(getter, setter):
+    'make_lens :: (s -> a), (a, s -> s) -> lens'
+
+    def new_func(func, state):
+        old_value = getter(state)
+        fa = func(old_value)
+        return functor.fmap(fa, lambda a: setter(a, state))
+
+    return Lens(new_func)
+
+
 class Lens:
     'A no-frills lens class. serves as the backbone of the lenses library'
 

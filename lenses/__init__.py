@@ -1,5 +1,5 @@
 from .boundlens import BoundLens
-from .lens import Lens, setter
+from .lens import Lens, setter, make_lens
 from .functor import fmap
 
 

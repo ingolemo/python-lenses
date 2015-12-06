@@ -2,7 +2,7 @@ import collections
 
 import pytest
 
-from lenses import lens
+from lenses import lens, make_lens, BoundLens
 
 
 def test_trivial_lens():
@@ -31,6 +31,14 @@ def test_dict_lens():
     assert lens({1: 2, 3: 4})[1].set(5) == {1: 5, 3: 4}
     with pytest.raises(AttributeError):
         assert lens({1: 2, 3: 4}).attr.set(5)
+
+
+def test_custom_lens():
+    my_lens = make_lens(lambda a: a[:-1], lambda a, s: a + '!')
+    state = 'hello!'
+    assert my_lens.get(state) == 'hello'
+    assert my_lens.set(state, 'bye') == 'bye!'
+    assert my_lens.modify(state, lambda a: a.replace('lo', 'p')) == 'help!'
 
 
 def test_custom_class_lens():
