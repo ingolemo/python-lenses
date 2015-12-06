@@ -7,7 +7,13 @@ for python.
 
 ## Installation
 
-	pip install lenses
+You can install the latest github version using pip like so:
+
+	pip install git+git://github.com/ingolemo/python-lenses.git
+
+You can uninstall similarly:
+
+	pip uninstall lenses
 
 ## How to Use
 
