@@ -23,6 +23,10 @@ class Const(Functor):
 
 @functools.singledispatch
 def fmap(functor, func):
+    '''Applies a function to the data 'inside' a functor.
+
+    Uses functools.singledispatch so you can write your own functors
+    for use with the library.'''
     raise NotImplementedError
 
 
