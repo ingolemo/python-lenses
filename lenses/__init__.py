@@ -3,12 +3,10 @@ from .lens import Lens, setter, make_lens
 from .functor import fmap
 
 
-def lens(obj=None):
+def lens(obj):
     'Returns a lens bound to an object. A BoundLens.'
-    if obj is None:
-        trivial_lens = Lens(lambda fn, state: fmap(
-            fn(state),
-            lambda newvalue: newvalue
-        ))
-        return trivial_lens
-    return BoundLens(obj, lens())
+    trivial_lens = Lens(lambda fn, state: fmap(
+        fn(state),
+        lambda newvalue: newvalue
+    ))
+    return BoundLens(obj, trivial_lens)
