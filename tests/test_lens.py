@@ -182,6 +182,24 @@ def test_lens_both():
     assert lenses.both.set(['1', '2'], 4) == [4, 4]
 
 
+def test_lens_item():
+    data = {0: 'hello', 1: 'world'}
+    my_lens = lenses.item(1)
+    assert my_lens.get(data) == (1, 'world')
+    assert my_lens.set(data, (2, 'everyone')) == {0: 'hello', 2: 'everyone'}
+    with pytest.raises(LookupError):
+        lenses.item(3).get(data)
+
+
+def test_lens_item_by_value():
+    data = {'hello': 0, 'world': 1}
+    my_lens = lenses.item_by_value(1)
+    assert my_lens.get(data) == ('world', 1)
+    assert my_lens.set(data, ('everyone', 2)) == {'hello': 0, 'everyone': 2}
+    with pytest.raises(LookupError):
+        lenses.item_by_value(3).get(data)
+
+
 # Tests for miscellaneous functions
 def test_make_lens():
     my_lens = lenses.make_lens(lambda a: a[:-1], lambda a, s: a + '!')

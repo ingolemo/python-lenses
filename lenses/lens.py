@@ -100,3 +100,35 @@ def both(func, state):
     'A traversal that magnifies both items [0] and [1].'
     mms = multi_magic_set(state, [('setitem', 0), ('setitem', 1)])
     return ap(func(state[0]), fmap(func(state[1]), mms))
+
+
+def item(old_key):
+    @Lens
+    def new_lens(fn, state):
+        return fmap(
+            fn((old_key, state[old_key])),
+            lambda new_value: dict([new_value] + [
+                (k, v) for k, v in state.items() if k is not old_key
+            ])
+        )  # yapf: disable
+
+    return new_lens
+
+
+def item_by_value(old_value):
+    def getter(state):
+        for dkey, dvalue in state.items():
+            if dvalue is old_value:
+                return dkey, dvalue
+        raise LookupError('{} not in dict'.format(old_value))
+
+    @Lens
+    def new_lens(fn, state):
+        return fmap(
+            fn(getter(state)),
+            lambda new_value: dict([new_value] + [
+                (k, v) for k, v in state.items() if v is not old_value
+            ])
+        )  # yapf: disable
+
+    return new_lens
