@@ -55,9 +55,11 @@ class Lens:
         The `other` lens is used to refine the `self` lens. The
         following two pieces of code should be equivalent:
 
-            self.compose(other).get(state)
+        ```
+        self.compose(other).get(state)
 
-            other.get(self.get(state))
+        other.get(self.get(state))
+        ```
         '''
 
         def new_func(fn, state):
