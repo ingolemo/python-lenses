@@ -1,9 +1,9 @@
 from .boundlens import BoundLens
-from .lens import Lens, make_lens
+from .lens import (Lens, make_lens, both, trivial)
 from .setter import setter
 from .typeclass import fmap
 
 
-def lens(obj):
+def lens(obj, lens=trivial):
     'Returns a lens bound to an object. A BoundLens.'
-    return BoundLens(obj, Lens.trivial())
+    return BoundLens(obj, lens)

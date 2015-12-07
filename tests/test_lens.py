@@ -2,7 +2,8 @@ import collections
 
 import pytest
 
-from lenses import lens, make_lens, BoundLens, Lens
+import lenses
+from lenses import lens
 
 
 def test_trivial_lens():
@@ -34,7 +35,7 @@ def test_dict_lens():
 
 
 def test_custom_lens():
-    my_lens = make_lens(lambda a: a[:-1], lambda a, s: a + '!')
+    my_lens = lenses.make_lens(lambda a: a[:-1], lambda a, s: a + '!')
     state = 'hello!'
     assert my_lens.get(state) == 'hello'
     assert my_lens.set(state, 'bye') == 'bye!'
@@ -129,7 +130,6 @@ def test_informative_lens_repr():
     assert repr(obj) in repr(lens(obj))
 
 
-def test_traverse_both():
-    l = Lens.trivial().both()
-    assert BoundLens(['1', '2'], l).get() == '12'
-    assert BoundLens(['1', '2'], l).set(4) == [4, 4]
+def test_both():
+    assert lenses.both.get(['1', '2']) == '12'
+    assert lenses.both.set(['1', '2'], 4) == [4, 4]

@@ -37,14 +37,6 @@ class Lens:
     def __init__(self, func):
         self.func = func
 
-    @classmethod
-    def trivial(cls):
-        'Returns a trivial lens that magnifies to the whole state.'
-        return Lens(lambda fn, state: fmap(
-            fn(state),
-            lambda newvalue: newvalue
-        ))
-
     def get(self, state):
         'Returns the value this lens is magnified on.'
         return self.func(lambda a: Const(a), state).item
@@ -73,12 +65,16 @@ class Lens:
 
         return Lens(new_func)
 
-    def both(self):
-        def new_func(func, state):
-            make_new = lambda a: (
-                lambda b: magic_set(
-                    magic_set(state, 'setitem', 0, a),
-                    'setitem', 1, b))
-            return ap(func(state[0]), fmap(func(state[1]), make_new))
 
-        return self.compose(Lens(new_func))
+@Lens
+def trivial(func, state):
+    'A trivial lens that magnifies to the whole state.'
+    return fmap(func(state), lambda newvalue: newvalue)
+
+
+@Lens
+def both(func, state):
+    'A traversal that magnifies both items [0] and [1].'
+    magic_set_two = lambda a: (lambda b: magic_set(
+        magic_set(state, 'setitem', 0, a), 'setitem', 1, b))
+    return ap(func(state[0]), fmap(func(state[1]), magic_set_two))
