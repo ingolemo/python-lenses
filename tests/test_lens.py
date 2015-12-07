@@ -2,7 +2,7 @@ import collections
 
 import pytest
 
-from lenses import lens, make_lens, BoundLens
+from lenses import lens, make_lens, BoundLens, Lens
 
 
 def test_trivial_lens():
@@ -127,3 +127,9 @@ def test_divide_lens():
 def test_informative_lens_repr():
     obj = object()
     assert repr(obj) in repr(lens(obj))
+
+
+def test_traverse_both():
+    l = Lens.trivial().both()
+    assert BoundLens(['1', '2'], l).get() == '12'
+    assert BoundLens(['1', '2'], l).set(4) == [4, 4]

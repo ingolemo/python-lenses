@@ -1,7 +1,7 @@
 import operator
 
 from . import lens
-from . import functor
+from .typeclass import fmap
 from .setter import magic_set
 
 
@@ -15,7 +15,7 @@ def _carry_op(name):
 
 def magic_set_lens(name, method, getter):
     return lens.Lens(
-        lambda fn, state: functor.fmap(
+        lambda fn, state: fmap(
             fn(getter(state, name)),
             lambda newvalue: magic_set(state, method, name, newvalue)
         )

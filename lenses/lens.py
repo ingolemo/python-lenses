@@ -1,4 +1,7 @@
-from . import functor
+from .identity import Identity
+from .const import Const
+from .typeclass import fmap, ap
+from .setter import magic_set
 
 
 def make_lens(getter, setter):
@@ -16,7 +19,7 @@ def make_lens(getter, setter):
     def new_func(func, state):
         old_value = getter(state)
         fa = func(old_value)
-        return functor.fmap(fa, lambda a: setter(a, state))
+        return fmap(fa, lambda a: setter(a, state))
 
     return Lens(new_func)
 
@@ -37,22 +40,22 @@ class Lens:
     @classmethod
     def trivial(cls):
         'Returns a trivial lens that magnifies to the whole state.'
-        return Lens(lambda fn, state: functor.fmap(
+        return Lens(lambda fn, state: fmap(
             fn(state),
             lambda newvalue: newvalue
         ))
 
     def get(self, state):
         'Returns the value this lens is magnified on.'
-        return self.func(lambda a: functor.Const(a), state).item
+        return self.func(lambda a: Const(a), state).item
 
     def modify(self, state, fn):
         'Applies a function to the magnified value.'
-        return self.func(lambda a: functor.Identity(fn(a)), state).item
+        return self.func(lambda a: Identity(fn(a)), state).item
 
     def set(self, state, newitem):
         'Sets the magnified value in the passed state.'
-        return self.func(lambda a: functor.Identity(newitem), state).item
+        return self.func(lambda a: Identity(newitem), state).item
 
     def compose(self, other):
         '''Composes another lens with this one.
@@ -69,3 +72,13 @@ class Lens:
             return self.func((lambda state2: other.func(fn, state2)), state)
 
         return Lens(new_func)
+
+    def both(self):
+        def new_func(func, state):
+            make_new = lambda a: (
+                lambda b: magic_set(
+                    magic_set(state, 'setitem', 0, a),
+                    'setitem', 1, b))
+            return ap(func(state[0]), fmap(func(state[1]), make_new))
+
+        return self.compose(Lens(new_func))

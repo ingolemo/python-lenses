@@ -1,7 +1,7 @@
 from .boundlens import BoundLens
 from .lens import Lens, make_lens
 from .setter import setter
-from .functor import fmap
+from .typeclass import fmap
 
 
 def lens(obj):
