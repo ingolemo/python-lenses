@@ -75,7 +75,8 @@ def _magic_set_lens(name, method, getter):
     def new_lens(fn, state):
         return fmap(
             fn(getter(state, name)),
-            lambda newvalue: magic_set(state, method, name, newvalue))
+            lambda newvalue: magic_set(state, method, name, newvalue)
+        )
 
     return new_lens
 
