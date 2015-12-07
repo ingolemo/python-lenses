@@ -1,5 +1,5 @@
 from .boundlens import BoundLens
-from .lens import (Lens, make_lens, both, trivial)
+from .lens import (Lens, make_lens, getattr_l, getitem, both, trivial)
 from .setter import setter
 from .typeclass import fmap
 

@@ -1,3 +1,5 @@
+import operator
+
 from .identity import Identity
 from .const import Const
 from .typeclass import fmap, ap
@@ -66,6 +68,24 @@ class Lens:
             return self.func((lambda state2: other.func(fn, state2)), state)
 
         return Lens(new_func)
+
+
+def _magic_set_lens(name, method, getter):
+    @Lens
+    def new_lens(fn, state):
+        return fmap(
+            fn(getter(state, name)),
+            lambda newvalue: magic_set(state, method, name, newvalue))
+
+    return new_lens
+
+
+def getattr_l(name):
+    return _magic_set_lens(name, 'setattr', getattr)
+
+
+def getitem(key):
+    return _magic_set_lens(key, 'setitem', operator.getitem)
 
 
 @Lens
