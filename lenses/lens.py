@@ -1,7 +1,7 @@
 from .identity import Identity
 from .const import Const
 from .typeclass import fmap, ap
-from .setter import magic_set
+from .setter import magic_set, multi_magic_set
 
 
 def make_lens(getter, setter):
@@ -77,6 +77,5 @@ def trivial(func, state):
 @Lens
 def both(func, state):
     'A traversal that magnifies both items [0] and [1].'
-    magic_set_two = lambda a: (lambda b: magic_set(
-        magic_set(state, 'setitem', 0, a), 'setitem', 1, b))
-    return ap(func(state[0]), fmap(func(state[1]), magic_set_two))
+    mms = multi_magic_set(state, [('setitem', 0), ('setitem', 1)])
+    return ap(func(state[0]), fmap(func(state[1]), mms))

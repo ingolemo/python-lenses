@@ -12,6 +12,18 @@ def magic_set(self, kind, key, value):
         return self.lens_setter(kind, key, value)
 
 
+def multi_magic_set(state, kindskeys):
+    'returns a curried function that uses magic_set to set its arguments'
+    if not kindskeys:
+        return state
+    kind, key = kindskeys.pop()
+
+    def func(a, kind=kind, key=key):
+        return multi_magic_set(magic_set(state, kind, key, a), kindskeys)
+
+    return func
+
+
 @functools.singledispatch
 def setter(self, kind, key, value):
     '''returns a copy of self with key replaced by value.
