@@ -200,6 +200,13 @@ def test_lens_item_by_value():
         lenses.item_by_value(3).get(data)
 
 
+def test_lens_tuple_l():
+    data = {'hello': 0, 'world': 1}
+    my_lens = lenses.tuple_l(lenses.getitem('hello'), lenses.getitem('world'))
+    assert my_lens.get(data) == (0, 1)
+    assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
+
+
 # Tests for miscellaneous functions
 def test_make_lens():
     my_lens = lenses.make_lens(lambda a: a[:-1], lambda a, s: a + '!')

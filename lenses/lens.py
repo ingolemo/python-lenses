@@ -132,3 +132,15 @@ def item_by_value(old_value):
         )  # yapf: disable
 
     return new_lens
+
+
+def tuple_l(*some_lenses):
+    def getter(state):
+        return tuple(a_lens.get(state) for a_lens in some_lenses)
+
+    def setter(new_values, state):
+        for a_lens, new_value in zip(some_lenses, new_values):
+            state = a_lens.set(state, new_value)
+        return state
+
+    return make_lens(getter, setter)
