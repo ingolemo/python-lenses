@@ -109,6 +109,11 @@ def test_boundlens_get():
     assert lens([1, 2, 3])[1].get() == 2
 
 
+def test_boundlens_get_all():
+    my_lens = lenses.both.compose(lenses.getitem(1))
+    assert lens([[1, 2], [3, 4]], my_lens).get_all() == (2, 4)
+
+
 def test_boundlens_set():
     assert lens(10).set(5) == 5
     assert lens([1, 2, 3])[1].set(5) == [1, 5, 3]

@@ -43,6 +43,10 @@ class Lens:
         'Returns the value this lens is magnified on.'
         return self.func(lambda a: Const(a), state).item
 
+    def get_all(self, state):
+        'Returns all values this lens traverses over.'
+        return self.func(lambda a: Const((a, )), state).item
+
     def modify(self, state, fn):
         'Applies a function to the magnified value.'
         return self.func(lambda a: Identity(fn(a)), state).item
@@ -75,8 +79,7 @@ def _magic_set_lens(name, method, getter):
     def new_lens(fn, state):
         return fmap(
             fn(getter(state, name)),
-            lambda newvalue: magic_set(state, method, name, newvalue)
-        )
+            lambda newvalue: magic_set(state, method, name, newvalue))
 
     return new_lens
 

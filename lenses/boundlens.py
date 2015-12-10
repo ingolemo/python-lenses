@@ -25,6 +25,10 @@ class BoundLens:
         'get the item via the lens'
         return self.lens.get(self.item)
 
+    def get_all(self):
+        'get all items via the lens'
+        return self.lens.get_all(self.item)
+
     def set(self, newvalue):
         'set the item via the lens'
         return self.lens.set(self.item, newvalue)
