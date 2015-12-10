@@ -39,11 +39,15 @@ class BoundLens:
         the method should return a new item.'''
         return self.set(getattr(self.get(), method_name)(*args, **kwargs))
 
+    def add_lens(self, new_lens):
+        'compose the internal lens with an extra lens'
+        return BoundLens(self.item, self.lens.compose(new_lens))
+
     def __getattr__(self, name):
-        return BoundLens(self.item, self.lens.compose(getattr_l(name)))
+        return self.add_lens(getattr_l(name))
 
     def __getitem__(self, name):
-        return BoundLens(self.item, self.lens.compose(getitem(name)))
+        return self.add_lens(getitem(name))
 
     # __new__
     # __init__

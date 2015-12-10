@@ -131,6 +131,11 @@ def test_boundlens_call_method_kwargs():
     assert lens('h').call_method('encode', encoding='utf-8') == b'h'
 
 
+def test_boundlens_add_lens():
+    assert lens([1, 2]).add_lens(lenses.trivial) + [3] == [1, 2, 3]
+    assert lens([1, 2]).add_lens(lenses.getitem(1)).set(3) == [1, 3]
+
+
 def test_boundlens_add():
     assert lens(2) + 1 == 3
     assert lens([[1, 2], 3])[0] + [4] == [[1, 2, 4], 3]
