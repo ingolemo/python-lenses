@@ -102,7 +102,7 @@ def trivial(func, state):
 def both(func, state):
     'A traversal that magnifies both items [0] and [1].'
     mms = multi_magic_set(state, [('setitem', 0), ('setitem', 1)])
-    return ap(func(state[0]), fmap(func(state[1]), mms))
+    return ap(func(state[1]), fmap(func(state[0]), mms))
 
 
 def item(old_key):

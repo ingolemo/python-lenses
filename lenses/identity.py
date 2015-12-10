@@ -5,6 +5,9 @@ class Identity:
     def __init__(self, item):
         self.item = item
 
+    def __repr__(self):
+        return '{}({!r})'.format(self.__class__.__qualname__, self.item)
+
     def fmap(self, fn):
         return Identity(fn(self.item))
 
