@@ -37,11 +37,8 @@ def test_set_then_set(lns):
     '''if we set a state using a lens and then immediately set it again,
     it should be as though we only set it once.'''
     obj = object()
-    assert (
-        lns.lens.set(
-            lns.lens.set(lns.state, obj), obj
-        ) == lns.lens.set(lns.state, obj)
-    )
+    assert (lns.lens.set(
+        lns.lens.set(lns.state, obj), obj) == lns.lens.set(lns.state, obj))
 
 
 # Tests for ensuring lenses work on different type of objects
