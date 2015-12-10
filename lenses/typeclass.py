@@ -47,3 +47,14 @@ def ap(applicative, func):
 @functools.singledispatch
 def traverse(traversable, func):
     return traversable.traverse(func)
+
+
+@traverse.register(list)
+def _(lst, func):
+    head, *rest = lst
+
+    cons = lambda a: lambda b: [a] + b
+    if rest:
+        return ap(traverse(rest, func), fmap(func(head), cons))
+    else:
+        return fmap(func(head), lambda a: [a])

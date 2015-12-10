@@ -2,7 +2,7 @@ import operator
 
 from .identity import Identity
 from .const import Const
-from .typeclass import fmap, ap
+from .typeclass import fmap, ap, traverse
 from .setter import magic_set, multi_magic_set
 
 
@@ -147,3 +147,8 @@ def tuple_l(*some_lenses):
         return state
 
     return make_lens(getter, setter)
+
+
+@Lens
+def traverse_l(fn, state):
+    return traverse(state, fn)

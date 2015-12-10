@@ -1,15 +1,14 @@
 from .boundlens import BoundLens
-from .lens import (
-    Lens,
-    both,
-    getattr_l,
-    getitem,
-    item,
-    item_by_value,
-    make_lens,
-    trivial,
-    tuple_l,
-)
+from .lens import (Lens,
+                   both,
+                   getattr_l,
+                   getitem,
+                   item,
+                   item_by_value,
+                   make_lens,
+                   traverse_l,
+                   trivial,
+                   tuple_l, )
 from .setter import setter
 from .typeclass import fmap
 

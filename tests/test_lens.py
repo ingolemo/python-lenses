@@ -214,6 +214,15 @@ def test_lens_tuple_l():
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
 
 
+def test_lens_traverse_l():
+    assert lenses.traverse_l.get_all([0, 1, 2, 3]) == (0, 1, 2, 3)
+    assert lenses.traverse_l.set([0, 1, 2, 3], 4) == [4, 4, 4, 4]
+
+    double_traversal = lenses.traverse_l.compose(lenses.traverse_l)
+    assert double_traversal.get_all([[0, 1], [2, 3]]) == (0, 1, 2, 3)
+    assert double_traversal.set([[0, 1], [2, 3]], 4) == [[4, 4], [4, 4]]
+
+
 # Tests for miscellaneous functions
 def test_make_lens():
     my_lens = lenses.make_lens(lambda a: a[:-1], lambda a, s: a + '!')
