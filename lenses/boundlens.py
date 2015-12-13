@@ -9,7 +9,7 @@ def _carry_op(name):
     return operation
 
 
-class BoundLens:
+class BoundLens(object):
     'A user-friendly lens with the argument pre-bound'
     __slots__ = ['item', 'lens']
 
@@ -18,7 +18,7 @@ class BoundLens:
         self.lens = sublens
 
     def __repr__(self):
-        return '{}({!r}, {!r})'.format(self.__class__.__qualname__, self.item,
+        return '{}({!r}, {!r})'.format(self.__class__.__name__, self.item,
                                        self.lens)
 
     def get(self):

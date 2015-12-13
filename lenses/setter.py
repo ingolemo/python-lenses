@@ -1,4 +1,7 @@
-import functools
+try:
+    from functools import singledispatch
+except ImportError:
+    from singledispatch import singledispatch
 import copy
 
 
@@ -24,7 +27,7 @@ def multi_magic_set(state, kindskeys):
     return func
 
 
-@functools.singledispatch
+@singledispatch
 def setter(self, kind, key, value):
     '''returns a copy of self with key replaced by value.
 

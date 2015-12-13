@@ -1,7 +1,7 @@
 from .typeclass import mempty, mappend
 
 
-class Const:
+class Const(object):
     def __init__(self, item):
         self.item = item
 

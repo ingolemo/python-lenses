@@ -1,7 +1,7 @@
 from .typeclass import ap
 
 
-class Identity:
+class Identity(object):
     def __init__(self, item):
         self.item = item
 

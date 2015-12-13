@@ -26,7 +26,7 @@ def make_lens(getter, setter):
     return Lens(new_func)
 
 
-class Lens:
+class Lens(object):
     '''A Lens. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function that does all the hard
     work. This function is a van Laarhoven lens and has the following

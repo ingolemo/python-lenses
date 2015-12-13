@@ -64,7 +64,7 @@ def test_type_dict():
 
 
 def test_type_custom_class_copy_and_mutate():
-    class C:
+    class C(object):
         def __init__(self, a, b):
             self.a = a
             self.b = b
@@ -76,7 +76,7 @@ def test_type_custom_class_copy_and_mutate():
 
 
 def test_type_custom_class_method_lens_setter():
-    class C:
+    class C(object):
         def __init__(self, a, b):
             self.a = a
             self.b = b

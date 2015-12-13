@@ -1,13 +1,16 @@
-import functools
+try:
+    from functools import singledispatch
+except ImportError:
+    from singledispatch import singledispatch
 
 
 # monoid
-@functools.singledispatch
+@singledispatch
 def mempty(monoid):
     return monoid.mempty()
 
 
-@functools.singledispatch
+@singledispatch
 def mappend(monoid, other):
     return monoid.mappend(other)
 
@@ -23,7 +26,7 @@ mappend.register(tuple)(lambda tup, other: tup + other)
 
 
 # functor
-@functools.singledispatch
+@singledispatch
 def fmap(functor, func):
     '''Applies a function to the data 'inside' a functor.
 
@@ -33,25 +36,25 @@ def fmap(functor, func):
 
 
 # applicative functor
-@functools.singledispatch
+@singledispatch
 def pure(applicative, item):
     return applicative.pure(item)
 
 
-@functools.singledispatch
+@singledispatch
 def ap(applicative, func):
     return applicative.ap(func)
 
 
 # traversable
-@functools.singledispatch
+@singledispatch
 def traverse(traversable, func):
     return traversable.traverse(func)
 
 
 @traverse.register(list)
 def _(lst, func):
-    head, *rest = lst
+    head, rest = lst[0], lst[1:]
 
     cons = lambda a: lambda b: [a] + b
     if rest:
