@@ -87,27 +87,31 @@ def _magic_set_lens(name, method, getter):
 
 
 def getattr_l(name):
+    '''A lens that magnifies an attribute on an object'''
     return _magic_set_lens(name, 'setattr', getattr)
 
 
 def getitem(key):
+    '''A lens that magnifies an item inside a container'''
     return _magic_set_lens(key, 'setitem', operator.getitem)
 
 
 @Lens
 def trivial(func, state):
-    'A trivial lens that magnifies to the whole state.'
+    '''A trivial lens that magnifies to the whole state.'''
     return fmap(func(state), lambda newvalue: newvalue)
 
 
 @Lens
 def both(func, state):
-    'A traversal that magnifies both items [0] and [1].'
+    '''A traversal that magnifies both items [0] and [1].'''
     mms = multi_magic_set(state, [('setitem', 1), ('setitem', 0)])
     return ap(func(state[1]), fmap(func(state[0]), mms))
 
 
 def item(old_key):
+    '''A lens that magnifies an item (key-value pair) in a dictionary by
+    its key'''
     @Lens
     def new_lens(fn, state):
         return fmap(
@@ -121,6 +125,8 @@ def item(old_key):
 
 
 def item_by_value(old_value):
+    '''A lens that magnifies an item (key-value pair) in a dictionary by
+    its value.'''
     def getter(state):
         for dkey, dvalue in state.items():
             if dvalue is old_value:
@@ -140,6 +146,8 @@ def item_by_value(old_value):
 
 
 def tuple_l(*some_lenses):
+    '''takes some lenses and returns a lens that magnifies a tuple with
+    values taken from all the lenses'''
     def getter(state):
         return tuple(a_lens.get(state) for a_lens in some_lenses)
 
@@ -153,4 +161,7 @@ def tuple_l(*some_lenses):
 
 @Lens
 def traverse_l(fn, state):
+    '''A traversal that focuses everything in a data structure depending
+    on how that data structure defines `lenses.typeclass.traverse`. Usually
+    somewhat similar to iterating over it.'''
     return traverse(state, fn)
