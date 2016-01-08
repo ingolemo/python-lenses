@@ -73,6 +73,8 @@ class Lens(object):
 
         return Lens(new_func)
 
+    __and__ = compose
+
 
 def _magic_set_lens(name, method, getter):
     @Lens

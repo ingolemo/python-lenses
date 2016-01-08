@@ -164,6 +164,11 @@ def test_boundlens_informative_repr():
     assert repr(obj) in repr(lens(obj))
 
 
+def test_lens_and():
+    my_lens = lenses.both & lenses.getitem(1)
+    assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
+
+
 # Tests for lenses and lens constructor function that are built into the
 # library.
 def test_lens_getattr_l():
