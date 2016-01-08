@@ -101,7 +101,7 @@ def trivial(func, state):
 @Lens
 def both(func, state):
     'A traversal that magnifies both items [0] and [1].'
-    mms = multi_magic_set(state, [('setitem', 0), ('setitem', 1)])
+    mms = multi_magic_set(state, [('setitem', 1), ('setitem', 0)])
     return ap(func(state[1]), fmap(func(state[0]), mms))
 
 
