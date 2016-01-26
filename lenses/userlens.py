@@ -1,4 +1,6 @@
-from .lens import getattr_l, getitem
+from .lens import getattr_l, getitem, trivial
+
+_guard = object()
 
 
 def _carry_op(name):
@@ -9,43 +11,67 @@ def _carry_op(name):
     return operation
 
 
-class BoundLens(object):
-    'A user-friendly lens with the argument pre-bound'
+def _valid_item(selfitem, argitem):
+    items = selfitem is not _guard, argitem is not _guard
+    if items == (False, False):
+        raise ValueError('Lens is unbound and no item has been passed')
+    elif items == (True, True):
+        raise ValueError('Passed an item to an already bound Lens')
+    elif items == (True, False):
+        return selfitem
+    elif items == (False, True):
+        return argitem
+    else:
+        raise RuntimeError('Unreachable branch reached')
+
+
+class UserLens(object):
+    'A user-friendly object for interacting with the lenses library'
     __slots__ = ['item', 'lens']
 
     def __init__(self, item, sublens):
-        self.item = item
-        self.lens = sublens
+        self.item = _guard if item is None else item
+        self.lens = trivial() if sublens is None else sublens
 
     def __repr__(self):
         return '{}({!r}, {!r})'.format(self.__class__.__name__, self.item,
                                        self.lens)
 
-    def get(self):
+    def get(self, item=_guard):
         'get the item via the lens'
-        return self.lens.get(self.item)
+        item = _valid_item(self.item, item)
+        return self.lens.get(item)
 
-    def get_all(self):
+    def get_all(self, item=_guard):
         'get all items via the lens'
-        return self.lens.get_all(self.item)
+        item = _valid_item(self.item, item)
+        return self.lens.get_all(item)
 
-    def set(self, newvalue):
+    def set(self, newvalue, item=_guard):
         'set the item via the lens'
-        return self.lens.set(self.item, newvalue)
+        item = _valid_item(self.item, item)
+        return self.lens.set(item, newvalue)
 
-    def modify(self, func):
+    def modify(self, func, item=_guard):
         'apply a function to the item via the lens'
-        return self.lens.modify(self.item, func)
+        item = _valid_item(self.item, item)
+        return self.lens.modify(item, func)
 
-    def call_method(self, method_name, *args, **kwargs):
+    def call_method(self, method_name, *args, item=_guard, **kwargs):
         '''call a method on the item via the lens.
 
         the method should return a new item.'''
-        return self.set(getattr(self.get(), method_name)(*args, **kwargs))
+        method = getattr(self.get(item), method_name)
+        return self.set(method(*args, **kwargs), item)
 
     def add_lens(self, new_lens):
         'compose the internal lens with an extra lens'
-        return BoundLens(self.item, self.lens.compose(new_lens))
+        return UserLens(self.item, self.lens.compose(new_lens))
+
+    def bind(self, item):
+        if self.item is not _guard:
+            raise ValueError()
+        return UserLens(item, self.lens)
 
     def __getattr__(self, name):
         return self.add_lens(getattr_l(name))
