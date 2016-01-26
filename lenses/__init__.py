@@ -9,10 +9,10 @@ from .lens import (Lens,
                    traverse_l,
                    trivial,
                    tuple_l, )
-from .setter import setter
-from .typeclass import fmap
 
 
-def lens(obj, lens=trivial):
+def lens(obj, lens=None):
     'Returns a lens bound to an object. A BoundLens.'
+    if lens is None:
+        lens = trivial()
     return BoundLens(obj, lens)

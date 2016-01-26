@@ -7,7 +7,7 @@ from lenses import lens
 
 LensAndState = collections.namedtuple('LensAndState', 'lens state')
 lenses_and_states = [
-    LensAndState(lenses.trivial, None),
+    LensAndState(lenses.trivial(), None),
     LensAndState(lenses.getitem(0), [1, 2, 3]),
     LensAndState(lenses.getitem(0), (1, 2, 3)),
     LensAndState(lenses.getitem(0), {0: 'hello', 1: 'world'}),
@@ -110,7 +110,7 @@ def test_boundlens_get():
 
 
 def test_boundlens_get_all():
-    my_lens = lenses.both.compose(lenses.getitem(1))
+    my_lens = lenses.both().compose(lenses.getitem(1))
     assert lens([[1, 2], [3, 4]], my_lens).get_all() == (2, 4)
 
 
@@ -137,7 +137,7 @@ def test_boundlens_call_method_kwargs():
 
 
 def test_boundlens_add_lens():
-    assert lens([1, 2]).add_lens(lenses.trivial) + [3] == [1, 2, 3]
+    assert lens([1, 2]).add_lens(lenses.trivial()) + [3] == [1, 2, 3]
     assert lens([1, 2]).add_lens(lenses.getitem(1)).set(3) == [1, 3]
 
 
@@ -165,7 +165,7 @@ def test_boundlens_informative_repr():
 
 
 def test_lens_and():
-    my_lens = lenses.both & lenses.getitem(1)
+    my_lens = lenses.both() & lenses.getitem(1)
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
@@ -185,13 +185,13 @@ def test_lens_getitem():
 
 def test_lens_trivial():
     obj = object()
-    assert lenses.trivial.get(obj) is obj
-    assert lenses.trivial.set(obj, None) is None
+    assert lenses.trivial().get(obj) is obj
+    assert lenses.trivial().set(obj, None) is None
 
 
 def test_lens_both():
-    assert lenses.both.get(['1', '2']) == '12'
-    assert lenses.both.set(['1', '2'], 4) == [4, 4]
+    assert lenses.both().get(['1', '2']) == '12'
+    assert lenses.both().set(['1', '2'], 4) == [4, 4]
 
 
 def test_lens_item():
@@ -220,10 +220,10 @@ def test_lens_tuple_l():
 
 
 def test_lens_traverse_l():
-    assert lenses.traverse_l.get_all([0, 1, 2, 3]) == (0, 1, 2, 3)
-    assert lenses.traverse_l.set([0, 1, 2, 3], 4) == [4, 4, 4, 4]
+    assert lenses.traverse_l().get_all([0, 1, 2, 3]) == (0, 1, 2, 3)
+    assert lenses.traverse_l().set([0, 1, 2, 3], 4) == [4, 4, 4, 4]
 
-    double_traversal = lenses.traverse_l.compose(lenses.traverse_l)
+    double_traversal = lenses.traverse_l().compose(lenses.traverse_l())
     assert double_traversal.get_all([[0, 1], [2, 3]]) == (0, 1, 2, 3)
     assert double_traversal.set([[0, 1], [2, 3]], 4) == [[4, 4], [4, 4]]
 

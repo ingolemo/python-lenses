@@ -96,17 +96,19 @@ def getitem(key):
     return _magic_set_lens(key, 'setitem', operator.getitem)
 
 
-@Lens
-def trivial(func, state):
+def trivial():
     '''A trivial lens that magnifies to the whole state.'''
-    return fmap(func(state), lambda newvalue: newvalue)
+    def _(func, state):
+        return fmap(func(state), lambda newvalue: newvalue)
+    return Lens(_)
 
 
-@Lens
-def both(func, state):
+def both():
     '''A traversal that magnifies both items [0] and [1].'''
-    mms = multi_magic_set(state, [('setitem', 1), ('setitem', 0)])
-    return ap(func(state[1]), fmap(func(state[0]), mms))
+    def _(func, state):
+        mms = multi_magic_set(state, [('setitem', 1), ('setitem', 0)])
+        return ap(func(state[1]), fmap(func(state[0]), mms))
+    return Lens(_)
 
 
 def item(old_key):
@@ -159,9 +161,10 @@ def tuple_l(*some_lenses):
     return make_lens(getter, setter)
 
 
-@Lens
-def traverse_l(fn, state):
+def traverse_l():
     '''A traversal that focuses everything in a data structure depending
     on how that data structure defines `lenses.typeclass.traverse`. Usually
     somewhat similar to iterating over it.'''
-    return traverse(state, fn)
+    def _(fn, state):
+        return traverse(state, fn)
+    return Lens(_)
