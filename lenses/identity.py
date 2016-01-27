@@ -8,6 +8,11 @@ class Identity(object):
     def __repr__(self):
         return '{}({!r})'.format(self.__class__.__qualname__, self.item)
 
+    def __eq__(self, other):
+        if not isinstance(other, Identity):
+            return NotImplemented
+        return self.item == other.item
+
     def fmap(self, fn):
         return Identity(fn(self.item))
 
