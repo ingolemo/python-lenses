@@ -46,14 +46,22 @@ def test_userlens_bind():
     assert lens().bind([1, 2, 3]).get() == [1, 2, 3]
 
 
-def test_userlens_no__bind():
+def test_userlens_bind_selfitem():
+    assert lens(2).get() == 2
+
+
+def test_userlens_bind_argitem():
+    assert lens().get(2) == 2
+
+
+def test_userlens_no_bind():
     with pytest.raises(ValueError):
         lens().get()
 
 
 def test_userlens_no_double_bind():
     with pytest.raises(ValueError):
-        lens(1).bind(2).get()
+        lens(1).get(2)
 
 
 def test_userlens_add():
