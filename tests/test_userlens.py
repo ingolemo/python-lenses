@@ -1,5 +1,3 @@
-import collections
-
 import pytest
 
 import lenses
@@ -42,6 +40,20 @@ def test_userlens_call_method_kwargs():
 def test_userlens_add_lens():
     assert lens([1, 2]).add_lens(lenses.trivial()) + [3] == [1, 2, 3]
     assert lens([1, 2]).add_lens(lenses.getitem(1)).set(3) == [1, 3]
+
+
+def test_userlens_bind():
+    assert lens().bind([1, 2, 3]).get() == [1, 2, 3]
+
+
+def test_userlens_no__bind():
+    with pytest.raises(ValueError):
+        lens().get()
+
+
+def test_userlens_no_double_bind():
+    with pytest.raises(ValueError):
+        lens(1).bind(2).get()
 
 
 def test_userlens_add():
