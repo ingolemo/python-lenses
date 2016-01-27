@@ -8,6 +8,11 @@ class Const(object):
     def __repr__(self):
         return '{}({!r})'.format(self.__class__.__qualname__, self.item)
 
+    def __eq__(self, other):
+        if not isinstance(other, Const):
+            return NotImplemented
+        return self.item == other.item
+
     def fmap(self, func):
         return Const(self.item)
 
