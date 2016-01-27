@@ -46,6 +46,16 @@ def ap(applicative, func):
     return applicative.ap(func)
 
 
+@pure.register(list)
+def _(lst, item):
+    return [item]
+
+
+@ap.register(list)
+def _(lst, funcs):
+    return [f(i) for i in lst for f in funcs]
+
+
 # traversable
 @singledispatch
 def traverse(traversable, func):
