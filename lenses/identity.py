@@ -1,4 +1,4 @@
-from .typeclass import ap
+from .typeclass import ap, pure
 
 
 class Identity(object):
@@ -25,4 +25,4 @@ class Identity(object):
 
     def traverse(self, fn):
         applicative = fn(self.item)
-        return ap(applicative, applicative.pure(Identity))
+        return ap(applicative, pure(applicative, Identity))
