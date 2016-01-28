@@ -3,14 +3,14 @@ import collections
 import pytest
 
 import lenses
-from lenses import lens
+from lenses import lens, Lens
 
 LensAndState = collections.namedtuple('LensAndState', 'lens state')
 lenses_and_states = [
-    LensAndState(lenses.Lens.trivial(), None),
-    LensAndState(lenses.getitem(0), [1, 2, 3]),
-    LensAndState(lenses.getitem(0), (1, 2, 3)),
-    LensAndState(lenses.getitem(0), {0: 'hello', 1: 'world'}),
+    LensAndState(Lens.trivial(), None),
+    LensAndState(Lens.getitem(0), [1, 2, 3]),
+    LensAndState(Lens.getitem(0), (1, 2, 3)),
+    LensAndState(Lens.getitem(0), {0: 'hello', 1: 'world'}),
 ]  # yapf: disable
 
 
@@ -106,71 +106,73 @@ def test_type_unsupported_no_setter():
 # Tests for lenses and lens constructor function that are built into the
 # library.
 def test_lens_and():
-    my_lens = lenses.both() & lenses.getitem(1)
+    my_lens = Lens.both() & Lens.getitem(1)
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
-def test_lens_getattr_l():
+def test_lens_getattr():
     Tup = collections.namedtuple('Tup', 'attr')
     obj = Tup(1)
-    assert lenses.getattr_l('attr').get(obj) == 1
-    assert lenses.getattr_l('attr').set(obj, 2) == Tup(2)
+    assert Lens.getattr('attr').get(obj) == 1
+    assert Lens.getattr('attr').set(obj, 2) == Tup(2)
 
 
 def test_lens_getitem():
-    assert lenses.getitem(0).get([1, 2, 3]) == 1
-    assert lenses.getitem(0).set([1, 2, 3], 4) == [4, 2, 3]
+    assert Lens.getitem(0).get([1, 2, 3]) == 1
+    assert Lens.getitem(0).set([1, 2, 3], 4) == [4, 2, 3]
 
 
 def test_lens_trivial():
     obj = object()
-    assert lenses.Lens.trivial().get(obj) is obj
-    assert lenses.Lens.trivial().set(obj, None) is None
+    assert Lens.trivial().get(obj) is obj
+    assert Lens.trivial().set(obj, None) is None
 
 
 def test_lens_both():
-    assert lenses.both().get(['1', '2']) == '12'
-    assert lenses.both().set(['1', '2'], 4) == [4, 4]
+    assert Lens.both().get(['1', '2']) == '12'
+    assert Lens.both().set(['1', '2'], 4) == [4, 4]
 
 
 def test_lens_item():
     data = {0: 'hello', 1: 'world'}
-    my_lens = lenses.item(1)
+    my_lens = Lens.item(1)
     assert my_lens.get(data) == (1, 'world')
     assert my_lens.set(data, (2, 'everyone')) == {0: 'hello', 2: 'everyone'}
     with pytest.raises(LookupError):
-        lenses.item(3).get(data)
+        Lens.item(3).get(data)
 
 
 def test_lens_item_by_value():
     data = {'hello': 0, 'world': 1}
-    my_lens = lenses.item_by_value(1)
+    my_lens = Lens.item_by_value(1)
     assert my_lens.get(data) == ('world', 1)
     assert my_lens.set(data, ('everyone', 2)) == {'hello': 0, 'everyone': 2}
     with pytest.raises(LookupError):
-        lenses.item_by_value(3).get(data)
+        Lens.item_by_value(3).get(data)
 
 
 def test_lens_tuple_l():
     data = {'hello': 0, 'world': 1}
-    my_lens = lenses.tuple_l(lenses.getitem('hello'), lenses.getitem('world'))
+    get = Lens.getitem
+    my_lens = Lens.tuple(get('hello'), get('world'))
     assert my_lens.get(data) == (0, 1)
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
 
 
-def test_lens_traverse_l():
-    assert lenses.traverse_l().get_all([0, 1, 2, 3]) == (0, 1, 2, 3)
-    assert lenses.traverse_l().set([0, 1, 2, 3], 4) == [4, 4, 4, 4]
+def test_lens_traverse():
+    traversal = Lens.traverse()
+    assert traversal.get_all([0, 1, 2, 3]) == (0, 1, 2, 3)
+    assert traversal.set([0, 1, 2, 3], 4) == [4, 4, 4, 4]
 
-    double_traversal = lenses.traverse_l().compose(lenses.traverse_l())
+    double_traversal = traversal.compose(traversal)
     assert double_traversal.get_all([[0, 1], [2, 3]]) == (0, 1, 2, 3)
     assert double_traversal.set([[0, 1], [2, 3]], 4) == [[4, 4], [4, 4]]
 
 
 # Tests for miscellaneous functions
 def test_lens_from_getter_setter():
-    my_lens = lenses.Lens.from_getter_setter(lambda a: a[:-1],
-                                             lambda a, s: a + '!')
+    my_lens = Lens.from_getter_setter(lambda a: a[:-1],
+                                      lambda a, s: a + '!')
     state = 'hello!'
     assert my_lens.get(state) == 'hello'
     assert my_lens.set(state, 'bye') == 'bye!'

@@ -1,12 +1,5 @@
 from .userlens import UserLens
-from .lens import (Lens,
-                   both,
-                   getattr_l,
-                   getitem,
-                   item,
-                   item_by_value,
-                   traverse_l,
-                   tuple_l, )
+from .lens import Lens
 
 
 def lens(obj=None, lens=None):

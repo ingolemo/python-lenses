@@ -46,6 +46,75 @@ class Lens(object):
             return fmap(func(state), lambda newvalue: newvalue)
         return cls(_)
 
+    @classmethod
+    def getattr(cls, name):
+        '''A lens that magnifies an attribute on an object'''
+        return _magic_set_lens(name, 'setattr', getattr)
+
+    @classmethod
+    def getitem(cls, key):
+        '''A lens that magnifies an item inside a container'''
+        return _magic_set_lens(key, 'setitem', operator.getitem)
+
+    @classmethod
+    def both(cls):
+        '''A traversal that magnifies both items [0] and [1].'''
+        def _(func, state):
+            mms = multi_magic_set(state, [('setitem', 1), ('setitem', 0)])
+            return ap(func(state[1]), fmap(func(state[0]), mms))
+        return cls(_)
+
+    @classmethod
+    def item(cls, old_key):
+        '''A lens that magnifies an item (key-value pair) in a dictionary by
+        its key'''
+        def _(fn, state):
+            return fmap(
+                fn((old_key, state[old_key])),
+                lambda new_value: dict([new_value] + [
+                    (k, v) for k, v in state.items() if k is not old_key
+                ])
+            )
+
+        return cls(_)
+
+    @classmethod
+    def item_by_value(cls, old_value):
+        '''A lens that magnifies an item (key-value pair) in a dictionary by
+        its value.'''
+        def getter(state):
+            for dkey, dvalue in state.items():
+                if dvalue is old_value:
+                    return dkey, dvalue
+            raise LookupError('{} not in dict'.format(old_value))
+
+        def setter(new_value, state):
+            return dict([new_value] + [
+                (k, v) for k, v in state.items() if v is not old_value])
+
+        return cls.from_getter_setter(getter, setter)
+
+    @classmethod
+    def tuple(cls, *some_lenses):
+        '''takes some lenses and returns a lens that magnifies a tuple with
+        values taken from all the lenses'''
+        def getter(state):
+            return tuple(a_lens.get(state) for a_lens in some_lenses)
+
+        def setter(new_values, state):
+            for a_lens, new_value in zip(some_lenses, new_values):
+                state = a_lens.set(state, new_value)
+            return state
+
+        return cls.from_getter_setter(getter, setter)
+
+    @classmethod
+    def traverse(cls):
+        '''A traversal that focuses everything in a data structure depending
+        on how that data structure defines `lenses.typeclass.traverse`. Usually
+        somewhat similar to iterating over it.'''
+        return cls(lambda fn, state: traverse(state, fn))
+
     def get(self, state):
         'Returns the value this lens is magnified on.'
         return self.func(lambda a: Const(a), state).item
@@ -93,78 +162,15 @@ def _magic_set_lens(name, method, getter):
     return new_lens
 
 
-def getattr_l(name):
-    '''A lens that magnifies an attribute on an object'''
-    return _magic_set_lens(name, 'setattr', getattr)
-
-
-def getitem(key):
-    '''A lens that magnifies an item inside a container'''
-    return _magic_set_lens(key, 'setitem', operator.getitem)
-
-
-def both():
-    '''A traversal that magnifies both items [0] and [1].'''
-    def _(func, state):
-        mms = multi_magic_set(state, [('setitem', 1), ('setitem', 0)])
-        return ap(func(state[1]), fmap(func(state[0]), mms))
-    return Lens(_)
-
-
-def item(old_key):
-    '''A lens that magnifies an item (key-value pair) in a dictionary by
-    its key'''
-    @Lens
-    def new_lens(fn, state):
-        return fmap(
-            fn((old_key, state[old_key])),
-            lambda new_value: dict([new_value] + [
-                (k, v) for k, v in state.items() if k is not old_key
-            ])
-        )  # yapf: disable
-
-    return new_lens
-
-
-def item_by_value(old_value):
-    '''A lens that magnifies an item (key-value pair) in a dictionary by
-    its value.'''
-    def getter(state):
-        for dkey, dvalue in state.items():
-            if dvalue is old_value:
-                return dkey, dvalue
-        raise LookupError('{} not in dict'.format(old_value))
-
-    @Lens
-    def new_lens(fn, state):
-        return fmap(
-            fn(getter(state)),
-            lambda new_value: dict([new_value] + [
-                (k, v) for k, v in state.items() if v is not old_value
-            ])
-        )  # yapf: disable
-
-    return new_lens
-
-
-def tuple_l(*some_lenses):
-    '''takes some lenses and returns a lens that magnifies a tuple with
-    values taken from all the lenses'''
-    def getter(state):
-        return tuple(a_lens.get(state) for a_lens in some_lenses)
-
-    def setter(new_values, state):
-        for a_lens, new_value in zip(some_lenses, new_values):
-            state = a_lens.set(state, new_value)
-        return state
-
-    return Lens.from_getter_setter(getter, setter)
-
-
-def traverse_l():
-    '''A traversal that focuses everything in a data structure depending
-    on how that data structure defines `lenses.typeclass.traverse`. Usually
-    somewhat similar to iterating over it.'''
-    def _(fn, state):
-        return traverse(state, fn)
-    return Lens(_)
+def _is_lens_constructor(constr):
+    return constr in {
+        Lens.from_getter_setter,
+        Lens.trivial,
+        Lens.getattr,
+        Lens.getitem,
+        Lens.both,
+        Lens.item,
+        Lens.item_by_value,
+        Lens.tuple,
+        Lens.traverse,
+    }

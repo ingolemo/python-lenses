@@ -1,4 +1,4 @@
-from .lens import getattr_l, getitem, Lens
+from .lens import Lens, _is_lens_constructor
 
 _guard = object()
 
@@ -74,10 +74,19 @@ class UserLens(object):
         return UserLens(item, self.lens)
 
     def __getattr__(self, name):
-        return self.add_lens(getattr_l(name))
+        if not name.endswith('_'):
+            return self.add_lens(Lens.getattr(name))
+
+        constructor = getattr(Lens, name[:-1])
+        if not _is_lens_constructor(constructor):
+            raise AttributeError('Not a valid lens constructor')
+
+        def _(*args, **kwargs):
+            return self.add_lens(constructor(*args, **kwargs))
+        return _
 
     def __getitem__(self, name):
-        return self.add_lens(getitem(name))
+        return self.add_lens(Lens.getitem(name))
 
     # __new__
     # __init__

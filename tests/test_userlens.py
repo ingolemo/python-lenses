@@ -1,18 +1,16 @@
 import pytest
 
-import lenses
-from lenses import lens
+from lenses import lens, Lens
 
 
-# Tests for using lens combinators through a UserLens
+# Tests for using UserLens' standard methods
 def test_userlens_get():
     assert lens(10).get() == 10
     assert lens([1, 2, 3])[1].get() == 2
 
 
 def test_userlens_get_all():
-    my_lens = lenses.both().compose(lenses.getitem(1))
-    assert lens([[1, 2], [3, 4]], my_lens).get_all() == (2, 4)
+    assert lens([[1, 2], [3, 4]]).both_()[1].get_all() == (2, 4)
 
 
 def test_userlens_set():
@@ -38,8 +36,8 @@ def test_userlens_call_method_kwargs():
 
 
 def test_userlens_add_lens():
-    assert lens([1, 2]).add_lens(lenses.Lens.trivial()) + [3] == [1, 2, 3]
-    assert lens([1, 2]).add_lens(lenses.getitem(1)).set(3) == [1, 3]
+    assert lens([1, 2]).add_lens(Lens.trivial()) + [3] == [1, 2, 3]
+    assert lens([1, 2]).add_lens(Lens.getitem(1)).set(3) == [1, 3]
 
 
 def test_userlens_bind():
@@ -64,6 +62,7 @@ def test_userlens_no_double_bind():
         lens(1).get(2)
 
 
+# Testing that UserLens properly passes though dunder methods
 def test_userlens_add():
     assert lens(2) + 1 == 3
     assert lens([[1, 2], 3])[0] + [4] == [[1, 2, 4], 3]
@@ -82,6 +81,34 @@ def test_userlens_divide():
     assert lens(10) / 2 == 5
 
 
+# Testing that you can user Lens constructors through UserLens properly
+def test_userlens_constructor_trivial():
+    assert lens(3).trivial_().get() == 3
+
+
+def test_userlens_constructor_getitem():
+    assert lens([1, 2, 3]).getitem_(1).get() == 2
+
+
+def test_userlens_constructor_getattr():
+    assert lens(3).getattr_('denominator').get() == 1
+
+
+def test_userlens_constructor_both():
+    assert lens([1, 2]).both_().get_all() == (1, 2)
+
+
+def test_userlens_constructor_nonexistant():
+    with pytest.raises(AttributeError):
+        lens(3).flobadob_()
+
+
+def test_userlens_constructor_nonconstructor():
+    with pytest.raises(AttributeError):
+        lens(3).get_()
+
+
+# misc UserLens tests
 def test_userlens_informative_repr():
     obj = object()
     assert repr(obj) in repr(lens(obj))
