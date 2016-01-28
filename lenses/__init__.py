@@ -5,7 +5,6 @@ from .lens import (Lens,
                    getitem,
                    item,
                    item_by_value,
-                   make_lens,
                    traverse_l,
                    trivial,
                    tuple_l, )

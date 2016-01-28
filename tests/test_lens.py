@@ -168,8 +168,9 @@ def test_lens_traverse_l():
 
 
 # Tests for miscellaneous functions
-def test_make_lens():
-    my_lens = lenses.make_lens(lambda a: a[:-1], lambda a, s: a + '!')
+def test_lens_from_getter_setter():
+    my_lens = lenses.Lens.from_getter_setter(lambda a: a[:-1],
+                                             lambda a, s: a + '!')
     state = 'hello!'
     assert my_lens.get(state) == 'hello'
     assert my_lens.set(state, 'bye') == 'bye!'

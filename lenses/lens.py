@@ -6,26 +6,6 @@ from .typeclass import fmap, ap, traverse
 from .setter import magic_set, multi_magic_set
 
 
-def make_lens(getter, setter):
-    '''turns a pair of getter and setter functions into a van Laarhoven
-    lens. A getter function is one that takes a state and returns a
-    value derived from that state. A setter function takes a new value and
-    an old state and injects the new value into the old state, returning
-    a new state.
-
-    make_lens :: getter_func, setter_func -> Lens
-    getter_func :: state -> value
-    setter_func :: new_value, old_state -> new_state
-    '''
-
-    def new_func(func, state):
-        old_value = getter(state)
-        fa = func(old_value)
-        return fmap(fa, lambda a: setter(a, state))
-
-    return Lens(new_func)
-
-
 class Lens(object):
     '''A Lens. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function that does all the hard
@@ -38,6 +18,26 @@ class Lens(object):
 
     def __init__(self, func):
         self.func = func
+
+    @classmethod
+    def from_getter_setter(cls, getter, setter):
+        '''turns a pair of getter and setter functions into a van Laarhoven
+        lens. A getter function is one that takes a state and returns a
+        value derived from that state. A setter function takes a new value and
+        an old state and injects the new value into the old state, returning
+        a new state.
+
+        make_lens :: getter_func, setter_func -> Lens
+        getter_func :: state -> value
+        setter_func :: new_value, old_state -> new_state
+        '''
+
+        def new_func(func, state):
+            old_value = getter(state)
+            fa = func(old_value)
+            return fmap(fa, lambda a: setter(a, state))
+
+        return cls(new_func)
 
     def get(self, state):
         'Returns the value this lens is magnified on.'
@@ -158,7 +158,7 @@ def tuple_l(*some_lenses):
             state = a_lens.set(state, new_value)
         return state
 
-    return make_lens(getter, setter)
+    return Lens.from_getter_setter(getter, setter)
 
 
 def traverse_l():
