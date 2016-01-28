@@ -1,4 +1,4 @@
-from .lens import getattr_l, getitem, trivial
+from .lens import getattr_l, getitem, Lens
 
 _guard = object()
 
@@ -31,7 +31,7 @@ class UserLens(object):
 
     def __init__(self, item, sublens):
         self.item = _guard if item is None else item
-        self.lens = trivial() if sublens is None else sublens
+        self.lens = Lens.trivial() if sublens is None else sublens
 
     def __repr__(self):
         return '{}({!r}, {!r})'.format(self.__class__.__name__, self.item,

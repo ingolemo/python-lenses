@@ -39,6 +39,13 @@ class Lens(object):
 
         return cls(new_func)
 
+    @classmethod
+    def trivial(cls):
+        '''A trivial lens that magnifies to the whole state.'''
+        def _(func, state):
+            return fmap(func(state), lambda newvalue: newvalue)
+        return cls(_)
+
     def get(self, state):
         'Returns the value this lens is magnified on.'
         return self.func(lambda a: Const(a), state).item
@@ -94,13 +101,6 @@ def getattr_l(name):
 def getitem(key):
     '''A lens that magnifies an item inside a container'''
     return _magic_set_lens(key, 'setitem', operator.getitem)
-
-
-def trivial():
-    '''A trivial lens that magnifies to the whole state.'''
-    def _(func, state):
-        return fmap(func(state), lambda newvalue: newvalue)
-    return Lens(_)
 
 
 def both():

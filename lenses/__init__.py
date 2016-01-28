@@ -6,7 +6,6 @@ from .lens import (Lens,
                    item,
                    item_by_value,
                    traverse_l,
-                   trivial,
                    tuple_l, )
 
 

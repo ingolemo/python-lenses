@@ -7,7 +7,7 @@ from lenses import lens
 
 LensAndState = collections.namedtuple('LensAndState', 'lens state')
 lenses_and_states = [
-    LensAndState(lenses.trivial(), None),
+    LensAndState(lenses.Lens.trivial(), None),
     LensAndState(lenses.getitem(0), [1, 2, 3]),
     LensAndState(lenses.getitem(0), (1, 2, 3)),
     LensAndState(lenses.getitem(0), {0: 'hello', 1: 'world'}),
@@ -124,8 +124,8 @@ def test_lens_getitem():
 
 def test_lens_trivial():
     obj = object()
-    assert lenses.trivial().get(obj) is obj
-    assert lenses.trivial().set(obj, None) is None
+    assert lenses.Lens.trivial().get(obj) is obj
+    assert lenses.Lens.trivial().set(obj, None) is None
 
 
 def test_lens_both():
