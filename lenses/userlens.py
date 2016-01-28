@@ -70,7 +70,7 @@ class UserLens(object):
 
     def bind(self, item):
         if self.item is not _guard:
-            raise ValueError()
+            raise ValueError('Trying to bind an already bound lens')
         return UserLens(item, self.lens)
 
     def __getattr__(self, name):
