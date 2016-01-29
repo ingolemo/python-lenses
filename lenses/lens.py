@@ -115,6 +115,18 @@ class Lens(object):
         somewhat similar to iterating over it.'''
         return cls(lambda fn, state: traverse(state, fn))
 
+    @classmethod
+    def decode(cls, *args, **kwargs):
+        '''A lens that decodes and encodes one the fly. Lets you focus a
+        byte string as a unicode string.'''
+        def getter(state):
+            return state.decode(*args, **kwargs)
+
+        def setter(new_value, old_state):
+            return new_value.encode(*args, **kwargs)
+
+        return cls.from_getter_setter(getter, setter)
+
     def get(self, state):
         'Returns the value this lens is magnified on.'
         return self.func(lambda a: Const(a), state).item
@@ -164,6 +176,7 @@ def _magic_set_lens(name, method, getter):
 
 def _is_lens_constructor(constr):
     return constr in {
+        Lens.decode,
         Lens.from_getter_setter,
         Lens.trivial,
         Lens.getattr,

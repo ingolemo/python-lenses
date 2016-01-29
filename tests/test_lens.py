@@ -123,6 +123,12 @@ def test_lens_and():
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
+def test_lens_decode():
+    assert Lens.decode().get(b'hello') == 'hello'
+    assert Lens.decode('utf-8').get(b'caf\xc3\xa9') == 'caf\xe9'
+    assert Lens.decode('ascii', 'replace').set(b'', '\xe9') == b'?'
+
+
 def test_lens_getattr():
     Tup = collections.namedtuple('Tup', 'attr')
     obj = Tup(1)
