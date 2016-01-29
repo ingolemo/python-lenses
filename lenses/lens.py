@@ -176,14 +176,14 @@ def _magic_set_lens(name, method, getter):
 
 def _is_lens_constructor(constr):
     return constr in {
+        Lens.both,
         Lens.decode,
         Lens.from_getter_setter,
-        Lens.trivial,
         Lens.getattr,
         Lens.getitem,
-        Lens.both,
         Lens.item,
         Lens.item_by_value,
-        Lens.tuple,
         Lens.traverse,
+        Lens.trivial,
+        Lens.tuple,
     }
