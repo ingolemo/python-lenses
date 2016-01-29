@@ -1,44 +1,57 @@
 import collections
 
 import pytest
+import hypothesis
+import hypothesis.strategies as strat
 
-import lenses
 from lenses import lens, Lens
 
-LensAndState = collections.namedtuple('LensAndState', 'lens state')
-lenses_and_states = [
-    LensAndState(Lens.trivial(), None),
-    LensAndState(Lens.getitem(0), [1, 2, 3]),
-    LensAndState(Lens.getitem(0), (1, 2, 3)),
-    LensAndState(Lens.getitem(0), {0: 'hello', 1: 'world'}),
-]  # yapf: disable
 
+def build_lens_strat():
+    lens_const = strat.one_of(
+        strat.tuples(strat.just(Lens.getitem),
+                     strat.integers(min_value=0, max_value=10)),
+    )
+    lens_consts = strat.lists(lens_const, max_size=5)
 
-@pytest.fixture(params=lenses_and_states)
-def lns(request):
-    return request.param
+    def _(lcons):
+        lst = strat.just(Lens.trivial())
+        dst = strat.just(object())
+        for lcon in lcons:
+            if lcon[0] is Lens.getitem:
+                lst = lst.map(lambda l: lcon[0](lcon[1]).compose(l))
+                dst = strat.lists(dst, min_size=lcon[1]+1)
+        return strat.tuples(lst, dst)
+    return lens_consts.flatmap(_)
+
+lens_strat = build_lens_strat()
 
 
 # Tests for lens rules and other invariants
+@hypothesis.given(lens_strat)
 def test_get_then_set(lns):
     '''if we get from a state and then immediately set it again we
     should get back the same state'''
-    assert lns.lens.set(lns.state, lns.lens.get(lns.state)) == lns.state
+    ls, state = lns
+    assert ls.set(state, ls.get(state)) == state
 
 
+@hypothesis.given(lens_strat)
 def test_set_then_get(lns):
     '''if we set a state and immediately get it we should get back what
     we set'''
+    ls, state = lns
     obj = object()
-    assert lns.lens.get(lns.lens.set(lns.state, obj)) == obj
+    assert ls.get(ls.set(state, obj)) == obj
 
 
+@hypothesis.given(lens_strat)
 def test_set_then_set(lns):
     '''if we set a state using a lens and then immediately set it again,
     it should be as though we only set it once.'''
+    ls, state = lns
     obj = object()
-    assert (lns.lens.set(
-        lns.lens.set(lns.state, obj), obj) == lns.lens.set(lns.state, obj))
+    assert ls.set(ls.set(state, obj), obj) == ls.set(state, obj)
 
 
 # Tests for ensuring lenses work on different type of objects
