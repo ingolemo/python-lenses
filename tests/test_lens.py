@@ -88,7 +88,7 @@ def test_type_custom_class_copy_and_mutate():
     assert lens(C(C(0, 1), C(2, 3))).a.b.set(4) == C(C(0, 4), C(2, 3))
 
 
-def test_type_custom_class_method_lens_setter():
+def test_type_custom_class_lens_setter():
     class C(object):
         def __init__(self, a, b):
             self.a = a
