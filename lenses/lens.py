@@ -172,18 +172,3 @@ def _magic_set_lens(name, method, getter):
             lambda newvalue: magic_set(state, method, name, newvalue))
 
     return new_lens
-
-
-def _is_lens_constructor(constr):
-    return constr in {
-        Lens.both,
-        Lens.decode,
-        Lens.from_getter_setter,
-        Lens.getattr,
-        Lens.getitem,
-        Lens.item,
-        Lens.item_by_value,
-        Lens.traverse,
-        Lens.trivial,
-        Lens.tuple,
-    }
