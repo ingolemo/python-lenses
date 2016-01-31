@@ -1,8 +1,20 @@
 import functools
 
-from .lens import Lens, _is_lens_constructor
+from .lens import Lens
 
-_guard = object()
+
+class Unbound:
+    instance = None
+
+    def __new__(cls):
+        if cls.instance is None:
+            cls.instance = super().__new__(cls)
+        return cls.instance
+
+    def __repr__(self):
+        return '<_unbound>'
+
+_unbound = Unbound()
 
 
 def _carry_op(name):
@@ -22,7 +34,7 @@ def _carry_lens(method):
 
 
 def _valid_item(selfitem, argitem):
-    items = selfitem is not _guard, argitem is not _guard
+    items = selfitem is not _unbound, argitem is not _unbound
     if items == (False, False):
         raise ValueError('Lens is unbound and no item has been passed')
     elif items == (True, True):
@@ -40,46 +52,47 @@ class UserLens(object):
     __slots__ = ['item', 'lens']
 
     def __init__(self, item, sublens):
-        self.item = _guard if item is None else item
+        self.item = _unbound if item is None else item
         self.lens = Lens.trivial() if sublens is None else sublens
 
     def __repr__(self):
         return '{}({!r}, {!r})'.format(self.__class__.__name__, self.item,
                                        self.lens)
 
-    def get(self, item=_guard):
+    def get(self, item=_unbound):
         'get the item via the lens'
         item = _valid_item(self.item, item)
         return self.lens.get(item)
 
-    def get_all(self, item=_guard):
+    def get_all(self, item=_unbound):
         'get all items via the lens'
         item = _valid_item(self.item, item)
         return self.lens.get_all(item)
 
-    def set(self, newvalue, item=_guard):
+    def set(self, newvalue, item=_unbound):
         'set the item via the lens'
         item = _valid_item(self.item, item)
         return self.lens.set(item, newvalue)
 
-    def modify(self, func, item=_guard):
+    def modify(self, func, item=_unbound):
         'apply a function to the item via the lens'
         item = _valid_item(self.item, item)
         return self.lens.modify(item, func)
 
-    def call_method(self, method_name, *args, item=_guard, **kwargs):
+    def call_method(self, method_name, *args, item=_unbound, **kwargs):
         '''call a method on the item via the lens.
 
         the method should return a new item.'''
-        method = getattr(self.get(item), method_name)
-        return self.set(method(*args, **kwargs), item)
+        def func(a):
+            return getattr(a, method_name)(*args, **kwargs)
+        return self.modify(func, item)
 
     def add_lens(self, new_lens):
         'compose the internal lens with an extra lens'
         return UserLens(self.item, self.lens.compose(new_lens))
 
     def bind(self, item):
-        if self.item is not _guard:
+        if self.item is not _unbound:
             raise ValueError('Trying to bind an already bound lens')
         return UserLens(item, self.lens)
 
