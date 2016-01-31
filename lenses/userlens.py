@@ -111,6 +111,7 @@ class UserLens(object):
     getitem_ = _carry_lens(Lens.getitem)
     item_ = _carry_lens(Lens.item)
     item_by_value_ = _carry_lens(Lens.item_by_value)
+    items_ = _carry_lens(Lens.item)
     traverse_ = _carry_lens(Lens.traverse)
     trivial_ = _carry_lens(Lens.trivial)
     tuple_ = _carry_lens(Lens.tuple)

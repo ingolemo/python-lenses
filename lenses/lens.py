@@ -95,6 +95,14 @@ class Lens(object):
         return cls.from_getter_setter(getter, setter)
 
     @classmethod
+    def items(cls):
+        '''A lens focusing a dictionary as a list of key-value tuples.
+        Similar to dict.items'''
+        def _(fn, state):
+            return fmap(fn(state.items()), dict)
+        return cls(_)
+
+    @classmethod
     def tuple(cls, *some_lenses):
         '''takes some lenses and returns a lens that magnifies a tuple with
         values taken from all the lenses'''
