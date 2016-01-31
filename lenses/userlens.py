@@ -1,3 +1,5 @@
+import functools
+
 from .lens import Lens, _is_lens_constructor
 
 _guard = object()
@@ -9,6 +11,14 @@ def _carry_op(name):
 
     operation.__name__ = name
     return operation
+
+
+def _carry_lens(method):
+    @functools.wraps(method)
+    def _(self, *args, **kwargs):
+        lens = method(*args, **kwargs)
+        return type(self)(self.item, self.lens.compose(lens))
+    return _
 
 
 def _valid_item(selfitem, argitem):
@@ -74,19 +84,23 @@ class UserLens(object):
         return UserLens(item, self.lens)
 
     def __getattr__(self, name):
-        if not name.endswith('_'):
-            return self.add_lens(Lens.getattr(name))
-
-        constructor = getattr(Lens, name[:-1])
-        if not _is_lens_constructor(constructor):
+        if name.endswith('_'):
             raise AttributeError('Not a valid lens constructor')
-
-        def _(*args, **kwargs):
-            return self.add_lens(constructor(*args, **kwargs))
-        return _
+        return self.add_lens(Lens.getattr(name))
 
     def __getitem__(self, name):
         return self.add_lens(Lens.getitem(name))
+
+    both_ = _carry_lens(Lens.both)
+    decode_ = _carry_lens(Lens.decode)
+    from_getter_setter_ = _carry_lens(Lens.from_getter_setter)
+    getattr_ = _carry_lens(Lens.getattr)
+    getitem_ = _carry_lens(Lens.getitem)
+    item_ = _carry_lens(Lens.item)
+    item_by_value_ = _carry_lens(Lens.item_by_value)
+    traverse_ = _carry_lens(Lens.traverse)
+    trivial_ = _carry_lens(Lens.trivial)
+    tuple_ = _carry_lens(Lens.tuple)
 
     # __new__
     # __init__
