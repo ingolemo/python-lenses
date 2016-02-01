@@ -5,6 +5,7 @@ data-structures without mutating them. It is inspired by the lenses in
 Haskell, although it's much less principled and the api is more suitable
 for python.
 
+
 ## Installation
 
 You can install the latest github version using pip like so:
@@ -15,6 +16,7 @@ You can uninstall similarly:
 
 	pip uninstall lenses
 
+
 ## How to Use
 
 For most users, the lenses library exports only one thing worth knowing
@@ -23,11 +25,11 @@ about; a `lens` function:
 	>>> from lenses import lens
 
 If you have a large data structure that you want to manipulate, you can
-pass it to this function and you will receive a BoundLens, which is a
-Lens that has been bound to that specific object. The lens can then be
-walked to focus it down on a particular part of the data-structure. You
-walk the lens by getting attributes and items from it (anything that
-would call `__getattr__` or `__getitem__`):
+pass it to this function and you will receive a bound `UserLens` object,
+which is a Lens that has been bound to that specific object. The lens
+can then be walked to focus it down on a particular part of the
+data-structure. You walk the lens by getting attributes and items from
+it (anything that would call `__getattr__` or `__getitem__`):
 
 	>>> data = [1, 2, 3]
 	>>> my_lens = lens(data)[1]
@@ -131,12 +133,6 @@ copies are made. This makes lenses more memory efficient than using
 	>>> old_state.worlds[2] is new_state.worlds[2]
 	False
 
-## TODO
-
-* add decent api for unbound lenses
-* document unbound lenses
-* add lens combinators
-* allow lenses to manipulate multiple objects
 
 ## License
 
