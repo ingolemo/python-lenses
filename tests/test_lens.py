@@ -167,11 +167,10 @@ def test_lens_both():
 
 def test_lens_item():
     data = {0: 'hello', 1: 'world'}
-    my_lens = Lens.item(1)
-    assert my_lens.get(data) == (1, 'world')
-    assert my_lens.set(data, (2, 'everyone')) == {0: 'hello', 2: 'everyone'}
-    with pytest.raises(LookupError):
-        Lens.item(3).get(data)
+    assert Lens.item(1).get(data) == (1, 'world')
+    assert Lens.item(1).set(data, (2, 'everyone')) == {0: 'hello',
+                                                       2: 'everyone'}
+    assert Lens.item(3).get(data) is None
 
 
 def test_lens_item_by_value():

@@ -80,15 +80,19 @@ class Lens(object):
     def item(cls, old_key):
         '''A lens that focuses a single item (key-value pair) in a
         dictionary by its key.'''
-        def _(fn, state):
-            return fmap(
-                fn((old_key, state[old_key])),
-                lambda new_value: dict([new_value] + [
-                    (k, v) for k, v in state.items() if k is not old_key
-                ])
-            )
+        def getter(state):
+            try:
+                return old_key, state[old_key]
+            except KeyError:
+                return None
 
-        return cls(_)
+        def setter(value, state):
+            data = {k: v for k, v in state.items() if k is not old_key}
+            if value is not None:
+                data[value[0]] = value[1]
+            return data
+
+        return Lens.from_getter_setter(getter, setter)
 
     @classmethod
     def item_by_value(cls, old_value):
