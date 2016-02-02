@@ -94,7 +94,7 @@ class UserLens(object):
 
     both_ = _carry_lens(Lens.both)
     decode_ = _carry_lens(Lens.decode)
-    from_getter_setter_ = _carry_lens(Lens.from_getter_setter)
+    getter_setter_ = _carry_lens(Lens.from_getter_setter)
     getattr_ = _carry_lens(Lens.getattr)
     getitem_ = _carry_lens(Lens.getitem)
     item_ = _carry_lens(Lens.item)
