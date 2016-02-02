@@ -88,23 +88,36 @@ def test_type_custom_class_copy_and_mutate():
     assert lens(C(C(0, 1), C(2, 3))).a.b.set(4) == C(C(0, 4), C(2, 3))
 
 
-def test_type_custom_class_lens_setter():
+def test_type_custom_class_lens_setattr():
     class C(object):
-        def __init__(self, a, b):
-            self.a = a
-            self.b = b
+        def __init__(self, a):
+            self._a = a
+
+        @property
+        def a(self):
+            return self._a
 
         def __eq__(self, other):
-            return self.a == other.a and self.b == other.b
+            return self.a == other.a
 
-        def lens_setter(self, kind, key, value):
-            if kind == 'setattr':
-                if key == 'a':
-                    return C(value, self.b)
-                elif key == 'b':
-                    return C(self.a, value)
+        def _lens_setattr(self, key, value):
+            if key == 'a':
+                return C(value)
 
-    assert lens(C(C(0, 1), C(2, 3))).a.b.set(4) == C(C(0, 4), C(2, 3))
+    assert lens(C(C(9))).a.a.set(4) == C(C(4))
+
+
+def test_type_custom_class_immutable():
+    class C(object):
+        def __init__(self, a):
+            self._a = a
+
+        @property
+        def a(self):
+            return self._a
+
+    with pytest.raises(AttributeError):
+        lens(C(9)).a.set(7)
 
 
 # Tests to make sure types that are not supported by lenses return the

@@ -3,7 +3,7 @@ import operator
 from .identity import Identity
 from .const import Const
 from .typeclass import fmap, ap, traverse
-from .setter import magic_set, multi_magic_set
+from .setter import setitem_immutable, setattr_immutable, multi_magic_set
 
 
 class Lens(object):
@@ -50,19 +50,29 @@ class Lens(object):
     def getattr(cls, name):
         '''A lens that focuses an attribute of an object. Analogous to
         `getattr`.'''
-        return _magic_set_lens(name, 'setattr', getattr)
+        def getter(state):
+            return getattr(state, name)
+
+        def setter(value, state):
+            return setattr_immutable(state, name, value)
+
+        return Lens.from_getter_setter(getter, setter)
 
     @classmethod
     def getitem(cls, key):
         '''A lens that focuses an item inside a container. Analogous to
         `operator.itemgetter`.'''
-        return _magic_set_lens(key, 'setitem', operator.getitem)
+        def setter(value, state):
+            return setitem_immutable(state, key, value)
+
+        return Lens.from_getter_setter(operator.itemgetter(key), setter)
 
     @classmethod
     def both(cls):
         '''A traversal that focuses both items [0] and [1].'''
         def _(func, state):
-            mms = multi_magic_set(state, [('setitem', 1), ('setitem', 0)])
+            mms = multi_magic_set(state, [(setitem_immutable, 1),
+                                          (setitem_immutable, 0)])
             return ap(func(state[1]), fmap(func(state[0]), mms))
         return cls(_)
 

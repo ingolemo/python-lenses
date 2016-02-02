@@ -5,53 +5,53 @@ except ImportError:
 import copy
 
 
-def magic_set(self, kind, key, value):
-    'A setter function that tries many different ways to set things'
-    try:
-        self.lens_setter
-    except AttributeError:
-        return setter(self, kind, key, value)
-    else:
-        return self.lens_setter(kind, key, value)
-
-
-def multi_magic_set(state, kindskeys):
-    'returns a curried function that uses magic_set to set its arguments'
-    if not kindskeys:
+def multi_magic_set(state, setters):
+    # this should probably be a constructor for a traversal
+    # it's really ugly and i'm not sure if it's called for
+    if not setters:
         return state
-    kind, key = kindskeys.pop()
+    setter, key = setters.pop()
 
-    def func(a, kind=kind, key=key):
-        return multi_magic_set(magic_set(state, kind, key, a), kindskeys)
+    def func(a, setter=setter, key=key):
+        return multi_magic_set(setter(state, key, a), setters)
 
     return func
 
 
 @singledispatch
-def setter(self, kind, key, value):
-    '''returns a copy of self with key replaced by value.
-
-    kind is either 'setitem' or 'setattr' depending on how the lens
-    was accessed. The default approach is to make a copy of self and
-    attempt to mutate the copy.
-    '''
-    selfcopy = copy.copy(self)
-    if kind == 'setitem':
+def setitem_immutable(self, key, value):
+    try:
+        self._lens_setitem
+    except AttributeError:
+        selfcopy = copy.copy(self)
         selfcopy[key] = value
-    elif kind == 'setattr':
-        setattr(selfcopy, key, value)
-    return selfcopy
+        return selfcopy
+    else:
+        return self._lens_setitem(key, value)
 
 
-@setter.register(tuple)
-def _(self, kind, key, value):
-    '''Handles setting items in tuples.
+@setitem_immutable.register(tuple)
+def _(self, key, value):
+    return tuple(value if i == key else item
+                 for i, item in enumerate(self))
 
-    Assumes that if we try to set an attribute on a tuple then it is
-    actually a namedtuple.'''
-    if kind == 'setitem':
-        return tuple(value if i == key else item
-                     for i, item in enumerate(self))
-    elif kind == 'setattr':
-        return type(self)(*(value if field == key else item
-                            for field, item in zip(self._fields, self)))
+
+@singledispatch
+def setattr_immutable(self, name, value):
+    try:
+        self._lens_setattr
+    except AttributeError:
+        selfcopy = copy.copy(self)
+        setattr(selfcopy, name, value)
+        return selfcopy
+    else:
+        return self._lens_setattr(name, value)
+
+
+@setattr_immutable.register(tuple)
+def _(self, name, value):
+    # setting attributes on a tuple probably means we really have a
+    # namedtuple so we can use self._fields to understand the names
+    data = (value if field == name else item
+            for field, item in zip(self._fields, self))
+    return type(self)(*data)
