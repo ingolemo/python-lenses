@@ -184,13 +184,3 @@ class Lens(object):
         return Lens(new_func)
 
     __and__ = compose
-
-
-def _magic_set_lens(name, method, getter):
-    @Lens
-    def new_lens(fn, state):
-        return fmap(
-            fn(getter(state, name)),
-            lambda newvalue: magic_set(state, method, name, newvalue))
-
-    return new_lens
