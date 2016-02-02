@@ -3,20 +3,6 @@ import functools
 from .lens import Lens
 
 
-class Unbound:
-    instance = None
-
-    def __new__(cls):
-        if cls.instance is None:
-            cls.instance = super().__new__(cls)
-        return cls.instance
-
-    def __repr__(self):
-        return '<_unbound>'
-
-_unbound = Unbound()
-
-
 def _carry_op(name):
     def operation(self, *args, **kwargs):
         return self.modify(lambda a: getattr(a, name)(*args, **kwargs))
@@ -33,59 +19,49 @@ def _carry_lens(method):
     return _
 
 
-def _valid_state(selfstate, argstate):
-    states = selfstate is not _unbound, argstate is not _unbound
-    if states == (False, False):
-        raise ValueError('Lens is unbound and no state has been passed')
-    elif states == (True, True):
-        raise ValueError('Passed an state to an already bound Lens')
-    elif states == (True, False):
-        return selfstate
-    elif states == (False, True):
-        return argstate
-    else:
-        raise RuntimeError('Unreachable branch reached')
-
-
 class UserLens(object):
     'A user-friendly object for interacting with the lenses library'
     __slots__ = ['state', 'lens']
 
     def __init__(self, state, sublens):
-        self.state = _unbound if state is None else state
+        self.state = state
         self.lens = Lens.trivial() if sublens is None else sublens
 
     def __repr__(self):
         return '{}({!r}, {!r})'.format(self.__class__.__name__,
                                        self.state, self.lens)
 
-    def get(self, state=_unbound):
-        'Get the value in `state` or `self.state` focused by the lens.'
-        state = _valid_state(self.state, state)
-        return self.lens.get(state)
+    def _assert_state(self):
+        if self.state is None:
+            raise ValueError('Operation requires a bound lens')
 
-    def get_all(self, state=_unbound):
-        '''Get multiple values in `state` or `self.state` focused by the
-        lens. Returns them as a tuple.'''
-        state = _valid_state(self.state, state)
-        return self.lens.get_all(state)
+    def get(self):
+        'Get the value focused by the lens.'
+        self._assert_state()
+        return self.lens.get(self.state)
 
-    def set(self, newvalue, state=_unbound):
-        '''Set the focus of `state` or `self.state` to `newvalue`.'''
-        state = _valid_state(self.state, state)
-        return self.lens.set(state, newvalue)
+    def get_all(self):
+        '''Get multiple values focused by the lens. Returns them as a
+        tuple.'''
+        self._assert_state()
+        return self.lens.get_all(self.state)
 
-    def modify(self, func, state=_unbound):
-        '''Apply a function to the focus of `state` or `self.state`.'''
-        state = _valid_state(self.state, state)
-        return self.lens.modify(state, func)
+    def set(self, newvalue):
+        '''Set the focus to `newvalue`.'''
+        self._assert_state()
+        return self.lens.set(self.state, newvalue)
 
-    def call_method(self, method_name, *args, state=_unbound, **kwargs):
-        '''Call a method on the focus of `state` or `self.state`. The
-        method must return a new value for the focus.'''
+    def modify(self, func):
+        '''Apply a function to the focus.'''
+        self._assert_state()
+        return self.lens.modify(self.state, func)
+
+    def call_method(self, method_name, *args, **kwargs):
+        '''Call a method on the focus. The method must return a new
+        value for the focus.'''
         def func(a):
             return getattr(a, method_name)(*args, **kwargs)
-        return self.modify(func, state)
+        return self.modify(func)
 
     def add_lens(self, other):
         '''Refine the current focus of this lens by composing it with
@@ -94,7 +70,7 @@ class UserLens(object):
         if isinstance(other, Lens):
             return UserLens(self.state, self.lens.compose(other))
         elif isinstance(other, UserLens):
-            if other.state is not _unbound:
+            if other.state is not None:
                 raise ValueError('Other lens has a state bound to it.')
             return UserLens(self.state, self.lens.compose(other.lens))
         else:
@@ -104,7 +80,7 @@ class UserLens(object):
     def bind(self, state):
         '''Bind this lens to a specific `state`. Raises `ValueError`
         when the lens has already been bound.'''
-        if self.state is not _unbound:
+        if self.state is not None:
             raise ValueError('Trying to bind an already bound lens')
         return UserLens(state, self.lens)
 
