@@ -133,6 +133,56 @@ copies are made. This makes lenses more memory efficient than using
 	>>> old_state.worlds[2] is new_state.worlds[2]
 	False
 
+If you pass no arguments to the `lens` function then you will get an
+unbound `UserLens` object. An unbound lens can be manipulated in all the
+ways that a bound lens can except that you can't call any of the methods
+that manipulate the state (such as `get` and `set`).
+
+	>>> unbound_lens = lens()
+	>>> key_one = unbound_lens['one']
+
+You can then attach a state to the lens using the `bind` method and call
+state manipulating methods as normal:
+
+	>>> key_one.bind({'one': 1, 'two': 2}).get()
+	1
+
+If you have two lenses, you can join them together using the `add_lens`
+method. Joining lenses means that one of the lenses is placed "inside"
+of the other so that the focus of one lens is fed into other one as its
+the state:
+
+	>>> first = lens()[0]
+	>>> second = lens()[1]
+	>>> first_then_second = first.add_lens(second)
+	>>> first_then_second.bind([[2, 3], [4, 5]]).get()
+	3
+	>>> second_then_first = second.add_lens(first)
+	>>> second_then_first.bind([[2, 3], [4, 5]]).get()
+	4
+
+So far we've seen lenses that extract data out of data-structures, but
+lenses are more powerful than that. Lenses can actually perform
+arbitrary computation on the data passing through them as long as that
+computation can be reversed.
+
+A simple example is that of the `item_` method which returns a lens that
+focuses on a single key of a dictionary but returns both the key and the
+value:
+
+	>>> l = lens({'one': 1, 'two': 2})
+	>>> l.item_('one').get()
+	('one', 1)
+	>>> l.item_('two').set(('three', 3))
+	{'one': 1, 'three': 3}
+
+There are a number of such more complicated lenses defined on
+`UserLens`. To help avoid collision with accessing attributes on the
+state, their names all end with a single underscore. See
+`help(lenses.UserLens)` in the repl for more. If you need to access an
+attribute on the state that has been shadowed by UserLens' methods then
+you can use `UserLens.getattr_(attribute)`.
+
 
 ## License
 
