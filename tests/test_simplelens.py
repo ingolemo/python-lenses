@@ -185,9 +185,11 @@ def test_lens_item_by_value():
 def test_lens_items():
     data = {0: 'zero', 1: 'one'}
     my_lens = SimpleLens.items()
-    assert sorted(my_lens.get(data)) == [(0, 'zero'), (1, 'one')]
-    assert my_lens.set(data, [(2, 'two'), (3, 'three')]) == {2: 'two',
-                                                             3: 'three'}
+    assert sorted(my_lens.get_all(data)) == [(0, 'zero'), (1, 'one')]
+
+    my_lens = SimpleLens.items().compose(SimpleLens.getitem(0))
+    assert sorted(my_lens.get_all(data)) == [0, 1]
+    assert my_lens.modify(data, lambda a: a + 1) == {1: 'zero', 2: 'one'}
 
 
 def test_lens_tuple_l():

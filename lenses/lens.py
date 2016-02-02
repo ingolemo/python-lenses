@@ -99,7 +99,7 @@ class Lens(object):
     getitem_ = _carry_lens(SimpleLens.getitem)
     item_ = _carry_lens(SimpleLens.item)
     item_by_value_ = _carry_lens(SimpleLens.item_by_value)
-    items_ = _carry_lens(SimpleLens.item)
+    items_ = _carry_lens(SimpleLens.items)
     traverse_ = _carry_lens(SimpleLens.traverse)
     trivial_ = _carry_lens(SimpleLens.trivial)
     tuple_ = _carry_lens(SimpleLens.tuple)

@@ -1,9 +1,30 @@
 import operator
+import functools
 
 from .identity import Identity
 from .const import Const
 from .typeclass import fmap, ap, traverse
 from .setter import setitem_immutable, setattr_immutable, multi_magic_set
+
+
+def starargs_curry(n):
+    def decorator(fn):
+
+        @functools.wraps(fn)
+        def wrapper(arg):
+            args = []
+
+            def arg_collector(arg):
+                nonlocal args
+                args.append(arg)
+                if len(args) == n:
+                    return fn(*args)
+                else:
+                    return arg_collector
+
+            return arg_collector(arg)
+        return wrapper
+    return decorator
 
 
 class SimpleLens(object):
@@ -115,7 +136,17 @@ class SimpleLens(object):
         '''A lens focusing a dictionary as a list of key-value tuples.
         Analogous to `dict.items`.'''
         def _(fn, state):
-            return fmap(fn(state.items()), dict)
+            items = list(state.items())
+
+            @starargs_curry(len(items))
+            def dict_builder(*args):
+                return dict(args)
+
+            dict_partial = fmap(fn(items[0]), dict_builder)
+            for item in items[1:]:
+                dict_partial = ap(fn(item), dict_partial)
+
+            return dict_partial
         return cls(_)
 
     @classmethod
