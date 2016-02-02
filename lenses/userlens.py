@@ -29,7 +29,7 @@ def _carry_lens(method):
     @functools.wraps(method)
     def _(self, *args, **kwargs):
         lens = method(*args, **kwargs)
-        return type(self)(self.item, self.lens.compose(lens))
+        return self.add_lens(lens)
     return _
 
 
