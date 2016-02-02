@@ -35,6 +35,11 @@ def fmap(functor, func):
     return functor.fmap(func)
 
 
+@fmap.register(list)
+def _(lst, func):
+    return [func(a) for a in lst]
+
+
 # applicative functor
 @singledispatch
 def pure(applicative, item):
