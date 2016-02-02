@@ -35,9 +35,24 @@ def test_userlens_call_method_kwargs():
     assert lens('h').call_method('encode', encoding='utf-8') == b'h'
 
 
-def test_userlens_add_lens():
+def test_userlens_add_lens_lens():
     assert lens([1, 2]).add_lens(Lens.trivial()) + [3] == [1, 2, 3]
     assert lens([1, 2]).add_lens(Lens.getitem(1)).set(3) == [1, 3]
+
+
+def test_userlens_add_lens_userlens():
+    assert lens([1, 2]).add_lens(lens()) + [3] == [1, 2, 3]
+    assert lens([1, 2]).add_lens(lens()[1]).set(3) == [1, 3]
+
+
+def test_userlens_add_lens_bound_userlens():
+    with pytest.raises(ValueError):
+        lens([1, 2]).add_lens(lens(1))
+
+
+def test_userlens_add_lens_bad_lens():
+    with pytest.raises(TypeError):
+        lens([1, 2]).add_lens(1)
 
 
 def test_userlens_bind():

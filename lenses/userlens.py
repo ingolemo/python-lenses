@@ -87,10 +87,19 @@ class UserLens(object):
             return getattr(a, method_name)(*args, **kwargs)
         return self.modify(func, state)
 
-    def add_lens(self, new_lens):
-        '''Refine the current focus of this lens by composing it with a
-        `lenses.Lens` object.'''
-        return UserLens(self.state, self.lens.compose(new_lens))
+    def add_lens(self, other):
+        '''Refine the current focus of this lens by composing it with
+        another lens object. Can be a `lenses.Lens` or an unbound
+        `lenses.UserLens`.'''
+        if isinstance(other, Lens):
+            return UserLens(self.state, self.lens.compose(other))
+        elif isinstance(other, UserLens):
+            if other.state is not _unbound:
+                raise ValueError('Other lens has a state bound to it.')
+            return UserLens(self.state, self.lens.compose(other.lens))
+        else:
+            raise TypeError('''Cannot add lens of type {!r}.'''
+                            .format(type(other)))
 
     def bind(self, state):
         '''Bind this lens to a specific `state`. Raises `ValueError`
