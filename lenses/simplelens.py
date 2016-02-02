@@ -42,22 +42,22 @@ class SimpleLens(object):
 
     @classmethod
     def from_getter_setter(cls, getter, setter):
-        '''Turns a pair of getter and setter functions into a van Laarhoven
-        lens. A getter function is one that takes a state and returns a
-        value derived from that state. A setter function takes a new value and
-        an old state and injects the new value into the old state, returning
-        a new state.
+        '''Turns a pair of getter and setter functions into a van
+        Laarhoven lens. A getter function is one that takes a state and
+        returns a value derived from that state. A setter function takes
+        an old state and a new value and injects the new value into the
+        old state, returning a new state.
 
         def getter(state) -> value
-        def setter(new_value, old_state) -> new_state
+        def setter(old_state, new_value) -> new_state
         '''
 
-        def new_func(func, state):
+        def _(func, state):
             old_value = getter(state)
             fa = func(old_value)
-            return fmap(fa, lambda a: setter(a, state))
+            return fmap(fa, lambda a: setter(state, a))
 
-        return cls(new_func)
+        return cls(_)
 
     @classmethod
     def trivial(cls):
@@ -74,7 +74,7 @@ class SimpleLens(object):
         def getter(state):
             return getattr(state, name)
 
-        def setter(value, state):
+        def setter(state, value):
             return setattr_immutable(state, name, value)
 
         return SimpleLens.from_getter_setter(getter, setter)
@@ -83,7 +83,7 @@ class SimpleLens(object):
     def getitem(cls, key):
         '''A lens that focuses an item inside a container. Analogous to
         `operator.itemgetter`.'''
-        def setter(value, state):
+        def setter(state, value):
             return setitem_immutable(state, key, value)
 
         return SimpleLens.from_getter_setter(operator.itemgetter(key), setter)
@@ -107,7 +107,7 @@ class SimpleLens(object):
             except KeyError:
                 return None
 
-        def setter(value, state):
+        def setter(state, value):
             data = {k: v for k, v in state.items() if k is not old_key}
             if value is not None:
                 data[value[0]] = value[1]
@@ -125,7 +125,7 @@ class SimpleLens(object):
                     return dkey, dvalue
             raise LookupError('{} not in dict'.format(old_value))
 
-        def setter(new_value, state):
+        def setter(state, new_value):
             return dict([new_value] + [
                 (k, v) for k, v in state.items() if v is not old_value])
 
@@ -156,7 +156,7 @@ class SimpleLens(object):
         def getter(state):
             return tuple(a_lens.get(state) for a_lens in some_lenses)
 
-        def setter(new_values, state):
+        def setter(state, new_values):
             for a_lens, new_value in zip(some_lenses, new_values):
                 state = a_lens.set(state, new_value)
             return state
@@ -177,7 +177,7 @@ class SimpleLens(object):
         def getter(state):
             return state.decode(*args, **kwargs)
 
-        def setter(new_value, old_state):
+        def setter(old_state, new_value):
             return new_value.encode(*args, **kwargs)
 
         return cls.from_getter_setter(getter, setter)

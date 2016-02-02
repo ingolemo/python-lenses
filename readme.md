@@ -191,7 +191,7 @@ into a lens using the `getter_setter_` method. As an example here is a
 lens that focuses some text and interprets it as json data:
 
 	>>> import json
-	>>> def setter(value, state):
+	>>> def setter(state, value):
 	...     return json.dumps(value)
 	...
 	>>> json_lens = lens().getter_setter_(json.loads, setter)

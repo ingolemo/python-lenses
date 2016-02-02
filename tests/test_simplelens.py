@@ -213,7 +213,7 @@ def test_lens_traverse():
 # Tests for miscellaneous functions
 def test_lens_from_getter_setter():
     my_lens = SimpleLens.from_getter_setter(lambda a: a[:-1],
-                                            lambda a, s: a + '!')
+                                            lambda s, a: a + '!')
     state = 'hello!'
     assert my_lens.get(state) == 'hello'
     assert my_lens.set(state, 'bye') == 'bye!'

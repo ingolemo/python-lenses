@@ -18,7 +18,7 @@ class MethodLens:
             def getter(state):
                 return self.fget(state, *args, **kwargs)
 
-            def setter(value, state):
+            def setter(state, value):
                 return self.fset(state, value, *args, **kwargs)
 
             return Lens(obj, SimpleLens.from_getter_setter(getter, setter))
