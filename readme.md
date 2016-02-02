@@ -149,8 +149,8 @@ state manipulating methods as normal:
 
 If you have two lenses, you can join them together using the `add_lens`
 method. Joining lenses means that one of the lenses is placed "inside"
-of the other so that the focus of one lens is fed into other one as its
-the state:
+of the other so that the focus of one lens is fed into the other one as
+its the state:
 
 	>>> first = lens()[0]
 	>>> second = lens()[1]
@@ -160,6 +160,9 @@ the state:
 	>>> second_then_first = second.add_lens(first)
 	>>> second_then_first.bind([[2, 3], [4, 5]]).get()
 	4
+
+When you call `a.add_lens(b)`, `b` must be an unbound lens and the
+resulting lens will be bound to the same object as `a`, if any.
 
 So far we've seen lenses that extract data out of data-structures, but
 lenses are more powerful than that. Lenses can actually perform
@@ -182,6 +185,24 @@ state, their names all end with a single underscore. See
 `help(lenses.UserLens)` in the repl for more. If you need to access an
 attribute on the state that has been shadowed by UserLens' methods then
 you can use `UserLens.getattr_(attribute)`.
+
+At their heart, lenses are really just souped-up getters and setters. If
+you have a getter and a setter for some data then you can turn those
+into a lens using the `getter_setter_` method. As an example here is a
+lens that focuses some text and interprets it as json data:
+
+	>>> import json
+	>>> def setter(value, state):
+	...     return json.dumps(value)
+	...
+	>>> json_lens = lens().getter_setter_(json.loads, setter)
+	>>> my_data = json_lens.bind('{"numbers":[1, 2, 3]}')
+	>>> my_data.get()
+	{'numbers': [1, 2, 3]}
+	>>> my_data['numbers'][1].set(4)
+	'{"numbers": [1, 4, 3]}'
+
+See its docstring for details on how to use `UserLens.getter_setter_`.
 
 
 ## License
