@@ -183,6 +183,14 @@ def test_lens_item_by_value():
         Lens.item_by_value(3).get(data)
 
 
+def test_lens_items():
+    data = {0: 'zero', 1: 'one'}
+    my_lens = Lens.items()
+    assert sorted(my_lens.get(data)) == [(0, 'zero'), (1, 'one')]
+    assert my_lens.set(data, [(2, 'two'), (3, 'three')]) == {2: 'two',
+                                                             3: 'three'}
+
+
 def test_lens_tuple_l():
     data = {'hello': 0, 'world': 1}
     get = Lens.getitem
