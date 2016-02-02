@@ -25,8 +25,8 @@ about; a `lens` function:
 	>>> from lenses import lens
 
 If you have a large data structure that you want to manipulate, you can
-pass it to this function and you will receive a bound `UserLens` object,
-which is a Lens that has been bound to that specific object. The lens
+pass it to this function and you will receive a bound `Lens` object,
+which is a lens that has been bound to that specific object. The lens
 can then be walked to focus it down on a particular part of the
 data-structure. You walk the lens by getting attributes and items from
 it (anything that would call `__getattr__` or `__getitem__`):
@@ -134,7 +134,7 @@ copies are made. This makes lenses more memory efficient than using
 	False
 
 If you pass no arguments to the `lens` function then you will get an
-unbound `UserLens` object. An unbound lens can be manipulated in all the
+unbound `Lens` object. An unbound lens can be manipulated in all the
 ways that a bound lens can except that you can't call any of the methods
 that manipulate the state (such as `get` and `set`).
 
@@ -179,12 +179,11 @@ value:
 	>>> l.item_('two').set(('three', 3))
 	{'one': 1, 'three': 3}
 
-There are a number of such more complicated lenses defined on
-`UserLens`. To help avoid collision with accessing attributes on the
-state, their names all end with a single underscore. See
-`help(lenses.UserLens)` in the repl for more. If you need to access an
-attribute on the state that has been shadowed by UserLens' methods then
-you can use `UserLens.getattr_(attribute)`.
+There are a number of such more complicated lenses defined on `Lens`. To
+help avoid collision with accessing attributes on the state, their names
+all end with a single underscore. See `help(lenses.Lens)` in the repl
+for more. If you need to access an attribute on the state that has been
+shadowed by Lens' methods then you can use `Lens.getattr_(attribute)`.
 
 At their heart, lenses are really just souped-up getters and setters. If
 you have a getter and a setter for some data then you can turn those
@@ -202,7 +201,7 @@ lens that focuses some text and interprets it as json data:
 	>>> my_data['numbers'][1].set(4)
 	'{"numbers": [1, 4, 3]}'
 
-See its docstring for details on how to use `UserLens.getter_setter_`.
+See its docstring for details on how to use `Lens.getter_setter_`.
 
 
 ## License

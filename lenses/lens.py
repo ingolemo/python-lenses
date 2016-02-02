@@ -1,190 +1,192 @@
-import operator
+import functools
 
-from .identity import Identity
-from .const import Const
-from .typeclass import fmap, ap, traverse
-from .setter import setitem_immutable, setattr_immutable, multi_magic_set
+from .simplelens import SimpleLens
+
+
+def _carry_op(name):
+    def operation(self, *args, **kwargs):
+        return self.modify(lambda a: getattr(a, name)(*args, **kwargs))
+
+    operation.__name__ = name
+    return operation
+
+
+def _carry_lens(method):
+    @functools.wraps(method)
+    def _(self, *args, **kwargs):
+        lens = method(*args, **kwargs)
+        return self.add_lens(lens)
+    return _
 
 
 class Lens(object):
-    '''A Lens. Serves as the backbone of the lenses library. Acts as an
-    object-oriented wrapper around a function that does all the hard
-    work. This function is a van Laarhoven lens and has the following
-    type (in ML-style notation):
+    'A user-friendly object for interacting with the lenses library'
+    __slots__ = ['state', 'lens']
 
-    func :: (value -> functor value), state -> functor state
-    '''
-    __slots__ = ['func']
+    def __init__(self, state, sublens):
+        self.state = state
+        self.lens = SimpleLens.trivial() if sublens is None else sublens
 
-    def __init__(self, func):
-        self.func = func
+    def __repr__(self):
+        return '{}({!r}, {!r})'.format(self.__class__.__name__,
+                                       self.state, self.lens)
 
-    @classmethod
-    def from_getter_setter(cls, getter, setter):
-        '''Turns a pair of getter and setter functions into a van Laarhoven
-        lens. A getter function is one that takes a state and returns a
-        value derived from that state. A setter function takes a new value and
-        an old state and injects the new value into the old state, returning
-        a new state.
+    def _assert_state(self):
+        if self.state is None:
+            raise ValueError('Operation requires a bound lens')
 
-        def getter(state) -> value
-        def setter(new_value, old_state) -> new_state
-        '''
+    def get(self):
+        'Get the value focused by the lens.'
+        self._assert_state()
+        return self.lens.get(self.state)
 
-        def new_func(func, state):
-            old_value = getter(state)
-            fa = func(old_value)
-            return fmap(fa, lambda a: setter(a, state))
+    def get_all(self):
+        '''Get multiple values focused by the lens. Returns them as a
+        tuple.'''
+        self._assert_state()
+        return self.lens.get_all(self.state)
 
-        return cls(new_func)
+    def set(self, newvalue):
+        '''Set the focus to `newvalue`.'''
+        self._assert_state()
+        return self.lens.set(self.state, newvalue)
 
-    @classmethod
-    def trivial(cls):
-        '''A trivial lens that focuses the whole state. Analogous to
-        `lambda a: a`.'''
-        def _(func, state):
-            return fmap(func(state), lambda newvalue: newvalue)
-        return cls(_)
+    def modify(self, func):
+        '''Apply a function to the focus.'''
+        self._assert_state()
+        return self.lens.modify(self.state, func)
 
-    @classmethod
-    def getattr(cls, name):
-        '''A lens that focuses an attribute of an object. Analogous to
-        `getattr`.'''
-        def getter(state):
-            return getattr(state, name)
+    def call_method(self, method_name, *args, **kwargs):
+        '''Call a method on the focus. The method must return a new
+        value for the focus.'''
+        def func(a):
+            return getattr(a, method_name)(*args, **kwargs)
+        return self.modify(func)
 
-        def setter(value, state):
-            return setattr_immutable(state, name, value)
+    def add_lens(self, other):
+        '''Refine the current focus of this lens by composing it with
+        another lens object. Can be a `lenses.SimpleLens` or an unbound
+        `lenses.Lens`.'''
+        if isinstance(other, SimpleLens):
+            return Lens(self.state, self.lens.compose(other))
+        elif isinstance(other, Lens):
+            if other.state is not None:
+                raise ValueError('Other lens has a state bound to it.')
+            return Lens(self.state, self.lens.compose(other.lens))
+        else:
+            raise TypeError('''Cannot add lens of type {!r}.'''
+                            .format(type(other)))
 
-        return Lens.from_getter_setter(getter, setter)
+    def bind(self, state):
+        '''Bind this lens to a specific `state`. Raises `ValueError`
+        when the lens has already been bound.'''
+        if self.state is not None:
+            raise ValueError('Trying to bind an already bound lens')
+        return Lens(state, self.lens)
 
-    @classmethod
-    def getitem(cls, key):
-        '''A lens that focuses an item inside a container. Analogous to
-        `operator.itemgetter`.'''
-        def setter(value, state):
-            return setitem_immutable(state, key, value)
+    def __getattr__(self, name):
+        if name.endswith('_'):
+            raise AttributeError('Not a valid lens constructor')
+        return self.add_lens(SimpleLens.getattr(name))
 
-        return Lens.from_getter_setter(operator.itemgetter(key), setter)
+    def __getitem__(self, name):
+        return self.add_lens(SimpleLens.getitem(name))
 
-    @classmethod
-    def both(cls):
-        '''A traversal that focuses both items [0] and [1].'''
-        def _(func, state):
-            mms = multi_magic_set(state, [(setitem_immutable, 1),
-                                          (setitem_immutable, 0)])
-            return ap(func(state[1]), fmap(func(state[0]), mms))
-        return cls(_)
+    both_ = _carry_lens(SimpleLens.both)
+    decode_ = _carry_lens(SimpleLens.decode)
+    getter_setter_ = _carry_lens(SimpleLens.from_getter_setter)
+    getattr_ = _carry_lens(SimpleLens.getattr)
+    getitem_ = _carry_lens(SimpleLens.getitem)
+    item_ = _carry_lens(SimpleLens.item)
+    item_by_value_ = _carry_lens(SimpleLens.item_by_value)
+    items_ = _carry_lens(SimpleLens.item)
+    traverse_ = _carry_lens(SimpleLens.traverse)
+    trivial_ = _carry_lens(SimpleLens.trivial)
+    tuple_ = _carry_lens(SimpleLens.tuple)
 
-    @classmethod
-    def item(cls, old_key):
-        '''A lens that focuses a single item (key-value pair) in a
-        dictionary by its key.'''
-        def getter(state):
-            try:
-                return old_key, state[old_key]
-            except KeyError:
-                return None
-
-        def setter(value, state):
-            data = {k: v for k, v in state.items() if k is not old_key}
-            if value is not None:
-                data[value[0]] = value[1]
-            return data
-
-        return Lens.from_getter_setter(getter, setter)
-
-    @classmethod
-    def item_by_value(cls, old_value):
-        '''A lens that focuses a single item (key-value pair) in a
-        dictionary by its value.'''
-        def getter(state):
-            for dkey, dvalue in state.items():
-                if dvalue is old_value:
-                    return dkey, dvalue
-            raise LookupError('{} not in dict'.format(old_value))
-
-        def setter(new_value, state):
-            return dict([new_value] + [
-                (k, v) for k, v in state.items() if v is not old_value])
-
-        return cls.from_getter_setter(getter, setter)
-
-    @classmethod
-    def items(cls):
-        '''A lens focusing a dictionary as a list of key-value tuples.
-        Analogous to `dict.items`.'''
-        def _(fn, state):
-            return fmap(fn(state.items()), dict)
-        return cls(_)
-
-    @classmethod
-    def tuple(cls, *some_lenses):
-        '''A lens that combines the focuses of other lenses into a
-        single tuple.'''
-        def getter(state):
-            return tuple(a_lens.get(state) for a_lens in some_lenses)
-
-        def setter(new_values, state):
-            for a_lens, new_value in zip(some_lenses, new_values):
-                state = a_lens.set(state, new_value)
-            return state
-
-        return cls.from_getter_setter(getter, setter)
-
-    @classmethod
-    def traverse(cls):
-        '''A traversal that focuses everything in a data structure depending
-        on how that data structure defines `lenses.typeclass.traverse`. Usually
-        somewhat similar to iterating over it.'''
-        return cls(lambda fn, state: traverse(state, fn))
-
-    @classmethod
-    def decode(cls, *args, **kwargs):
-        '''A lens that decodes and encodes its focus the fly. Lets you
-        focus a byte string as a unicode string.'''
-        def getter(state):
-            return state.decode(*args, **kwargs)
-
-        def setter(new_value, old_state):
-            return new_value.encode(*args, **kwargs)
-
-        return cls.from_getter_setter(getter, setter)
-
-    def get(self, state):
-        '''Returns the focus within `state`. If multiple items are
-        focused then it will attempt to join them together with
-        `lenses.typeclass.mappend`.'''
-        return self.func(lambda a: Const(a), state).item
-
-    def get_all(self, state):
-        'Returns a tuple of all the focuses within `state`.'
-        return self.func(lambda a: Const((a, )), state).item
-
-    def modify(self, state, fn):
-        'Applies a function `fn` to the focus within `state`.'
-        return self.func(lambda a: Identity(fn(a)), state).item
-
-    def set(self, state, value):
-        'Sets the focus within `state` to `value`.'
-        return self.func(lambda a: Identity(value), state).item
-
-    def compose(self, other):
-        '''Composes another lens with this one.
-
-        The `other` lens is used to refine the focus of this lens. The
-        following two pieces of code should be equivalent:
-
-        ```
-        self.compose(other).get(state)
-
-        other.get(self.get(state))
-        ```
-        '''
-
-        def new_func(fn, state):
-            return self.func((lambda state2: other.func(fn, state2)), state)
-
-        return Lens(new_func)
-
-    __and__ = compose
+    # __new__
+    # __init__
+    # __del__
+    # __repr__
+    __str__ = _carry_op('__str__')
+    __bytes__ = _carry_op('__bytes__')
+    __format__ = _carry_op('__format__')
+    __lt__ = _carry_op('__lt__')
+    __le__ = _carry_op('__le__')
+    __eq__ = _carry_op('__eq__')
+    __ne__ = _carry_op('__ne__')
+    __gt__ = _carry_op('__gt__')
+    __ge__ = _carry_op('__ge__')
+    # __hash__
+    __bool__ = _carry_op('__bool__')
+    # __getattr__
+    # __getattribute__
+    # __setattr__
+    # __delattr__
+    # __dir__
+    # __get__
+    # __set__
+    # __delete__
+    # __slots__
+    # __instancecheck__
+    # __subclasscheck__
+    # __call__
+    # __len__
+    # __length_hint__
+    # __getitem__
+    # __missing__
+    # __setitem__
+    # __delitem__
+    # __iter__
+    # __next__
+    # __reversed__
+    # __contains__
+    __add__ = _carry_op('__add__')
+    __sub__ = _carry_op('__sub__')
+    __mul__ = _carry_op('__mul__')
+    __matmul__ = _carry_op('__matmul__')
+    __truediv__ = _carry_op('__truediv__')
+    __floordiv__ = _carry_op('__floordiv__')
+    __div__ = _carry_op('__div__')  # python 2
+    __mod__ = _carry_op('__mod__')
+    __divmod__ = _carry_op('__divmod__')
+    __pow__ = _carry_op('__pow__')
+    __lshift__ = _carry_op('__lshift__')
+    __rshift__ = _carry_op('__rshift__')
+    __and__ = _carry_op('__and__')
+    __xor__ = _carry_op('__xor__')
+    __or__ = _carry_op('__or__')
+    __radd__ = _carry_op('__radd__')
+    __rsub__ = _carry_op('__rsub__')
+    __rmul__ = _carry_op('__rmul__')
+    __rmatmul__ = _carry_op('__rmatmul__')
+    __rtruediv__ = _carry_op('__rtruediv__')
+    __rfloordiv__ = _carry_op('__rfloordiv__')
+    __rdiv__ = _carry_op('__rdiv__')  # python2
+    __rmod__ = _carry_op('__rmod__')
+    __rdivmod__ = _carry_op('__rdivmod__')
+    __rpow__ = _carry_op('__rpow__')
+    __rlshift__ = _carry_op('__rlshift__')
+    __rrshift__ = _carry_op('__rrshift__')
+    __rand__ = _carry_op('__rand__')
+    __rxor__ = _carry_op('__rxor__')
+    __ror__ = _carry_op('__ror__')
+    # we skip all the augmented artithmetic methods because the point of the
+    # lenses library is not to mutate anything
+    __neg__ = _carry_op('__neg__')
+    __pos__ = _carry_op('__pos__')
+    __abs__ = _carry_op('__abs__')
+    __invert__ = _carry_op('__invert__')
+    __complex__ = _carry_op('__complex__')
+    __int__ = _carry_op('__int__')
+    __long__ = _carry_op('__long__')  # python2
+    __float__ = _carry_op('__float__')
+    __round__ = _carry_op('__round__')
+    __index__ = _carry_op('__index__')
+    # __enter__
+    # __exit__
+    # __await__
+    # __aiter__
+    # __anext__
+    # __aenter__
+    # __aexit__
