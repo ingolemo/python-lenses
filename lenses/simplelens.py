@@ -133,8 +133,8 @@ class SimpleLens(object):
 
     @classmethod
     def items(cls):
-        '''A lens focusing a dictionary as a list of key-value tuples.
-        Analogous to `dict.items`.'''
+        '''A traversal focusing a dictionary as a list of key-value
+        tuples. Analogous to `dict.items`.'''
         def _(fn, state):
             items = list(state.items())
 
@@ -181,6 +181,18 @@ class SimpleLens(object):
             return new_value.encode(*args, **kwargs)
 
         return cls.from_getter_setter(getter, setter)
+
+    @classmethod
+    def keys(cls):
+        '''A traversal focusing the keys of a dictionary. Analogous to
+        `dict.keys`.'''
+        return cls.items().compose(cls.getitem(0))
+
+    @classmethod
+    def values(cls):
+        '''A traversal focusing the values of a dictionary. Analogous to
+        `dict.values`.'''
+        return cls.items().compose(cls.getitem(1))
 
     def get(self, state):
         '''Returns the focus within `state`. If multiple items are

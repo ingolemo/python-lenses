@@ -94,15 +94,17 @@ class Lens(object):
 
     both_ = _carry_lens(SimpleLens.both)
     decode_ = _carry_lens(SimpleLens.decode)
-    getter_setter_ = _carry_lens(SimpleLens.from_getter_setter)
     getattr_ = _carry_lens(SimpleLens.getattr)
     getitem_ = _carry_lens(SimpleLens.getitem)
+    getter_setter_ = _carry_lens(SimpleLens.from_getter_setter)
     item_ = _carry_lens(SimpleLens.item)
     item_by_value_ = _carry_lens(SimpleLens.item_by_value)
     items_ = _carry_lens(SimpleLens.items)
+    keys_ = _carry_lens(SimpleLens.keys)
     traverse_ = _carry_lens(SimpleLens.traverse)
     trivial_ = _carry_lens(SimpleLens.trivial)
     tuple_ = _carry_lens(SimpleLens.tuple)
+    values_ = _carry_lens(SimpleLens.values)
 
     # __new__
     # __init__
