@@ -40,6 +40,11 @@ def _(lst, func):
     return [func(a) for a in lst]
 
 
+@fmap.register(tuple)
+def _(tup, func):
+    return tuple(func(a) for a in tup)
+
+
 # applicative functor
 @singledispatch
 def pure(applicative, item):
@@ -59,6 +64,16 @@ def _(lst, item):
 @ap.register(list)
 def _(lst, funcs):
     return [f(i) for i in lst for f in funcs]
+
+
+@pure.register(tuple)
+def _(tup, item):
+    return (item,)
+
+
+@ap.register(tuple)
+def _(tup, funcs):
+    return tuple(f(i) for i in tup for f in funcs)
 
 
 # traversable
