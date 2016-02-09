@@ -1,5 +1,4 @@
 from .lens import Lens
-from .simplelens import SimpleLens
 from .methodlens import MethodLens
 
 

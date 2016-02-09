@@ -1,6 +1,6 @@
 import pytest
 
-from lenses import lens, SimpleLens
+from lenses import lens, baselens
 
 
 # Tests for using UserLens' standard methods
@@ -36,8 +36,8 @@ def test_userlens_call_method_kwargs():
 
 
 def test_userlens_add_lens_lens():
-    assert lens([1, 2]).add_lens(SimpleLens.trivial()) + [3] == [1, 2, 3]
-    assert lens([1, 2]).add_lens(SimpleLens.getitem(1)).set(3) == [1, 3]
+    assert lens([1, 2]).add_lens(baselens.TrivialLens()) + [3] == [1, 2, 3]
+    assert lens([1, 2]).add_lens(baselens.GetitemLens(1)).set(3) == [1, 3]
 
 
 def test_userlens_add_lens_userlens():

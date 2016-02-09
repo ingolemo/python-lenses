@@ -1,6 +1,6 @@
 import functools
 
-from .simplelens import SimpleLens
+from . import baselens
 
 
 def _carry_op(name):
@@ -25,7 +25,7 @@ class Lens(object):
 
     def __init__(self, state, sublens):
         self.state = state
-        self.lens = SimpleLens.trivial() if sublens is None else sublens
+        self.lens = baselens.TrivialLens() if sublens is None else sublens
 
     def __repr__(self):
         return '{}({!r}, {!r})'.format(self.__class__.__name__,
@@ -65,9 +65,9 @@ class Lens(object):
 
     def add_lens(self, other):
         '''Refine the current focus of this lens by composing it with
-        another lens object. Can be a `lenses.SimpleLens` or an unbound
+        another lens object. Can be a `lenses.BaseLens` or an unbound
         `lenses.Lens`.'''
-        if isinstance(other, SimpleLens):
+        if isinstance(other, baselens.BaseLens):
             return Lens(self.state, self.lens.compose(other))
         elif isinstance(other, Lens):
             if other.state is not None:
@@ -87,24 +87,24 @@ class Lens(object):
     def __getattr__(self, name):
         if name.endswith('_'):
             raise AttributeError('Not a valid lens constructor')
-        return self.add_lens(SimpleLens.getattr(name))
+        return self.add_lens(baselens.GetattrLens(name))
 
     def __getitem__(self, name):
-        return self.add_lens(SimpleLens.getitem(name))
+        return self.add_lens(baselens.GetitemLens(name))
 
-    both_ = _carry_lens(SimpleLens.both)
-    decode_ = _carry_lens(SimpleLens.decode)
-    getattr_ = _carry_lens(SimpleLens.getattr)
-    getitem_ = _carry_lens(SimpleLens.getitem)
-    getter_setter_ = _carry_lens(SimpleLens.from_getter_setter)
-    item_ = _carry_lens(SimpleLens.item)
-    item_by_value_ = _carry_lens(SimpleLens.item_by_value)
-    items_ = _carry_lens(SimpleLens.items)
-    keys_ = _carry_lens(SimpleLens.keys)
-    traverse_ = _carry_lens(SimpleLens.traverse)
-    trivial_ = _carry_lens(SimpleLens.trivial)
-    tuple_ = _carry_lens(SimpleLens.tuple)
-    values_ = _carry_lens(SimpleLens.values)
+    both_ = _carry_lens(baselens.BothLens)
+    decode_ = _carry_lens(baselens.DecodeLens)
+    getattr_ = _carry_lens(baselens.GetattrLens)
+    getitem_ = _carry_lens(baselens.GetitemLens)
+    getter_setter_ = _carry_lens(baselens.GetterSetterLens)
+    item_ = _carry_lens(baselens.ItemLens)
+    item_by_value_ = _carry_lens(baselens.ItemByValueLens)
+    items_ = _carry_lens(baselens.ItemsLens)
+    keys_ = _carry_lens(baselens.KeysLens)
+    traverse_ = _carry_lens(baselens.TraverseLens)
+    trivial_ = _carry_lens(baselens.TrivialLens)
+    tuple_ = _carry_lens(baselens.TupleLens)
+    values_ = _carry_lens(baselens.ValuesLens)
 
     # __new__
     # __init__

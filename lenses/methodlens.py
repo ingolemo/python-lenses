@@ -1,5 +1,5 @@
 from .lens import Lens
-from .simplelens import SimpleLens
+from . import baselens
 
 
 class MethodLens:
@@ -21,7 +21,7 @@ class MethodLens:
             def setter(state, value):
                 return self.fset(state, value, *args, **kwargs)
 
-            return Lens(obj, SimpleLens.from_getter_setter(getter, setter))
+            return Lens(obj, baselens.GetterSetterLens(getter, setter))
         return _
 
     def __call__(self, obj):
