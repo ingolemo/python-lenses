@@ -36,9 +36,9 @@ class Lens(object):
             raise ValueError('Operation requires a bound lens')
 
     def get(self):
-        'Get the value focused by the lens.'
+        'Get the first value focused by the lens.'
         self._assert_state()
-        return self.lens.get(self.state)
+        return self.lens.get_all(self.state)[0]
 
     def get_all(self):
         '''Get multiple values focused by the lens. Returns them as a
