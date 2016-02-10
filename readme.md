@@ -105,7 +105,7 @@ games:
 	>>> Enemy = namedtuple('Enemy', 'x y')
 	>>> 
 	>>> old_state = GameState({
-	...     1: World(..., ...),
+	...     1: World({}, 'grassland'),
 	...     2: World({
 	...         1: Level({}, {
 	...             'goomba1': Enemy(100, 45),
@@ -150,7 +150,7 @@ state manipulating methods as normal:
 If you have two lenses, you can join them together using the `add_lens`
 method. Joining lenses means that one of the lenses is placed "inside"
 of the other so that the focus of one lens is fed into the other one as
-its the state:
+its state:
 
 	>>> first = lens()[0]
 	>>> second = lens()[1]
@@ -202,6 +202,84 @@ lens that focuses some text and interprets it as json data:
 	'{"numbers": [1, 4, 3]}'
 
 See its docstring for details on how to use `Lens.getter_setter_`.
+
+All the lenses so far have focused a single object inside a state, but
+it is possible for a lens to have more than one focus. A lens with
+multiple foci is usually referred to as a traversal.
+
+A simple traversal can be made with the `_both` method. `Lens.both_`
+focuses the two objects at indices `0` and `1` within the state. It is
+intended to be used with tuples of length 2, but will work on any
+indexable object.
+
+One issue with multi-focus lenses is that the `get` method only ever
+returns a single focus. It will return the _first_ item focused by the
+traversal.
+
+If you want to get all the items focused by a lens then you can use the
+`get_all` method which will return those objects in a tuple:
+
+	>>> lens([0, 1, 2, 3]).both_().get_all()
+	(0, 1)
+
+Setting works with a traversal, though all foci will be set to the same
+object.
+
+	>>> lens([0, 1, 2, 3]).both_().set(4)
+	[4, 4, 2, 3]
+
+Modifying is the most useful operation you can perform. The modification
+will be applied to all the foci independently. All the foci must be of
+the same type (or at least be of a type that supports the modification
+that you want to make).
+
+	>>> lens([0, 1, 2, 3]).both_().modify(lambda a: a + 10)
+	[10, 11, 2, 3]
+	>>> lens([0, 1.0, 2, 3]).both_().modify(str)
+	['0', '1.0', 2, 3]
+
+You can of course use the same shortcut for operators that single-focus
+lenses allow:
+
+	>>> lens([0, 1, 2, 3]).both_() + 10
+	[10, 11, 2, 3]
+
+Traversals can be composed with normal lenses. The result is a traversal
+with the lens applied to each of its original foci:
+
+	>>> both_first = lens([[0, 1], [2, 3]]).both_()[0]
+	>>> both_first.get_all()
+	(0, 2)
+	>>> both_first + 10
+	[[10, 1], [12, 3]]
+
+Traversals can also be composed with other traversals just fine. They
+will simply increase the number of foci targeted. Note that `get_all`
+returns a flat tuple of foci; none of the structure of the state is
+preserved.
+
+	>>> both_twice = lens([[0, 1], [2, 3]]).both_().both_()
+	>>> both_twice.get_all()
+	(0, 1, 2, 3)
+	>>> both_twice + 10
+	[[10, 11], [12, 13]]
+
+The `values_` method returns a traversal that focuses all of the values
+in a dictionary. If we return to our `GameState` example from earlier,
+we can use `values_` to move _every_ enemy in the same level 1 pixel
+over to the right in one line of code:
+
+	>>> _ = lens(old_state).worlds[2].levels[1].enemies.values_().x + 1
+
+Or you could do the same thing to every enemy in the entire game
+(assuming that there were other enemies on other levels in the
+`GameState`):
+
+	>>> _ = (lens(old_state).worlds.values_()
+	...                     .levels.values_()
+	...                     .enemies.values_().x) + 1
+
+<!-- TODO: Add a lens that can filter foci -->
 
 
 ## License
