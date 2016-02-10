@@ -46,6 +46,12 @@ class Lens(object):
         self._assert_state()
         return self.lens.get_all(self.state)
 
+    def get_monoid(self):
+        '''Get the values focused by the lens, merging them together by
+        treating them as a monoid. See `lenses.typeclass.mappend`.'''
+        self._assert_state()
+        return self.lens.get(self.state)
+
     def set(self, newvalue):
         '''Set the focus to `newvalue`.'''
         self._assert_state()
