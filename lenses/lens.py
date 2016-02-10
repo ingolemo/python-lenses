@@ -106,6 +106,7 @@ class Lens(object):
     item_ = _carry_lens(baselens.ItemLens)
     item_by_value_ = _carry_lens(baselens.ItemByValueLens)
     items_ = _carry_lens(baselens.ItemsLens)
+    json_ = _carry_lens(baselens.JsonLens)
     keys_ = _carry_lens(baselens.KeysLens)
     traverse_ = _carry_lens(baselens.TraverseLens)
     trivial_ = _carry_lens(baselens.TrivialLens)

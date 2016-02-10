@@ -267,6 +267,23 @@ class ItemsLens(BaseLens):
         return 'ItemsLens()'
 
 
+class JsonLens(GetterSetterLens):
+    '''A lens that focuses a string containing json data as its parsed
+    equivalent. Analogous to `json.loads`.'''
+
+    def __init__(self):
+        self.json_mod = __import__('json')
+
+    def getter(self, state):
+        return self.json_mod.loads(state)
+
+    def setter(self, state, focus):
+        return self.json_mod.dumps(focus)
+
+    def __repr__(self):
+        return 'JsonLens()'
+
+
 class KeysLens(ComposedLens):
     '''A traversal focusing the keys of a dictionary. Analogous to
     `dict.keys`.'''

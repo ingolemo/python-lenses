@@ -201,7 +201,9 @@ lens that focuses some text and interprets it as json data:
 	>>> my_data['numbers'][1].set(4)
 	'{"numbers": [1, 4, 3]}'
 
-See its docstring for details on how to use `Lens.getter_setter_`.
+This is just an example; the json lens defined above is already
+available with the `json_` method. See its docstring for details on how
+to use `Lens.getter_setter_`.
 
 All the lenses so far have focused a single object inside a state, but
 it is possible for a lens to have more than one focus. A lens with

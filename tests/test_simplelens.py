@@ -198,6 +198,13 @@ def test_lens_items():
                           1) == {1: 'zero', 2: 'one'}
 
 
+def test_lens_json():
+    l = b.JsonLens()
+    data = '{"numbers":[1, 2, 3]}'
+    assert l.get(data) == {'numbers': [1, 2, 3]}
+    assert l.set(data, dict(numbers=[])) == '{"numbers": []}'
+
+
 def test_lens_tuple_l():
     data = {'hello': 0, 'world': 1}
     get = b.GetitemLens
