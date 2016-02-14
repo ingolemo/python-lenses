@@ -13,6 +13,10 @@ def test_userlens_get_all():
     assert lens([[1, 2], [3, 4]]).both_()[1].get_all() == (2, 4)
 
 
+def test_userlens_get_monoid():
+    assert lens([[1, 2], [3, 4]]).both_().get_monoid() == [1, 2, 3, 4]
+
+
 def test_userlens_set():
     assert lens(10).set(5) == 5
     assert lens([1, 2, 3])[1].set(5) == [1, 5, 3]
