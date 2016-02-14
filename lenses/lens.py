@@ -90,6 +90,9 @@ class Lens(object):
             raise ValueError('Trying to bind an already bound lens')
         return Lens(state, self.lens)
 
+    def __get__(self, obj, type=None):
+        return self.bind(obj)
+
     def __getattr__(self, name):
         if name.endswith('_'):
             raise AttributeError('Not a valid lens constructor')

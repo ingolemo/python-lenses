@@ -75,6 +75,18 @@ def test_lens_no_double_bind():
         lens(1).bind(2)
 
 
+def test_lens_descriptor():
+    class MyClass:
+        def __init__(self, items):
+            self._private_items = items
+
+        def __eq__(self, other):
+            return self._private_items == other._private_items
+
+        first = lens()._private_items[0]
+    assert MyClass([1, 2, 3]).first.set(4) == MyClass([4, 2, 3])
+
+
 # Testing that Lens properly passes though dunder methods
 def test_lens_add():
     assert lens(2) + 1 == 3

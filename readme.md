@@ -147,6 +147,24 @@ state manipulating methods as normal:
 	>>> key_one.bind({'one': 1, 'two': 2}).get()
 	1
 
+You can use unbound Lenses as descriptors. That is, if you set a lens as
+a class attribute and you access that attribute from an instance, you
+will get a lens that has been bound to that instance.
+
+This allows you to conveniently store and access lenses that are
+specific to particular classes as attributes of those classes.
+
+	>>> class MyClass:
+	...     def __init__(self, items):
+	...         self._private_items = items
+	...     def __repr__(self):
+	...         return 'MyClass({!r})'.format(self._private_items)
+	...     first = lens()._private_items[0]
+	...
+	>>> my_instance = MyClass([1, 2, 3])
+	>>> my_instance.first.set(4)
+	MyClass([4, 2, 3])
+
 If you have two lenses, you can join them together using the `add_lens`
 method. Joining lenses means that one of the lenses is placed "inside"
 of the other so that the focus of one lens is fed into the other one as
