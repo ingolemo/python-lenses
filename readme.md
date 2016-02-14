@@ -147,12 +147,13 @@ state manipulating methods as normal:
 	>>> key_one.bind({'one': 1, 'two': 2}).get()
 	1
 
-You can use unbound Lenses as descriptors. That is, if you set a lens as
-a class attribute and you access that attribute from an instance, you
-will get a lens that has been bound to that instance.
-
-This allows you to conveniently store and access lenses that are
-specific to particular classes as attributes of those classes.
+You can use unbound Lens objects as descriptors. That is, if you set a
+lens as a class attribute and you access that attribute from an
+instance, you will get a lens that has been bound to that instance. This
+allows you to conveniently store and access lenses that are likely to be
+used with particular classes as attributes of those classes. Attribute
+access is much more readable than requiring the user of a class to
+construct a lens themselves.
 
 	>>> class MyClass:
 	...     def __init__(self, items):
