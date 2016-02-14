@@ -141,6 +141,11 @@ def test_lens_and():
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
+def test_lens_compose_nolenses():
+    obj = object()
+    assert b.ComposedLens([]).get(obj) is obj
+
+
 def test_lens_double_compose_simplifies():
     assert b.ComposedLens([b.ComposedLens([])]).lenses == []
 
