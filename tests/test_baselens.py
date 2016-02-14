@@ -141,6 +141,10 @@ def test_lens_and():
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
+def test_lens_double_compose_simplifies():
+    assert b.ComposedLens([b.ComposedLens([])]).lenses == []
+
+
 def test_lens_decode():
     assert b.DecodeLens().get(b'hello') == 'hello'
     assert b.DecodeLens('utf-8').get(b'caf\xc3\xa9') == 'caf\xe9'
