@@ -3,6 +3,7 @@ from lenses import MethodLens
 
 def test_methodlens():
     class C(object):
+
         def __init__(self, a):
             self.a = a
 
@@ -12,7 +13,7 @@ def test_methodlens():
         def attr_set(self, new_value):
             return type(self)(new_value - 100)
 
-        attr = MethodLens(attr_get, attr_set)
+        attr = MethodLens(attr_get, attr_set, doc='focuses self.a + 100')
 
     assert C(3).attr().get() == 103
     assert (C(3).attr().set(107)).a == 7
@@ -21,6 +22,7 @@ def test_methodlens():
 
 def test_methodlens_decorator():
     class C(object):
+
         def __init__(self, a):
             self.a = a
 
@@ -39,6 +41,7 @@ def test_methodlens_decorator():
 
 def test_methodlens_property():
     class C(object):
+
         def __init__(self, a):
             self.a = a
 
