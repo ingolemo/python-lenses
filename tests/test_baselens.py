@@ -124,11 +124,12 @@ def test_type_custom_class_immutable():
         lens(C(9)).a.set(7)
 
 
-# Tests to make sure types that are not supported by lenses return the
-# right kinds of errors
-def test_type_unsupported_no_setter():
+def test_type_unsupported_no_setitem():
     with pytest.raises(TypeError):
         lens(object())[0].set(None)
+
+
+def test_type_unsupported_no_setattr():
     with pytest.raises(AttributeError):
         lens(object()).attr.set(None)
 
