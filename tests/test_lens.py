@@ -1,3 +1,5 @@
+import collections
+
 import pytest
 
 from lenses import lens, baselens
@@ -101,8 +103,18 @@ def test_lens_getitem():
     assert lens([1, 2, 3]).getitem_(1).get() == 2
 
 
+def test_lens_getitem_direct():
+    assert lens([1, 2, 3])[1].get() == 2
+
+
 def test_lens_getattr():
-    assert lens(3).getattr_('denominator').get() == 1
+    nt = collections.namedtuple('nt', 'attr')
+    assert lens(nt(3)).getattr_('attr').get() == 3
+
+
+def test_lens_getattr_direct():
+    nt = collections.namedtuple('nt', 'attr')
+    assert lens(nt(3)).attr.get() == 3
 
 
 def test_lens_both():
