@@ -8,9 +8,10 @@ from .setter import setitem_immutable, setattr_immutable, multi_magic_set
 
 
 def multiap(func, *args):
-    for arg in args[:-1]:
-        func = fmap(arg, func)
-    return ap(args[-1], func)
+    functor = fmap(args[0], func)
+    for arg in args[1:]:
+        functor = ap(arg, functor)
+    return functor
 
 
 def starargs_curry(n):
