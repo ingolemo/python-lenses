@@ -7,6 +7,12 @@ from .typeclass import fmap, ap, traverse
 from .setter import setitem_immutable, setattr_immutable, multi_magic_set
 
 
+def multiap(func, *args):
+    for arg in args[:-1]:
+        func = fmap(arg, func)
+    return ap(args[-1], func)
+
+
 def starargs_curry(n):
     def decorator(fn):
 
@@ -142,7 +148,7 @@ class BothLens(BaseLens):
     def func(self, f, state):
         mms = multi_magic_set(state, [(setitem_immutable, 1),
                                       (setitem_immutable, 0)])
-        return ap(f(state[1]), fmap(f(state[0]), mms))
+        return multiap(mms, f(state[0]), f(state[1]))
 
     def __repr__(self):
         return 'BothLens()'
@@ -257,11 +263,7 @@ class ItemsLens(BaseLens):
         def dict_builder(*args):
             return dict(args)
 
-        dict_partial = fmap(f(items[0]), dict_builder)
-        for item in items[1:]:
-            dict_partial = ap(f(item), dict_partial)
-
-        return dict_partial
+        return multiap(dict_builder, *map(f, items))
 
     def __repr__(self):
         return 'ItemsLens()'
