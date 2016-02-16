@@ -16,9 +16,8 @@ class Const(object):
     def fmap(self, func):
         return Const(self.item)
 
-    @classmethod
-    def pure(cls, item):
-        return cls(mempty(item))
+    def pure(self, item):
+        return Const(mempty(self.item))
 
     def ap(self, fn):
         return Const(mappend(fn.item, self.item))

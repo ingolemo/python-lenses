@@ -11,7 +11,8 @@ def test_const_not_eq():
 
 
 def test_const_pure():
-    assert const.Const(object()).pure([1, 2, 3]) == const.Const([])
+    assert const.Const([1, 2]).pure([1, 2, 3]) == const.Const([])
+    assert const.Const((1, 2)).pure((1, 2, 3)) == const.Const(())
 
 
 def test_const_descriptive_repr():
