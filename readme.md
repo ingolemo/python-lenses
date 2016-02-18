@@ -300,8 +300,6 @@ Or you could do the same thing to every enemy in the entire game
 	...                     .levels.values_()
 	...                     .enemies.values_().x) + 1
 
-<!-- TODO: Add a lens that can filter foci -->
-
 
 ## License
 

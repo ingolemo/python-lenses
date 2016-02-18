@@ -3,7 +3,7 @@ import abc
 
 from .identity import Identity
 from .const import Const
-from .typeclass import fmap, ap, traverse
+from .typeclass import fmap, pure, ap, traverse
 from .setter import setitem_immutable, setattr_immutable, multi_magic_set
 
 
@@ -173,6 +173,21 @@ class DecodeLens(GetterSetterLens):
         args = [repr(item) for item in self.args]
         kwargs = ['{}={!r}'.format(k, v) for k, v in self.kwargs.items()]
         return 'DecodeLens({})'.format(', '.join(args + kwargs))
+
+
+class FilteringLens(BaseLens):
+    '''A traversal that only traverses a focus if the predicate returns
+    when called with that focus as an argument. Best used when composed
+    after a traversal.'''
+
+    def __init__(self, predicate):
+        self.predicate = predicate
+
+    def func(self, f, state):
+        return f(state) if self.predicate(state) else pure(f(state), state)
+
+    def __repr__(self):
+        return 'FilteringLens({!r})'.format(self.predicate)
 
 
 class GetattrLens(GetterSetterLens):

@@ -103,6 +103,7 @@ class Lens(object):
 
     both_ = _carry_lens(baselens.BothLens)
     decode_ = _carry_lens(baselens.DecodeLens)
+    filter_ = _carry_lens(baselens.FilteringLens)
     getattr_ = _carry_lens(baselens.GetattrLens)
     getitem_ = _carry_lens(baselens.GetitemLens)
     getter_setter_ = _carry_lens(baselens.GetterSetterLens)
