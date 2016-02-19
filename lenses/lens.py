@@ -2,6 +2,62 @@ import functools
 
 from . import baselens
 
+lens_methods = [
+    ('both_', baselens.BothLens),
+    ('decode_', baselens.DecodeLens),
+    ('filter_', baselens.FilteringLens),
+    ('getattr_', baselens.GetattrLens),
+    ('getitem_', baselens.GetitemLens),
+    ('getter_setter_', baselens.GetterSetterLens),
+    ('item_', baselens.ItemLens),
+    ('item_by_value_', baselens.ItemByValueLens),
+    ('items_', baselens.ItemsLens),
+    ('json_', baselens.JsonLens),
+    ('keys_', baselens.KeysLens),
+    ('traverse_', baselens.TraverseLens),
+    ('trivial_', baselens.TrivialLens),
+    ('tuple_', baselens.TupleLens),
+    ('values_', baselens.ValuesLens),
+]
+
+transparent_dunders = [
+    # '__new__', '__init__', '__del__', '__repr__',
+
+    '__str__', '__bytes__', '__format__',
+    '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__',
+
+    # '__hash__',
+
+    '__bool__',
+
+    # '__getattr__', '__getattribute__', '__setattr__', '__delattr__',
+    # '__dir__',
+    # '__get__', '__set__', '__delete__',
+    # '__slots__',
+    # '__instancecheck__', '__subclasscheck__',
+    # '__call__',
+    # '__len__', '__length_hint__',
+    # '__getitem__', '__missing__', '__setitem__', '__delitem__',
+    # '__iter__', '__next__', '__reversed__',
+    # '__contains__',
+
+    '__add__', '__sub__', '__mul__', '__matmul__', '__truediv__',
+    '__floordiv__', '__div__', '__mod__', '__divmod__', '__pow__',
+    '__lshift__', '__rshift__', '__and__', '__xor__', '__or__',
+
+    '__radd__', '__rsub__', '__rmul__', '__rmatmul__', '__rtruediv__',
+    '__rfloordiv__', '__rdiv__', '__rmod__', '__rdivmod__', '__rpow__',
+    '__rlshift__', '__rrshift__', '__rand__', '__rxor__', '__ror__',
+
+    # we skip all the augmented artithmetic methods because the point of the
+    # lenses library is not to mutate anything
+    '__neg__', '__pos__', '__abs__', '__invert__', '__complex__', '__int__',
+    '__long__', '__float__', '__round__', '__index__',
+
+    # '__enter__', '__exit__', '__await__', '__aiter__', '__anext__',
+    # '__aenter__', '__aexit__',
+]
+
 
 def _carry_op(name):
     def operation(self, *args, **kwargs):
@@ -19,6 +75,17 @@ def _carry_lens(method):
     return _
 
 
+def _add_extra_methods(cls):
+    for dunder in transparent_dunders:
+        setattr(cls, dunder, _carry_op(dunder))
+
+    for name, lens in lens_methods:
+        setattr(cls, name, _carry_lens(lens))
+
+    return cls
+
+
+@_add_extra_methods
 class Lens(object):
     'A user-friendly object for interacting with the lenses library'
     __slots__ = ['state', 'lens']
@@ -100,106 +167,3 @@ class Lens(object):
 
     def __getitem__(self, name):
         return self.add_lens(baselens.GetitemLens(name))
-
-    both_ = _carry_lens(baselens.BothLens)
-    decode_ = _carry_lens(baselens.DecodeLens)
-    filter_ = _carry_lens(baselens.FilteringLens)
-    getattr_ = _carry_lens(baselens.GetattrLens)
-    getitem_ = _carry_lens(baselens.GetitemLens)
-    getter_setter_ = _carry_lens(baselens.GetterSetterLens)
-    item_ = _carry_lens(baselens.ItemLens)
-    item_by_value_ = _carry_lens(baselens.ItemByValueLens)
-    items_ = _carry_lens(baselens.ItemsLens)
-    json_ = _carry_lens(baselens.JsonLens)
-    keys_ = _carry_lens(baselens.KeysLens)
-    traverse_ = _carry_lens(baselens.TraverseLens)
-    trivial_ = _carry_lens(baselens.TrivialLens)
-    tuple_ = _carry_lens(baselens.TupleLens)
-    values_ = _carry_lens(baselens.ValuesLens)
-
-    # __new__
-    # __init__
-    # __del__
-    # __repr__
-    __str__ = _carry_op('__str__')
-    __bytes__ = _carry_op('__bytes__')
-    __format__ = _carry_op('__format__')
-    __lt__ = _carry_op('__lt__')
-    __le__ = _carry_op('__le__')
-    __eq__ = _carry_op('__eq__')
-    __ne__ = _carry_op('__ne__')
-    __gt__ = _carry_op('__gt__')
-    __ge__ = _carry_op('__ge__')
-    # __hash__
-    __bool__ = _carry_op('__bool__')
-    # __getattr__
-    # __getattribute__
-    # __setattr__
-    # __delattr__
-    # __dir__
-    # __get__
-    # __set__
-    # __delete__
-    # __slots__
-    # __instancecheck__
-    # __subclasscheck__
-    # __call__
-    # __len__
-    # __length_hint__
-    # __getitem__
-    # __missing__
-    # __setitem__
-    # __delitem__
-    # __iter__
-    # __next__
-    # __reversed__
-    # __contains__
-    __add__ = _carry_op('__add__')
-    __sub__ = _carry_op('__sub__')
-    __mul__ = _carry_op('__mul__')
-    __matmul__ = _carry_op('__matmul__')
-    __truediv__ = _carry_op('__truediv__')
-    __floordiv__ = _carry_op('__floordiv__')
-    __div__ = _carry_op('__div__')  # python 2
-    __mod__ = _carry_op('__mod__')
-    __divmod__ = _carry_op('__divmod__')
-    __pow__ = _carry_op('__pow__')
-    __lshift__ = _carry_op('__lshift__')
-    __rshift__ = _carry_op('__rshift__')
-    __and__ = _carry_op('__and__')
-    __xor__ = _carry_op('__xor__')
-    __or__ = _carry_op('__or__')
-    __radd__ = _carry_op('__radd__')
-    __rsub__ = _carry_op('__rsub__')
-    __rmul__ = _carry_op('__rmul__')
-    __rmatmul__ = _carry_op('__rmatmul__')
-    __rtruediv__ = _carry_op('__rtruediv__')
-    __rfloordiv__ = _carry_op('__rfloordiv__')
-    __rdiv__ = _carry_op('__rdiv__')  # python2
-    __rmod__ = _carry_op('__rmod__')
-    __rdivmod__ = _carry_op('__rdivmod__')
-    __rpow__ = _carry_op('__rpow__')
-    __rlshift__ = _carry_op('__rlshift__')
-    __rrshift__ = _carry_op('__rrshift__')
-    __rand__ = _carry_op('__rand__')
-    __rxor__ = _carry_op('__rxor__')
-    __ror__ = _carry_op('__ror__')
-    # we skip all the augmented artithmetic methods because the point of the
-    # lenses library is not to mutate anything
-    __neg__ = _carry_op('__neg__')
-    __pos__ = _carry_op('__pos__')
-    __abs__ = _carry_op('__abs__')
-    __invert__ = _carry_op('__invert__')
-    __complex__ = _carry_op('__complex__')
-    __int__ = _carry_op('__int__')
-    __long__ = _carry_op('__long__')  # python2
-    __float__ = _carry_op('__float__')
-    __round__ = _carry_op('__round__')
-    __index__ = _carry_op('__index__')
-    # __enter__
-    # __exit__
-    # __await__
-    # __aiter__
-    # __anext__
-    # __aenter__
-    # __aexit__
