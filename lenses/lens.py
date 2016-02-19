@@ -21,9 +21,9 @@ lens_methods = [
 ]
 
 transparent_dunders = [
-    # '__new__', '__init__', '__del__', '__repr__',
+    # '__new__', '__init__', '__del__', '__repr__', '__str__',
+    # '__bytes__', '__format__',
 
-    '__str__', '__bytes__', '__format__',
     '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__',
 
     # '__hash__',
