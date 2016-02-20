@@ -176,7 +176,8 @@ class DecodeLens(GetterSetterLens):
 
 
 class ErrorLens(BaseLens):
-    '''A lens that raises an exception whenever it is used.'''
+    '''A lens that raises an exception whenever it tries to focus
+    something. Useful for debugging.'''
 
     def __init__(self, exception):
         self.exception = exception
