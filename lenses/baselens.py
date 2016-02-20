@@ -175,6 +175,19 @@ class DecodeLens(GetterSetterLens):
         return 'DecodeLens({})'.format(', '.join(args + kwargs))
 
 
+class ErrorLens(BaseLens):
+    '''A lens that raises an exception whenever it is used.'''
+
+    def __init__(self, exception):
+        self.exception = exception
+
+    def func(self, f, state):
+        raise self.exception
+
+    def __repr__(self):
+        return 'ErrorLens({!r})'.format(self.excpetion)
+
+
 class FilteringLens(BaseLens):
     '''A traversal that only traverses a focus if the predicate returns
     when called with that focus as an argument. Best used when composed

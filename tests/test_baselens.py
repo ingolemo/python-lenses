@@ -179,6 +179,11 @@ def test_lens_both():
     assert b.BothLens().set(['1', '2'], 4) == [4, 4]
 
 
+def test_lens_error():
+    with pytest.raises(Exception):
+        b.ErrorLens(Exception('a message')).get(object())
+
+
 def test_lens_filtering():
     l = b.TraverseLens() & b.FilteringLens(lambda a: a > 0)
     assert l.set([1, -1, 1], 3) == [3, -1, 3]
