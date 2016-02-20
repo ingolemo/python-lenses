@@ -87,6 +87,24 @@ def test_lens_descriptor():
     assert MyClass([1, 2, 3]).first.set(4) == MyClass([4, 2, 3])
 
 
+def test_lens_descriptor_zoom():
+    class MyClass:
+        def __init__(self, items):
+            self._private_items = items
+
+        def __eq__(self, other):
+            return self._private_items == other._private_items
+
+        def __repr__(self):
+            return'M({!r})'.format(self._private_items)
+
+        first = lens()._private_items[0]
+
+    data = (MyClass([1, 2, 3]),)
+    assert lens(data)[0].first_l.get() == 1
+    assert lens(data)[0].first_l.set(4) == (MyClass([4, 2, 3]),)
+
+
 # Testing that Lens properly passes though dunder methods
 def test_lens_add():
     assert lens(2) + 1 == 3

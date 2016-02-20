@@ -384,6 +384,20 @@ class ValuesLens(ComposedLens):
         return 'ValuesLens()'
 
 
+class ZoomAttrLens(BaseLens):
+    '''A lens that looks up an attribute on its target and follows it as
+    if were a bound `Lens` object.'''
+
+    def __init__(self, name):
+        self.name = name
+
+    def func(self, f, state):
+        return getattr(state, self.name).zoom(f)
+
+    def __repr__(self):
+        return 'ZoomAttrLens({!r})'.format(self.name)
+
+
 class ZoomLens(BaseLens):
     '''Follows its state as it were a bound `Lens` object.'''
 

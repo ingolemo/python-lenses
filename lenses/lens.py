@@ -171,6 +171,10 @@ class Lens(object):
     def __getattr__(self, name):
         if name.endswith('_'):
             raise AttributeError('Not a valid lens constructor')
+
+        if name.endswith('_l'):
+            return self.add_lens(baselens.ZoomAttrLens(name[:-2]))
+
         return self.add_lens(baselens.GetattrLens(name))
 
     def __getitem__(self, name):
