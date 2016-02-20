@@ -380,3 +380,13 @@ class ValuesLens(ComposedLens):
 
     def __repr__(self):
         return 'ValuesLens()'
+
+
+class ZoomLens(BaseLens):
+    '''Follows its state as it were a bound `Lens` object.'''
+
+    def func(self, f, state):
+        return state.zoom(f)
+
+    def __repr__(self):
+        return 'ZoomLens()'

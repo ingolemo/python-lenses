@@ -250,6 +250,13 @@ def test_lens_traverse():
     assert double_traversal.set([[0, 1], [2, 3]], 4) == [[4, 4], [4, 4]]
 
 
+def test_lens_zoom():
+    l = b.GetitemLens(0) & b.ZoomLens()
+    data = [lens([1, 2, 3])[1]]
+    assert l.get(data) == 2
+    assert l.set(data, 7) == [[1, 7, 3]]
+
+
 # Tests for miscellaneous functions
 def test_lens_from_getter_setter():
     my_lens = b.GetterSetterLens(lambda a: a[:-1], lambda s, a: a + '!')

@@ -155,16 +155,16 @@ used with particular classes as attributes of those classes. Attribute
 access is much more readable than requiring the user of a class to
 construct a lens themselves.
 
-	>>> class MyClass:
+	>>> class ClassWithLens:
 	...     def __init__(self, items):
 	...         self._private_items = items
 	...     def __repr__(self):
-	...         return 'MyClass({!r})'.format(self._private_items)
+	...         return 'ClassWithLens({!r})'.format(self._private_items)
 	...     first = lens()._private_items[0]
 	...
-	>>> my_instance = MyClass([1, 2, 3])
+	>>> my_instance = ClassWithLens([1, 2, 3])
 	>>> my_instance.first.set(4)
-	MyClass([4, 2, 3])
+	ClassWithLens([4, 2, 3])
 
 If you have two lenses, you can join them together using the `add_lens`
 method. Joining lenses means that one of the lenses is placed "inside"
@@ -203,6 +203,15 @@ help avoid collision with accessing attributes on the state, their names
 all end with a single underscore. See `help(lenses.Lens)` in the repl
 for more. If you need to access an attribute on the state that has been
 shadowed by Lens' methods then you can use `Lens.getattr_(attribute)`.
+
+If you're going to be putting lenses as attributes of your classes then
+sooner or later you're going to write a lens that focuses another lens.
+You can activate this inner lens by calling the `zoom_` method. The lens
+you focus must be a bound lens. Here's an example using a class defined above:
+
+	>>> data = [ClassWithLens([1, 2, 3]), ClassWithLens([4, 5, 6])]
+	>>> lens(data)[1].first.zoom_().set(7)
+	[ClassWithLens([1, 2, 3]), ClassWithLens([7, 5, 6])]
 
 At their heart, lenses are really just souped-up getters and setters. If
 you have a getter and a setter for some data then you can turn those
