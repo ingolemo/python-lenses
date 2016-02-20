@@ -171,7 +171,8 @@ class DecodeLens(GetterSetterLens):
 
     def __repr__(self):
         args = [repr(item) for item in self.args]
-        kwargs = ['{}={!r}'.format(k, v) for k, v in self.kwargs.items()]
+        kwargs = ['{}={!r}'.format(k, v)
+                  for k, v in self.kwargs.items()]
         return 'DecodeLens({})'.format(', '.join(args + kwargs))
 
 
@@ -274,7 +275,8 @@ class ItemByValueLens(GetterSetterLens):
                 return dkey, dvalue
 
     def setter(self, state, focus):
-        new_dict = {k: v for k, v in state.items() if v is not self.value}
+        new_dict = {k: v for k, v in state.items()
+                    if v is not self.value}
         if focus is not None:
             new_dict[focus[0]] = focus[1]
         return new_dict
