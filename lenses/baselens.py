@@ -258,11 +258,12 @@ class ItemByValueLens(GetterSetterLens):
         for dkey, dvalue in state.items():
             if dvalue is self.value:
                 return dkey, dvalue
-        raise LookupError('{} not in dict'.format(self.value))
 
     def setter(self, state, focus):
-        return dict([focus] + [
-            (k, v) for k, v in state.items() if v is not self.value])
+        new_dict = {k: v for k, v in state.items() if v is not self.value}
+        if focus is not None:
+            new_dict[focus[0]] = focus[1]
+        return new_dict
 
     def __repr__(self):
         return 'ItemByValueLens({!r})'.format(self.key)

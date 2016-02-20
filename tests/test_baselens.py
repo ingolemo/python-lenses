@@ -199,8 +199,14 @@ def test_lens_item_by_value():
     assert my_lens.get(data) == ('world', 1)
     assert my_lens.set(data, ('everyone', 2)) == {
         'hello': 0, 'everyone': 2}
-    with pytest.raises(LookupError):
-        b.ItemByValueLens(3).get(data)
+
+
+def test_lens_item_by_value_missing_key():
+    data = {'hello': 0, 'world': 1}
+    my_lens = b.ItemByValueLens(2)
+    assert my_lens.get(data) is None
+    assert my_lens.set(data, ('test', 2)) == {
+        'hello': 0, 'world': 1, 'test': 2}
 
 
 def test_lens_items():
