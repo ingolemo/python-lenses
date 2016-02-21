@@ -253,7 +253,7 @@ class ItemLens(GetterSetterLens):
             return None
 
     def setter(self, state, focus):
-        data = {k: v for k, v in state.items() if k is not self.key}
+        data = {k: v for k, v in state.items() if k != self.key}
         if focus is not None:
             data[focus[0]] = focus[1]
         return data
@@ -275,11 +275,10 @@ class ItemByValueLens(GetterSetterLens):
                 return dkey, dvalue
 
     def setter(self, state, focus):
-        new_dict = {k: v for k, v in state.items()
-                    if v is not self.value}
+        data = {k: v for k, v in state.items() if v != self.value}
         if focus is not None:
-            new_dict[focus[0]] = focus[1]
-        return new_dict
+            data[focus[0]] = focus[1]
+        return data
 
     def __repr__(self):
         return 'ItemByValueLens({!r})'.format(self.key)
