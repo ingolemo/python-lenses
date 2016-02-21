@@ -81,10 +81,10 @@ method:
 	>>> lens([1, 2, 3])[0].modify(lambda a: a + 10)
 	[11, 2, 3]
 
-You can call methods on the data using `call_method`. Note that this
+You can call methods on the data using `call`. Note that this
 method should return new data to include in the data-structure:
 
-	>>> lens([1, {0, 3}, 2])[1].call_method('union', {3, 8})
+	>>> lens([1, {0, 3}, 2])[1].call('union', {3, 8})
 	[1, {0, 8, 3}, 2]
 
 Lenses will also pass most operators through to the data they're focused

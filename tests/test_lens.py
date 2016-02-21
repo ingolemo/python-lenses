@@ -29,16 +29,16 @@ def test_lens_modify():
     assert lens([1, 2, 3])[0].modify(lambda a: a + 5) == [6, 2, 3]
 
 
-def test_lens_call_method():
-    assert lens('hello').call_method('upper') == 'HELLO'
+def test_lens_call():
+    assert lens('hello').call('upper') == 'HELLO'
 
 
-def test_lens_call_method_args():
-    assert lens('h').call_method('center', 5) == '  h  '
+def test_lens_call_args():
+    assert lens('h').call('center', 5) == '  h  '
 
 
-def test_lens_call_method_kwargs():
-    assert lens('h').call_method('encode', encoding='utf-8') == b'h'
+def test_lens_call_kwargs():
+    assert lens('h').call('encode', encoding='utf-8') == b'h'
 
 
 def test_lens_add_lens_baselens():

@@ -131,7 +131,7 @@ class Lens(object):
         self._assert_state()
         return self.lens.modify(self.state, func)
 
-    def call_method(self, method_name, *args, **kwargs):
+    def call(self, method_name, *args, **kwargs):
         '''Call a method on the focus. The method must return a new
         value for the focus.'''
         def func(a):
