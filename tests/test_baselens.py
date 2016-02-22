@@ -55,8 +55,6 @@ from lenses import baselens as b
 #     assert ls.set(ls.set(state, obj), obj) == ls.set(state, obj)
 
 
-# Tests for lenses and lens constructor function that are built into the
-# library.
 def test_lens_and():
     my_lens = b.BothLens() & b.GetitemLens(1)
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
@@ -74,6 +72,16 @@ def test_ComposedLens_nolenses_set():
 
 def test_ComposedLens_nesting_simplifies():
     assert b.ComposedLens([b.ComposedLens([])]).lenses == []
+
+
+def test_ComposedLens_compose_simplifies():
+    l = b.ComposedLens([])
+    assert type(l & l) == b.TrivialLens
+
+
+def test_ComposedLens_meaningful_repr():
+    l = b.ComposedLens([])
+    assert repr(l.lenses) in repr(l)
 
 
 def test_DecodeLens_get():
@@ -161,6 +169,14 @@ def test_GetterSetterLens_modify():
     state = 'hello!'
     assert my_lens.modify(
         state, lambda a: a.replace('lo', 'p')) == 'help!'
+
+
+def test_GetterSetterLens_meaningful_repr():
+    getter = lambda s: s
+    setter = lambda s, f: f
+    l = b.GetterSetterLens(getter, setter)
+    assert repr(getter) in repr(l)
+    assert repr(setter) in repr(l)
 
 
 def test_ItemLens_get():
