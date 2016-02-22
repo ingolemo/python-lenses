@@ -19,6 +19,7 @@ lens_methods = [
     ('trivial_', baselens.TrivialLens),
     ('tuple_', baselens.TupleLens),
     ('values_', baselens.ValuesLens),
+    ('zoomattr_', baselens.ZoomAttrLens),
     ('zoom_', baselens.ZoomLens),
 ]
 
