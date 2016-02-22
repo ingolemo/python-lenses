@@ -391,7 +391,8 @@ class ZoomAttrLens(BaseLens):
         self.name = name
 
     def func(self, f, state):
-        return getattr(state, self.name).zoom(f)
+        l = getattr(state, self.name)
+        return l.lens.func(f, state)
 
     def __repr__(self):
         return 'ZoomAttrLens({!r})'.format(self.name)
@@ -401,7 +402,7 @@ class ZoomLens(BaseLens):
     '''Follows its state as it were a bound `Lens` object.'''
 
     def func(self, f, state):
-        return state.zoom(f)
+        return state.lens.func(f, state.state)
 
     def __repr__(self):
         return 'ZoomLens()'

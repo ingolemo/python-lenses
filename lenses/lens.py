@@ -159,12 +159,6 @@ class Lens(object):
             raise ValueError('Trying to bind an already bound lens')
         return Lens(state, self.lens)
 
-    def zoom(self, f):
-        '''Takes a function and runs it on the state using the
-        underlying lens.'''
-        self._assert_state()
-        return self.lens.func(f, self.state)
-
     def __get__(self, obj, type=None):
         return self.bind(obj)
 
