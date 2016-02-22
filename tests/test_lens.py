@@ -156,6 +156,85 @@ def test_lens_nonexistant_sublens():
         lens(3).flobadob_()
 
 
+# Tests for ensuring lenses work on different type of objects
+def test_type_tuple():
+    assert lens(((0, 0), (0, 0)))[0][1].set(1) == ((0, 1), (0, 0))
+
+
+def test_type_namedtuple():
+    Tup = collections.namedtuple('Tup', 'attr')
+    assert lens(Tup(0)).attr.set(1) == Tup(1)
+
+
+def test_type_list():
+    assert lens([[0, 1], [2, 3]])[1][0].set(4) == [[0, 1], [4, 3]]
+    with pytest.raises(AttributeError):
+        assert lens([[0, 1], [2, 3]]).attr.set(4)
+
+
+def test_type_dict():
+    assert lens({1: 2, 3: 4})[1].set(5) == {1: 5, 3: 4}
+    with pytest.raises(AttributeError):
+        assert lens({1: 2, 3: 4}).attr.set(5)
+
+
+def test_type_custom_class_copy_and_mutate():
+    class C(object):
+
+        def __init__(self, a, b):
+            self.a = a
+            self.b = b
+
+        def __eq__(self, other):
+            return self.a == other.a and self.b == other.b
+
+    assert lens(C(C(0, 1), C(2, 3))).a.b.set(4) == C(C(0, 4), C(2, 3))
+
+
+def test_type_custom_class_lens_setattr():
+    class C(object):
+
+        def __init__(self, a):
+            self._a = a
+
+        @property
+        def a(self):
+            return self._a
+
+        def __eq__(self, other):
+            return self.a == other.a
+
+        def _lens_setattr(self, key, value):
+            if key == 'a':
+                return C(value)
+
+    assert lens(C(C(9))).a.a.set(4) == C(C(4))
+
+
+def test_type_custom_class_immutable():
+    class C(object):
+
+        def __init__(self, a):
+            self._a = a
+
+        @property
+        def a(self):
+            return self._a
+
+    with pytest.raises(AttributeError):
+        lens(C(9)).a.set(7)
+
+
+def test_type_unsupported_no_setitem():
+    with pytest.raises(TypeError):
+        lens(object())[0].set(None)
+
+
+def test_type_unsupported_no_setattr():
+    with pytest.raises(AttributeError):
+        lens(object()).attr.set(None)
+
+
 # misc Lens tests
 def test_lens_informative_repr():
     obj = object()
