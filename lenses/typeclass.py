@@ -39,12 +39,12 @@ def fmap(functor, func):
 
 
 @fmap.register(list)
-def _(lst, func):
+def _fmap_list(lst, func):
     return [func(a) for a in lst]
 
 
 @fmap.register(tuple)
-def _(tup, func):
+def _fmap_tuple(tup, func):
     return tuple(func(a) for a in tup)
 
 
@@ -60,22 +60,22 @@ def ap(applicative, func):
 
 
 @pure.register(list)
-def _(lst, item):
+def _pure_list(lst, item):
     return [item]
 
 
 @ap.register(list)
-def _(lst, funcs):
+def _ap_list(lst, funcs):
     return [f(i) for i in lst for f in funcs]
 
 
 @pure.register(tuple)
-def _(tup, item):
+def _pure_tuple(tup, item):
     return (item,)
 
 
 @ap.register(tuple)
-def _(tup, funcs):
+def _ap_tuple(tup, funcs):
     return tuple(f(i) for i in tup for f in funcs)
 
 
@@ -86,7 +86,7 @@ def traverse(traversable, func):
 
 
 @traverse.register(list)
-def _(lst, func):
+def _traverse_list(lst, func):
     head, rest = lst[0], lst[1:]
 
     cons = lambda a: lambda b: [a] + b
