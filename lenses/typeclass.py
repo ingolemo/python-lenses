@@ -87,9 +87,15 @@ def traverse(traversable, func):
 
 @traverse.register(list)
 def _traverse_list(lst, func):
+    if lst == []:
+        i = func.get_pure([])
+        print(i)
+        return i
     head, rest = lst[0], lst[1:]
 
-    cons = lambda a: lambda b: [a] + b
+    def cons(a):
+        return lambda b: [a] + b
+
     if rest:
         return ap(traverse(rest, func), fmap(func(head), cons))
     else:

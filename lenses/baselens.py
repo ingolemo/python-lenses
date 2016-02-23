@@ -3,6 +3,7 @@ import abc
 
 from .identity import Identity
 from .const import Const
+from .functorisor import Functorisor
 from .typeclass import fmap, pure, ap, traverse
 from .setter import setitem_immutable, setattr_immutable, multi_magic_set
 
@@ -50,20 +51,32 @@ class BaseLens(object, metaclass=abc.ABCMeta):
     def get(self, state):
         '''Returns the focus within `state`. If multiple items are
         focused then it will attempt to join them together with
-        `lenses.typeclass.mappend`.'''
-        return self.func(lambda a: Const(a), state).item
+        `lenses.typeclass.mappend`. The lens must have at least one
+        focus.'''
+        def func_pure(a):
+            # it's a shame that we can't get values from types that have
+            # no focus, but nothing can be done short of carrying type
+            # information around all the way through the library.
+            raise ValueError('No focus to get')
+        const = Functorisor(func_pure, lambda a: Const(a))
+        return self.func(const, state).item
 
     def get_all(self, state):
         'Returns a tuple of all the focuses within `state`.'
-        return self.func(lambda a: Const((a, )), state).item
+        consttup = Functorisor(lambda a: Const(()), lambda a: Const((a,)))
+        return self.func(consttup, state).item
 
     def modify(self, state, fn):
         'Applies a function `fn` to the focus within `state`.'
-        return self.func(lambda a: Identity(fn(a)), state).item
+        identfn = Functorisor(lambda a: Identity(a),
+                              lambda a: Identity(fn(a)))
+        return self.func(identfn, state).item
 
     def set(self, state, value):
         'Sets the focus within `state` to `value`.'
-        return self.func(lambda a: Identity(value), state).item
+        ident = Functorisor(lambda a: Identity(a),
+                            lambda a: Identity(value))
+        return self.func(ident, state).item
 
     def compose(self, other):
         '''Composes another lens with this one.
@@ -103,6 +116,7 @@ class ComposedLens(BaseLens):
 
         res = f
         for lens in reversed(self.lenses):
+            @res.replace_func
             def res(st, res=res, lens=lens):
                 return lens.func(res, st)
         return res(state)
@@ -290,6 +304,8 @@ class ItemsLens(BaseLens):
 
     def func(self, f, state):
         items = list(state.items())
+        if items == []:
+            return f.get_pure(state)
 
         @starargs_curry(len(items))
         def dict_builder(*args):

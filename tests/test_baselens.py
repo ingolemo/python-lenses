@@ -223,11 +223,21 @@ def test_ItemsLens_get_all():
     assert sorted(my_lens.get_all(data)) == [(0, 'zero'), (1, 'one')]
 
 
+def test_ItemsLens_get_all_empty():
+    my_lens = b.ItemsLens()
+    assert sorted(my_lens.get_all({})) == []
+
+
 def test_ItemsLens_modify():
     data = {0: 'zero', 1: 'one'}
-    my_lens = b.ItemsLens().compose(b.GetitemLens(0))
+    my_lens = b.ItemsLens() & b.GetitemLens(0)
     assert my_lens.modify(data, lambda a: a + 1) == {
         1: 'zero', 2: 'one'}
+
+
+def test_ItemsLens_modify_empty():
+    my_lens = b.ItemsLens() & b.GetitemLens(0)
+    assert my_lens.modify({}, lambda a: a + 1) == {}
 
 
 def test_JsonLens_get():
@@ -256,12 +266,29 @@ def test_TupleLens_set():
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
 
 
+def test_TraverseLens_get():
+    assert b.TraverseLens().get(['a', 'b', 'c']) == 'abc'
+
+
+def test_TraverseLens_get_empty():
+    with pytest.raises(ValueError):
+        b.TraverseLens().get([])
+
+
 def test_TraverseLens_get_all():
     assert b.TraverseLens().get_all([0, 1, 2, 3]) == (0, 1, 2, 3)
 
 
+def test_TraverseLens_get_all_empty():
+    assert b.TraverseLens().get_all([]) == ()
+
+
 def test_TraverseLens_set():
     assert b.TraverseLens().set([0, 1, 2, 3], 4) == [4, 4, 4, 4]
+
+
+def test_TraverseLens_set_empty():
+    assert b.TraverseLens().set([], 4) == []
 
 
 def test_TraverseLens_get_all_double():
@@ -269,9 +296,19 @@ def test_TraverseLens_get_all_double():
     assert l.get_all([[0, 1], [2, 3]]) == (0, 1, 2, 3)
 
 
+def test_TraverseLens_get_all_double_empty():
+    l = b.TraverseLens() & b.TraverseLens()
+    assert l.get_all([[0, 1], []]) == (0, 1)
+
+
 def test_TraverseLens_set_double():
     l = b.TraverseLens() & b.TraverseLens()
     assert l.set([[0, 1], [2, 3]], 4) == [[4, 4], [4, 4]]
+
+
+def test_TraverseLens_set_double_empty():
+    l = b.TraverseLens() & b.TraverseLens()
+    assert l.set([[0, 1], []], 4) == [[4, 4], []]
 
 
 def test_ZoomLens_get():
