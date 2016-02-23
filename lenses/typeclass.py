@@ -88,9 +88,7 @@ def traverse(traversable, func):
 @traverse.register(list)
 def _traverse_list(lst, func):
     if lst == []:
-        i = func.get_pure([])
-        print(i)
-        return i
+        return func.get_pure([])
     head, rest = lst[0], lst[1:]
 
     def cons(a):
