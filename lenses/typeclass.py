@@ -24,6 +24,9 @@ mappend.register(list)(lambda lst, other: lst + other)
 mempty.register(tuple)(lambda lst: ())
 mappend.register(tuple)(lambda tup, other: tup + other)
 
+mempty.register(dict)(lambda lst: {})
+mappend.register(dict)(lambda tup, other: tup + other)
+
 
 # functor
 @singledispatch
