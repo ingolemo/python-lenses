@@ -1,2 +1,4 @@
 coverage run -m pytest "$@"
-coverage report -m
+if [ "$?" = '0' ]; then
+	coverage report -m
+fi
