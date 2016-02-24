@@ -106,35 +106,71 @@ class Lens(object):
             raise ValueError('Operation requires a bound lens')
 
     def get(self):
-        'Get the first value focused by the lens.'
+        '''Get the first value focused by the lens.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3]).get()
+            [1, 2, 3]
+            >>> lens([1, 2, 3])[0].get()
+            1
+        '''
         self._assert_state()
         return self.lens.get_all(self.state)[0]
 
     def get_all(self):
         '''Get multiple values focused by the lens. Returns them as a
-        tuple.'''
+        tuple.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3])[0].get_all()
+            (1,)
+            >>> lens([1, 2, 3]).both_().get_all()
+            (1, 2)
+        '''
         self._assert_state()
         return self.lens.get_all(self.state)
 
     def get_monoid(self):
         '''Get the values focused by the lens, merging them together by
-        treating them as a monoid. See `lenses.typeclass.mappend`.'''
+        treating them as a monoid. See `lenses.typeclass.mappend`.
+
+            >>> from lenses import lens
+            >>> lens([[], [1], [2, 3]]).traverse_().get_monoid()
+            [1, 2, 3]
+        '''
         self._assert_state()
         return self.lens.get(self.state)
 
     def set(self, newvalue):
-        '''Set the focus to `newvalue`.'''
+        '''Set the focus to `newvalue`.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3])[1].set(4)
+            [1, 4, 3]
+        '''
         self._assert_state()
         return self.lens.set(self.state, newvalue)
 
     def modify(self, func):
-        '''Apply a function to the focus.'''
+        '''Apply a function to the focus.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3])[1].modify(str)
+            [1, '2', 3]
+            >>> lens([1, 2, 3])[1].modify(lambda n: n + 10)
+            [1, 12, 3]
+        '''
         self._assert_state()
         return self.lens.modify(self.state, func)
 
     def call(self, method_name, *args, **kwargs):
         '''Call a method on the focus. The method must return a new
-        value for the focus.'''
+        value for the focus.
+
+            >>> from lenses import lens
+            >>> lens(['alpha', 'beta', 'gamma'])[2].call('upper')
+            ['alpha', 'beta', 'GAMMA']
+        '''
         def func(a):
             return getattr(a, method_name)(*args, **kwargs)
         return self.modify(func)
@@ -142,7 +178,13 @@ class Lens(object):
     def add_lens(self, other):
         '''Refine the current focus of this lens by composing it with
         another lens object. Can be a `lenses.BaseLens` or an unbound
-        `lenses.Lens`.'''
+        `lenses.Lens`.
+
+            >>> from lenses import lens
+            >>> second_first = lens()[1][0]
+            >>> lens([[0, 1], [2, 3]]).add_lens(second_first).get()
+            2
+        '''
         if isinstance(other, baselens.BaseLens):
             return Lens(self.state, self.lens.compose(other))
         elif isinstance(other, Lens):
@@ -155,7 +197,12 @@ class Lens(object):
 
     def bind(self, state):
         '''Bind this lens to a specific `state`. Raises `ValueError`
-        when the lens has already been bound.'''
+        when the lens has already been bound.
+
+            >>> from lenses import lens
+            >>> lens()[1].bind([1, 2, 3]).get()
+            2
+        '''
         if self.state is not None:
             raise ValueError('Trying to bind an already bound lens')
         return Lens(state, self.lens)
