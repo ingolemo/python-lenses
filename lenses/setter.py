@@ -28,7 +28,7 @@ def setitem_immutable(self, key, value):
 
 
 @setitem_immutable.register(tuple)
-def _(self, key, value):
+def _tuple_setitem_immutable(self, key, value):
     return tuple(value if i == key else item
                  for i, item in enumerate(self))
 
@@ -46,7 +46,7 @@ def setattr_immutable(self, name, value):
 
 
 @setattr_immutable.register(tuple)
-def _(self, name, value):
+def _tuple_setattr_immutable(self, name, value):
     # setting attributes on a tuple probably means we really have a
     # namedtuple so we can use self._fields to understand the names
     data = (value if field == name else item
