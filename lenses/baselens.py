@@ -267,9 +267,13 @@ class ItemLens(GetterSetterLens):
             return None
 
     def setter(self, state, focus):
-        data = {k: v for k, v in state.items() if k != self.key}
-        if focus is not None:
-            data[focus[0]] = focus[1]
+        data = state.copy()
+        if focus is None:
+            del data[self.key]
+            return data
+        if focus[0] != self.key:
+            del data[self.key]
+        data[focus[0]] = focus[1]
         return data
 
     def __repr__(self):
@@ -285,11 +289,14 @@ class ItemByValueLens(GetterSetterLens):
 
     def getter(self, state):
         for dkey, dvalue in state.items():
-            if dvalue is self.value:
+            if dvalue == self.value:
                 return dkey, dvalue
 
     def setter(self, state, focus):
-        data = {k: v for k, v in state.items() if v != self.value}
+        data = state.copy()
+        for key, val in state.items():
+            if val == self.value:
+                del data[key]
         if focus is not None:
             data[focus[0]] = focus[1]
         return data
@@ -309,7 +316,10 @@ class ItemsLens(BaseLens):
 
         @starargs_curry(len(items))
         def dict_builder(*args):
-            return dict(a for a in args if a is not None)
+            data = state.copy()
+            data.clear()
+            data.update(a for a in args if a is not None)
+            return data
 
         return multiap(dict_builder, *map(f, items))
 
