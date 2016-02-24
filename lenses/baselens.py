@@ -309,7 +309,7 @@ class ItemsLens(BaseLens):
 
         @starargs_curry(len(items))
         def dict_builder(*args):
-            return dict(args)
+            return dict(a for a in args if a is not None)
 
         return multiap(dict_builder, *map(f, items))
 
