@@ -63,7 +63,8 @@ class BaseLens(object, metaclass=abc.ABCMeta):
 
     def get_all(self, state):
         'Returns a tuple of all the focuses within `state`.'
-        consttup = Functorisor(lambda a: Const(()), lambda a: Const((a,)))
+        consttup = Functorisor(
+            lambda a: Const(()), lambda a: Const((a,)))
         return self.func(consttup, state).item
 
     def modify(self, state, fn):
@@ -105,7 +106,7 @@ class ComposedLens(BaseLens):
         for lens in lenses:
             if isinstance(lens, TrivialLens):
                 continue
-            elif isinstance(lens, ComposedLens):
+            elif type(lens) is ComposedLens:
                 yield from lens.lenses
             else:
                 yield lens
