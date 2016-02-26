@@ -9,6 +9,7 @@ lens_methods = [
     ('filter_', baselens.FilteringLens),
     ('getattr_', baselens.GetattrLens),
     ('getitem_', baselens.GetitemLens),
+    ('getter_', baselens.GetterLens),
     ('getter_setter_', baselens.GetterSetterLens),
     ('item_', baselens.ItemLens),
     ('item_by_value_', baselens.ItemByValueLens),

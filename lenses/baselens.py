@@ -323,6 +323,36 @@ class GetitemLens(GetterSetterLens):
         return 'GetitemLens({!r})'.format(self.key)
 
 
+class GetterLens(GetterSetterLens):
+    '''A lens that applies a function to its focus when the focus is
+    retrieved, but will just sets whatever it is asked. This lens
+    allows you to post-process values as you retrieve them, but still
+    lets you set values directly. Equivalent to
+    `GetterSetterLens(getter, (lambda s, f: f))'.
+
+    Note that modify does both a get and a set.
+
+        >>> from lenses import lens
+        >>> lens().getter_(str)
+        Lens(None, GetterLens(<class 'str'>))
+        >>> lens([1, 2, 3])[0].getter_(str).get()
+        '1'
+        >>> lens([1, 2, 3])[0].getter_(str).set(4)
+        [4, 2, 3]
+        >>> lens([1, 2, 3])[0].getter_(str).modify(lambda a: a+'.')
+        ['1.', 2, 3]
+    '''
+
+    def __init__(self, getter):
+        self.getter = getter
+
+    def setter(self, state, focus):
+        return focus
+
+    def __repr__(self):
+        return 'GetterLens({!r})'.format(self.getter)
+
+
 class ItemLens(GetterSetterLens):
     '''A lens that focuses a single item (key-value pair) in a
     dictionary by its key. Set an item to `None` to remove it from the
