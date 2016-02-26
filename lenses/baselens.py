@@ -517,6 +517,39 @@ class KeysLens(ComposedLens):
         return 'KeysLens()'
 
 
+class NormalisingLens(GetterSetterLens):
+    '''A lens that applies a function as it sets a new focus without
+    regard to the old state. It will get foci without transformation.
+    This lens allows you to post-process values before you set them
+    them, but still get value as they exist in the state. Useful for
+    type conversions or normalising data. This lens is similar to the
+    SetterLens, but the setter function has a more convenient signature,
+    applicable to most built-in functions/constructors.
+
+        >>> from lenses import lens
+        >>> lens().norm_(int)
+        Lens(None, NormalisingLens(<class 'int'>))
+        >>> lens([1, 2, 3])[0].norm_(int).get()
+        1
+        >>> lens([1, 2, 3])[0].norm_(int).set('4')
+        [4, 2, 3]
+        >>> lens([1, 2, 3])[0].norm_(int).modify(lambda a: a - 4.5)
+        [-3, 2, 3]
+    '''
+
+    def __init__(self, setter):
+        self.raw_setter = setter
+
+    def getter(self, state):
+        return state
+
+    def setter(self, state, focus):
+        return self.raw_setter(focus)
+
+    def __repr__(self):
+        return 'NormalisingLens({!r})'.format(self.raw_setter)
+
+
 class SetterLens(GetterSetterLens):
     '''A lens that applies a function as it sets a new focus, but will
     get foci without transformation. Note that modify does both a get
