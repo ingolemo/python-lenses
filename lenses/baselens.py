@@ -517,6 +517,35 @@ class KeysLens(ComposedLens):
         return 'KeysLens()'
 
 
+class SetterLens(GetterSetterLens):
+    '''A lens that applies a function as it sets a new focus, but will
+    get foci without transformation. Note that modify does both a get
+    and a set.
+
+        >>> from lenses import lens
+        >>> def setter(state, focus):
+        ...     return type(state)(focus)
+        ...
+        >>> lens().setter_(setter)
+        Lens(None, SetterLens(<function setter at ...>))
+        >>> lens([1, 2, 3])[0].setter_(setter).get()
+        1
+        >>> lens([1, 2, 3])[0].setter_(setter).set('4')
+        [4, 2, 3]
+        >>> lens([1, 2, 3])[0].setter_(setter).modify(lambda a: a - 4.5)
+        [-3, 2, 3]
+    '''
+
+    def __init__(self, setter):
+        self.setter = setter
+
+    def getter(self, state):
+        return state
+
+    def __repr__(self):
+        return 'SetterLens({!r})'.format(self.setter)
+
+
 class TraverseLens(BaseLens):
     '''A traversal that focuses everything in a data structure depending
     on how that data structure defines `lenses.typeclass.traverse`. Usually
