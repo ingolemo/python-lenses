@@ -106,11 +106,18 @@ class GameState:
 
     def draw(self, screen):
         curses.textpad.rectangle(screen, MIN-1, MIN-1, MAX+1, MAX+1)
-        for robot in self.robots:
-            screen.addstr(robot[1], robot[0], 'O')
-        for crash in self.crashes:
-            screen.addstr(crash[1], crash[0], '*')
-        screen.addstr(self.player[1], self.player[0], '@')
+        for x in range(MIN, MAX + 1):
+            for y in range(MIN, MAX + 1):
+                coord = (x, y)
+                if coord == self.player:
+                    ch = b'@'
+                elif coord in self.crashes:
+                    ch = b'#'
+                elif coord in self.robots:
+                    ch = b'O'
+                else:
+                    ch = b'.'
+                screen.addch(y, x, ch)
 
 
 def main():
