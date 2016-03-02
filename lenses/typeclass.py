@@ -12,17 +12,44 @@ def mappend(monoid, other):
     return monoid.mappend(other)
 
 
-mempty.register(str)(lambda string: '')
-mappend.register(str)(lambda string, other: string + other)
+@mempty.register(str)
+def _mempty_str(string):
+    return ''
 
-mempty.register(list)(lambda lst: [])
-mappend.register(list)(lambda lst, other: lst + other)
 
-mempty.register(tuple)(lambda lst: ())
-mappend.register(tuple)(lambda tup, other: tup + other)
+@mappend.register(str)
+def _mappend_str(string, other):
+    return string + other
 
-mempty.register(dict)(lambda lst: {})
-mappend.register(dict)(lambda dic, other: {**dic, **other})
+
+@mempty.register(list)
+def _mempty_list(lst):
+    return []
+
+
+@mappend.register(list)
+def _mappend_list(lst, other):
+    return lst + other
+
+
+@mempty.register(tuple)
+def _mempty_tuple(tup):
+    return ()
+
+
+@mappend.register(tuple)
+def _mappend_tuple(tup, other):
+    return tup + other
+
+
+@mempty.register(dict)
+def _mempty_dict(dct):
+    return {}
+
+
+@mappend.register(dict)
+def _mappend_dict(dct, other):
+    return {**dct, **other}
 
 
 # functor
