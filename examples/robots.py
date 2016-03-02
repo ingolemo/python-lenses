@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-import contextlib
-import curses
-import curses.textpad
+import sys
+import tty
 from random import randint
 
 from lenses import lens
@@ -10,25 +9,6 @@ from lenses import lens
 MIN = 1
 MAX = 20
 ROBOTS = 6
-
-
-@contextlib.contextmanager
-def curses_context():
-    '''a context manager for setting up curses'''
-    screen = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
-    curses.curs_set(0)
-    curses.start_color()
-    curses.use_default_colors()
-    screen.keypad(1)
-    try:
-        yield screen
-    finally:
-        screen.keypad(0)
-        curses.nocbreak()
-        curses.echo()
-        curses.endwin()
 
 
 def restrain(n):
@@ -104,41 +84,41 @@ class GameState:
         self = lens(self).message.set(message)
         return lens(self).running.set(False)
 
-    def draw(self, screen):
-        curses.textpad.rectangle(screen, MIN-1, MIN-1, MAX+1, MAX+1)
-        for x in range(MIN, MAX + 1):
-            for y in range(MIN, MAX + 1):
+    def __str__(self):
+        rows = []
+        for y in range(MIN, MAX + 1):
+            chars = []
+            for x in range(MIN, MAX + 1):
                 coord = (x, y)
                 if coord == self.player:
-                    ch = b'@'
+                    ch = '@'
                 elif coord in self.crashes:
-                    ch = b'#'
+                    ch = '#'
                 elif coord in self.robots:
-                    ch = b'O'
+                    ch = 'O'
                 else:
-                    ch = b'.'
-                screen.addch(y, x, ch)
+                    ch = '.'
+                chars.append(ch)
+            rows.append(''.join(chars))
+        return '\n'.join(rows) + '\n'
 
 
 def main():
-    with curses_context() as screen:
-        state = GameState()
-        state.draw(screen)
-        while state.running:
-            input = chr(screen.getch())
+    tty.setcbreak(sys.stdin.fileno())
 
-            state, should_advance = state.handle_input(input)
-            if should_advance:
-                state = state.advance_robots()
-                state = state.check_game_end()
+    state = GameState()
+    print(state)
+    while state.running:
+        input = sys.stdin.read(1)
 
-            screen.clear()
-            state.draw(screen)
-            screen.refresh()
+        state, should_advance = state.handle_input(input)
+        if should_advance:
+            state = state.advance_robots()
+            state = state.check_game_end()
 
-        if state.message:
-            screen.addstr(0, 2, state.message)
-            screen.getch()
+        print(state)
+
+    print(state.message)
 
 
 if __name__ == '__main__':
