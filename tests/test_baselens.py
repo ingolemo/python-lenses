@@ -96,6 +96,22 @@ def test_DecodeLens_set():
     assert b.DecodeLens('ascii', 'replace').set(b'', '\xe9') == b'?'
 
 
+def test_EachLens_get_all():
+    assert b.EachLens().get_all([1, 2, 3]) == (1, 2, 3)
+
+
+def test_EachLens_set():
+    assert b.EachLens().set([1, 2, 3], 4) == [4, 4, 4]
+
+
+def test_EachLens_get_all_empty():
+    assert b.EachLens().get_all([]) == ()
+
+
+def test_EachLens_set_empty():
+    assert b.EachLens().set([], 4) == []
+
+
 def test_GetattrLens_get():
     Tup = collections.namedtuple('Tup', 'attr')
     assert b.GetattrLens('attr').get(Tup(1)) == 1

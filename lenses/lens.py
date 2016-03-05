@@ -6,6 +6,7 @@ lens_methods = [
     ('both_', baselens.BothLens),
     ('decode_', baselens.DecodeLens),
     ('error_', baselens.ErrorLens),
+    ('each_', baselens.EachLens),
     ('filter_', baselens.FilteringLens),
     ('getattr_', baselens.GetattrLens),
     ('getitem_', baselens.GetitemLens),

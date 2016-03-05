@@ -222,6 +222,34 @@ class DecodeLens(GetterSetterLens):
         return 'DecodeLens({})'.format(', '.join(args + kwargs))
 
 
+class EachLens(BaseLens):
+    '''A traversal that iterates over its state, focusing everything it
+    iterates over. It uses `setter.fromiter` to reform the state
+    afterwards so it should work with an iterable that function
+    supports. Analogous to `iter`.
+
+        >>> from lenses import lens
+        >>> data = [1, 2, 3]
+        >>> lens().each_()
+        Lens(None, EachLens())
+        >>> lens(data).each_().get_all()
+        (1, 2, 3)
+        >>> lens(data).each_().modify(lambda n: n + 1)
+        [2, 3, 4]
+    '''
+
+    def func(self, f, state):
+        items = list(state)
+        if items == []:
+            return f.get_pure(state)
+
+        return fmap(multiap(collect_args(len(items)), *map(f, items)),
+                    lambda a: setter.fromiter(state, a))
+
+    def __repr__(self):
+        return 'EachLens()'
+
+
 class ErrorLens(BaseLens):
     '''A lens that raises an exception whenever it tries to focus
     something. Useful for debugging.
