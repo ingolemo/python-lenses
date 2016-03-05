@@ -1,3 +1,5 @@
+from . import typeclass
+
 class Nothing:
     instance = None
 
@@ -17,6 +19,9 @@ class Nothing:
 
     def ap(self, wrapped_func):
         return self
+
+    def traverse(self, func):
+        return func.get_pure(self)
 
 
 class Just:
@@ -44,3 +49,6 @@ class Just:
         elif isinstance(wrapped_func, Nothing):
             return Nothing()
         raise TypeError('must be Nothing or Just')
+
+    def traverse(self, func):
+        return typeclass.fmap(func(self.item), Just)
