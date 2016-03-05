@@ -51,3 +51,43 @@ def _tuple_setattr_immutable(self, name, value):
     data = (value if field == name else item
             for field, item in zip(self._fields, self))
     return type(self)(*data)
+
+
+@singledispatch
+def fromiter(self, iterable):
+    '''Takes an object and an iterable and produces a new object that is
+    a copy of the original with data from `iterable` reincorporated. It
+    is intended as the inverse of the `iter` function. Any state in
+    `self` that is not modelled by the iterable should remain unchanged.
+
+        fromiter(obj, iter(obj)) == obj
+    '''
+    try:
+        self._lens_fromiter
+    except AttributeError:
+        message = 'Don\'t know how to create instance of {} from iterable'
+        raise NotImplementedError(message.format(type(self)))
+    else:
+        return self._lens_fromiter(iterable)
+
+
+@fromiter.register(list)
+def _list_fromiter(self, iterable):
+    return list(iterable)
+
+
+@fromiter.register(set)
+def _set_fromiter(self, iterable):
+    return set(iterable)
+
+
+@fromiter.register(str)
+def _str_fromiter(self, iterable):
+    return ''.join(iterable)
+
+
+@fromiter.register(tuple)
+def _tuple_fromiter(self, iterable):
+    # we need to use `type(self)` to handle namedtuples and perhaps
+    # other subclasses
+    return type(self)(iterable)
