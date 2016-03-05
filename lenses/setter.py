@@ -4,6 +4,12 @@ import copy
 
 @singledispatch
 def setitem_immutable(self, key, value):
+    '''Takes an object, a key, and a value and produces a new object
+    that is a copy of the original but with `value` as the new value of
+    `key`.
+
+        setitem_immutable(obj, key, obj[key]) == obj
+    '''
     try:
         self._lens_setitem
     except AttributeError:
@@ -22,6 +28,12 @@ def _tuple_setitem_immutable(self, key, value):
 
 @singledispatch
 def setattr_immutable(self, name, value):
+    '''Takes an object, a string, and a value and produces a new object
+    that is a copy of the original but with the attribute called `name`
+    set to `value`.
+
+        setattr_immutable(obj, 'attr', obj.attr) == obj
+    '''
     try:
         self._lens_setattr
     except AttributeError:
