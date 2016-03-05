@@ -29,7 +29,7 @@ class GameState:
     def __init__(self):
         self.robots = set()
         self.crashes = set()
-        self.player = (9, 9)
+        self.player = (MAXX // 2, MAXY // 2)
         self.running = True
         self.message = None
 
