@@ -6,17 +6,22 @@ from random import randint
 
 from lenses import lens
 
-MIN = 1
-MAX = 20
+MAXX = 40
+MAXY = 20
 ROBOTS = 6
 
 
-def restrain(n):
-    return max(MIN, min(n, MAX))
+def add_vectors(v1, v2):
+    return (max(0, min(MAXX, v1[0] + v2[0])),
+            max(0, min(MAXY, v1[1] + v2[1])))
 
 
 def cmp(a, b):
     return (a > b) - (a < b)
+
+
+def random_vector():
+    return randint(0, MAXX), randint(0, MAXY)
 
 
 class GameState:
@@ -29,27 +34,27 @@ class GameState:
         self.message = None
 
         for _ in range(ROBOTS):
-            robot_coord = randint(MIN, MAX), randint(MIN, MAX)
-            self.robots.add(robot_coord)
+            self.robots.add(random_vector())
 
     def handle_input(self, input):
         dirs = {
             'h': (-1, 0), 'j': (0, 1), 'k': (0, -1), 'l': (1, 0),
             'y': (-1, -1), 'u': (1, -1), 'n': (1, 1), 'b': (-1, 1),
-            '.': (0, 0),
         }
 
         if input in dirs:
-            dx, dy = dirs[input]
-            self = lens(self).player[0] + dx
-            self = lens(self).player[1] + dy
-            self = lens(self).player.both_().modify(restrain)
+            old_pos = lens(self).player.get()
+            new_pos = add_vectors(old_pos, dirs[input])
+            if new_pos == old_pos:
+                return self, False
+            self = lens(self).player.set(new_pos)
+            return self, True
+        elif input == '.':
             return self, True
         elif input == 'q':
             return self.end_game(), False
         elif input == 't':
-            self = lens(self).player.both_().modify(
-                lambda a: randint(MIN, MAX))
+            self = lens(self).player.modify(lambda a: random_vector())
             return self, True
         else:
             return self, False
@@ -57,17 +62,16 @@ class GameState:
     def advance_robots(self):
         new_robots = set()
         crashes = set(self.crashes)
-        for x, y in self.robots:
-            dx = cmp(self.player[0], x)
-            dy = cmp(self.player[1], y)
-            new_coord = (x + dx, y + dy)
-            if new_coord in new_robots:
-                crashes.add(new_coord)
-                new_robots.remove(new_coord)
-            elif new_coord in crashes:
+        for old_pos in self.robots:
+            new_pos = add_vectors(
+                old_pos, tuple(map(cmp, self.player, old_pos)))
+            if new_pos in new_robots:
+                crashes.add(new_pos)
+                new_robots.remove(new_pos)
+            elif new_pos in crashes:
                 pass
             else:
-                new_robots.add(new_coord)
+                new_robots.add(new_pos)
         self = lens(self).robots.set(new_robots)
         self = lens(self).crashes.set(crashes)
         return self
@@ -86,9 +90,9 @@ class GameState:
 
     def __str__(self):
         rows = []
-        for y in range(MIN, MAX + 1):
+        for y in range(0, MAXY + 1):
             chars = []
-            for x in range(MIN, MAX + 1):
+            for x in range(0, MAXX + 1):
                 coord = (x, y)
                 if coord == self.player:
                     ch = '@'
