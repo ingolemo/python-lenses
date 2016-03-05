@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 
+'''
+robots.py
+
+You (`@`) are a person surrounded by killer robots (`O`). Dodge the
+robots with the vi-keys (`hjkl`, `.` to wait, and `yubn` for diagonals)
+and try to make them crash into each other. You win if all robots crash.
+You lose if a robot lands on your square. If you find yourself stuck you
+can press `t` to teleport to a new position. If you teleport next to a
+robot then they will kill you, so watch out.
+'''
+
 import sys
 import tty
 from random import randint
@@ -37,6 +48,11 @@ class GameState:
             self.robots.add(random_vector())
 
     def handle_input(self, input):
+        '''Takes a single character string as input and alters the game
+        state according to that input. Mostly, this means moving the
+        player around. Returns a new game state and boolean indicating
+        whether the input had an effect on the state.'''
+
         dirs = {
             'h': (-1, 0), 'j': (0, 1), 'k': (0, -1), 'l': (1, 0),
             'y': (-1, -1), 'u': (1, -1), 'n': (1, 1), 'b': (-1, 1),
@@ -60,6 +76,10 @@ class GameState:
             return self, False
 
     def advance_robots(self):
+        '''Produces a new game state in which the robots have advanced
+        towards the player by one step. Handles the robots crashing into
+        one another too.'''
+
         new_robots = set()
         crashes = set(self.crashes)
         for old_pos in self.robots:
@@ -77,6 +97,11 @@ class GameState:
         return self
 
     def check_game_end(self):
+        '''Checks for the game's win/lose conditions and 'alters' the
+        game state to reflect the condition found. If the game has not
+        been won or lost then it just returns the game state
+        unaltered.'''
+
         if self.player in self.robots | self.crashes:
             return self.end_game('You Died!')
         elif not self.robots:
@@ -84,7 +109,10 @@ class GameState:
         else:
             return self
 
-    def end_game(self, message=None):
+    def end_game(self, message=''):
+        '''Returns a completed game state object, setting an optional
+        message to display after the game is over.'''
+
         self = lens(self).message.set(message)
         return lens(self).running.set(False)
 
@@ -108,6 +136,10 @@ class GameState:
 
 
 def main():
+    '''The main function. Instantiates a GameState object and then
+    enters a REPL-like main loop, waiting for input, updating the state
+    based on the input, then outputting the new state.'''
+
     tty.setcbreak(sys.stdin.fileno())
 
     state = GameState()
