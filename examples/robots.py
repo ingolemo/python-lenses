@@ -13,6 +13,7 @@ robot then they will kill you, so watch out.
 
 import sys
 import tty
+import termios
 from random import randint
 
 from lenses import lens
@@ -20,6 +21,16 @@ from lenses import lens
 MAXX = 40
 MAXY = 20
 ROBOTS = 12
+
+
+def get_single_char():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        return sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
 def add_vectors(v1, v2):
@@ -139,12 +150,10 @@ def main():
     enters a REPL-like main loop, waiting for input, updating the state
     based on the input, then outputting the new state.'''
 
-    tty.setcbreak(sys.stdin.fileno())
-
     state = GameState()
     print(state)
     while state.running:
-        input = sys.stdin.read(1)
+        input = get_single_char()
 
         state, should_advance = state.handle_input(input)
         if should_advance:
