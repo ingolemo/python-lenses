@@ -59,9 +59,8 @@ class GameState:
         }
 
         if input in dirs:
-            old_pos = lens(self).player.get()
-            new_pos = add_vectors(old_pos, dirs[input])
-            if new_pos == old_pos:
+            new_pos = add_vectors(self.player, dirs[input])
+            if new_pos == self.player:
                 return self, False
             self = lens(self).player.set(new_pos)
             return self, True
@@ -70,7 +69,7 @@ class GameState:
         elif input == 'q':
             return self.end_game(), False
         elif input == 't':
-            self = lens(self).player.modify(lambda a: random_vector())
+            self = lens(self).player.set(random_vector())
             return self, True
         else:
             return self, False
