@@ -1,5 +1,3 @@
-import abc
-
 from . import setter
 from .identity import Identity
 from .const import Const
@@ -44,7 +42,7 @@ def collect_args(n):
     return arg_collector
 
 
-class BaseLens(object, metaclass=abc.ABCMeta):
+class BaseLens:
     '''A BaseLens. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function that does all the hard
     work. This function is a van Laarhoven lens and has the following
@@ -53,9 +51,9 @@ class BaseLens(object, metaclass=abc.ABCMeta):
     func :: (value -> functor value), state -> functor state
     '''
 
-    @abc.abstractmethod
     def func(self, f, state):
-        pass
+        message = 'Tried to use unimplemented lens {}.'
+        raise NotImplementedError(message.format(type(self)))
 
     def get(self, state):
         '''Returns the focus within `state`. If multiple items are

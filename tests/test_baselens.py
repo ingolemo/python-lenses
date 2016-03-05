@@ -55,6 +55,11 @@ from lenses import baselens as b
 #     assert ls.set(ls.set(state, obj), obj) == ls.set(state, obj)
 
 
+def test_BaseLens():
+    with pytest.raises(NotImplementedError):
+        b.BaseLens().get(None)
+
+
 def test_lens_and():
     my_lens = b.BothLens() & b.GetitemLens(1)
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
