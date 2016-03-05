@@ -1,38 +1,47 @@
-import functools
 import abc
 
+from . import setter
 from .identity import Identity
 from .const import Const
 from .functorisor import Functorisor
 from .typeclass import fmap, pure, ap, traverse
-from .setter import setitem_immutable, setattr_immutable, multi_magic_set
 
 
 def multiap(func, *args):
+    '''Applies `func` to the data inside the `args` functors
+    incrementally. `func` must be a curried function that takes
+    `len(args)` arguments.
+
+        >>> func = lambda a: lambda b: a + b
+        >>> multiap(func, [1, 10], [100])
+        [101, 110]
+    '''
     functor = fmap(args[0], func)
     for arg in args[1:]:
         functor = ap(arg, functor)
     return functor
 
 
-def starargs_curry(n):
-    def decorator(fn):
+def collect_args(n):
+    '''Returns a function that can be called `n` times with a single
+    argument before returning all the args that have been passed to it
+    in a tuple. Useful as a substitute for functions that can't easily be
+    curried.
 
-        @functools.wraps(fn)
-        def wrapper(arg):
-            args = []
+        >>> from lenses.baselens import collect_args
+        >>> collect_args(3)(1)(2)(3)
+        (1, 2, 3)
+    '''
+    args = []
 
-            def arg_collector(arg):
-                nonlocal args
-                args.append(arg)
-                if len(args) == n:
-                    return fn(*args)
-                else:
-                    return arg_collector
-
-            return arg_collector(arg)
-        return wrapper
-    return decorator
+    def arg_collector(arg):
+        nonlocal args
+        args.append(arg)
+        if len(args) == n:
+            return tuple(args)
+        else:
+            return arg_collector
+    return arg_collector
 
 
 class BaseLens(object, metaclass=abc.ABCMeta):
@@ -172,9 +181,12 @@ class BothLens(BaseLens):
     '''
 
     def func(self, f, state):
-        mms = multi_magic_set(state, [(setitem_immutable, 1),
-                                      (setitem_immutable, 0)])
-        return multiap(mms, f(state[0]), f(state[1]))
+        def multisetter(items):
+            s = setter.setitem_immutable(state, 0, items[0])
+            s = setter.setitem_immutable(s, 1, items[1])
+            return s
+        return fmap(multiap(collect_args(2), f(state[0]), f(state[1])),
+                    multisetter)
 
     def __repr__(self):
         return 'BothLens()'
@@ -285,7 +297,7 @@ class GetattrLens(GetterSetterLens):
         return getattr(state, self.name)
 
     def setter(self, state, focus):
-        return setattr_immutable(state, self.name, focus)
+        return setter.setattr_immutable(state, self.name, focus)
 
     def __repr__(self):
         return 'GetattrLens({!r})'.format(self.name)
@@ -317,7 +329,7 @@ class GetitemLens(GetterSetterLens):
         return state[self.key]
 
     def setter(self, state, focus):
-        return setitem_immutable(state, self.key, focus)
+        return setter.setitem_immutable(state, self.key, focus)
 
     def __repr__(self):
         return 'GetitemLens({!r})'.format(self.key)
@@ -455,14 +467,14 @@ class ItemsLens(BaseLens):
         if items == []:
             return f.get_pure(state)
 
-        @starargs_curry(len(items))
-        def dict_builder(*args):
+        def dict_builder(args):
             data = state.copy()
             data.clear()
             data.update(a for a in args if a is not None)
             return data
 
-        return multiap(dict_builder, *map(f, items))
+        return fmap(multiap(collect_args(len(items)), *map(f, items)),
+                    dict_builder)
 
     def __repr__(self):
         return 'ItemsLens()'

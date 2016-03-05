@@ -2,19 +2,6 @@ from functools import singledispatch
 import copy
 
 
-def multi_magic_set(state, setters):
-    # this should probably be a constructor for a traversal
-    # it's really ugly and i'm not sure if it's called for
-    if not setters:
-        return state
-    setter, key = setters.pop()
-
-    def func(a, setter=setter, key=key):
-        return multi_magic_set(setter(state, key, a), setters)
-
-    return func
-
-
 @singledispatch
 def setitem_immutable(self, key, value):
     try:
