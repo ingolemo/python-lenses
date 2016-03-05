@@ -8,7 +8,7 @@ from lenses import lens
 
 MAXX = 40
 MAXY = 20
-ROBOTS = 6
+ROBOTS = 12
 
 
 def add_vectors(v1, v2):
