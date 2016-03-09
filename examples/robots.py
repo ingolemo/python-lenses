@@ -54,8 +54,8 @@ class Vector(tuple):
         other, potentially diagonally.'''
 
         return self + Vector((
-            (self[0] > other[0]) - (self[0] < other[0]),
-            (self[1] > other[1]) - (self[1] < other[1]),
+            (self[0] < other[0]) - (self[0] > other[0]),
+            (self[1] < other[1]) - (self[1] > other[1]),
         ))
 
 
