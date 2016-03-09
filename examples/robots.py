@@ -113,9 +113,11 @@ class GameState:
                 pass
             else:
                 new_robots.add(new_pos)
-        self = lens(self).robots.set(new_robots)
-        self = lens(self).crashes.set(crashes)
-        return self
+
+        return lens(self).tuple_(
+            lens().robots,
+            lens().crashes,
+        ).set((new_robots, crashes))
 
     def check_game_end(self):
         '''Checks for the game's win/lose conditions and 'alters' the
