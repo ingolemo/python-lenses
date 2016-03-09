@@ -33,17 +33,30 @@ def get_single_char():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
-def add_vectors(v1, v2):
-    return (max(0, min(MAXX, v1[0] + v2[0])),
-            max(0, min(MAXY, v1[1] + v2[1])))
+class Vector(tuple):
 
+    @classmethod
+    def random(cls):
+        'produces a random vector inside the play area.'
 
-def cmp(a, b):
-    return (a > b) - (a < b)
+        return cls((randint(0, MAXX), randint(0, MAXY)))
 
+    def __add__(self, other):
+        return Vector((self[0] + other[0], self[1] + other[1]))
 
-def random_vector():
-    return randint(0, MAXX), randint(0, MAXY)
+    def inside(self):
+        'checks if the vector is inside the play area.'
+
+        return all([0 <= self[0] <= MAXX, 0 <= self[1] <= MAXY])
+
+    def step_towards(self, other):
+        '''returns the vector moved one step in the direction of the
+        other, potentially diagonally.'''
+
+        return self + Vector((
+            (self[0] > other[0]) - (self[0] < other[0]),
+            (self[1] > other[1]) - (self[1] < other[1]),
+        ))
 
 
 class GameState:
@@ -51,12 +64,12 @@ class GameState:
     def __init__(self):
         self.robots = set()
         self.crashes = set()
-        self.player = (MAXX // 2, MAXY // 2)
+        self.player = Vector((MAXX // 2, MAXY // 2))
         self.running = True
         self.message = None
 
         for _ in range(ROBOTS):
-            self.robots.add(random_vector())
+            self.robots.add(Vector.random())
 
     def handle_input(self, input):
         '''Takes a single character string as input and alters the game
@@ -70,17 +83,16 @@ class GameState:
         }
 
         if input in dirs:
-            new_pos = add_vectors(self.player, dirs[input])
-            if new_pos == self.player:
+            new_self = lens(self).player + dirs[input]
+            if not new_self.player.inside():
                 return self, False
-            self = lens(self).player.set(new_pos)
-            return self, True
+            return new_self, True
         elif input == '.':
             return self, True
         elif input == 'q':
             return self.end_game(), False
         elif input == 't':
-            self = lens(self).player.set(random_vector())
+            self = lens(self).player.set(Vector.random())
             return self, True
         else:
             return self, False
@@ -93,8 +105,7 @@ class GameState:
         new_robots = set()
         crashes = set(self.crashes)
         for old_pos in self.robots:
-            new_pos = add_vectors(
-                old_pos, tuple(map(cmp, self.player, old_pos)))
+            new_pos = old_pos.step_towards(self.player)
             if new_pos in new_robots:
                 crashes.add(new_pos)
                 new_robots.remove(new_pos)
@@ -131,7 +142,7 @@ class GameState:
         for y in range(0, MAXY + 1):
             chars = []
             for x in range(0, MAXX + 1):
-                coord = (x, y)
+                coord = Vector((x, y))
                 if coord == self.player:
                     ch = '@'
                 elif coord in self.crashes:
