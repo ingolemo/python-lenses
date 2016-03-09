@@ -109,12 +109,54 @@ def test_EachLens_set():
     assert b.EachLens().set([1, 2, 3], 4) == [4, 4, 4]
 
 
+def test_EachLens_get_all_on_set():
+    assert sorted(b.EachLens().get_all({1, 2, 3})) == [1, 2, 3]
+
+
+def test_EachLens_set_on_set():
+    assert b.EachLens().set({1, 2, 3}, 4) == {4}
+
+
+def test_EachLens_modify_on_set():
+    assert b.EachLens().modify({1, 2, 3}, lambda a: a+1) == {2, 3, 4}
+
+
 def test_EachLens_get_all_empty():
     assert b.EachLens().get_all([]) == ()
 
 
 def test_EachLens_set_empty():
     assert b.EachLens().set([], 4) == []
+
+
+def test_EachLens_get_all_with_starting_None():
+    assert b.EachLens(filter_none=True).get_all([None, None]) == ()
+
+
+def test_EachLens_set_with_starting_None():
+    assert b.EachLens(filter_none=True).set([None, None], 4) == []
+
+
+def test_EachLens_set_None():
+    assert b.EachLens(filter_none=True).set([1, 2, 3], None) == []
+
+
+def test_EachLens_get_all_with_starting_filtered():
+    def f(a):
+        return a != 2
+    assert b.EachLens(f).get_all([1, 2, 3]) == (1, 3)
+
+
+def test_EachLens_set_with_starting_filtered():
+    def f(a):
+        return a != 2
+    assert b.EachLens(f).set([1, 2, 3], 4) == [4, 4]
+
+
+def test_EachLens_set_filtered():
+    def f(a):
+        return a != 4
+    assert b.EachLens(f).set([1, 2, 3], 4) == []
 
 
 def test_GetattrLens_get():

@@ -234,15 +234,29 @@ class EachLens(BaseLens):
         (1, 2, 3)
         >>> lens(data).each_().modify(lambda n: n + 1)
         [2, 3, 4]
+        >>> lens(data).each_(filter_none=True).set(None)
+        []
     '''
 
+    def __init__(self, filter_func=None,  *, filter_none=False):
+        if filter_none:
+            self.filter_func = lambda a: a is not None
+        elif filter_func is None:
+            self.filter_func = lambda a: True
+        else:
+            self.filter_func = filter_func
+
     def func(self, f, state):
-        items = list(state)
+        items = list(filter(self.filter_func, state))
+
+        def build_new_state_from_iter(a):
+            return setter.fromiter(state, filter(self.filter_func, a))
+
         if items == []:
-            return f.get_pure(state)
+            return f.get_pure(build_new_state_from_iter(items))
 
         return fmap(multiap(collect_args(len(items)), *map(f, items)),
-                    lambda a: setter.fromiter(state, a))
+                    build_new_state_from_iter)
 
     def __repr__(self):
         return 'EachLens()'
