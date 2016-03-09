@@ -225,3 +225,6 @@ class Lens(object):
 
     def __getitem__(self, name):
         return self.add_lens(baselens.GetitemLens(name))
+
+    def _underlying_lens(self):
+        return self.lens

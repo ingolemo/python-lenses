@@ -100,6 +100,9 @@ class BaseLens:
         '''
         return ComposedLens([self]).compose(other)
 
+    def _underlying_lens(self):
+        return self
+
     __and__ = compose
 
 
@@ -690,7 +693,7 @@ class TupleLens(GetterSetterLens):
     '''
 
     def __init__(self, *lenses):
-        self.lenses = lenses
+        self.lenses = [l._underlying_lens() for l in lenses]
 
     def getter(self, state):
         return tuple(lens.get(state) for lens in self.lenses)

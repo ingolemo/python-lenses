@@ -315,17 +315,29 @@ def test_JsonLens_set():
     assert l.set(data, {'numbers': []}) == '{"numbers": []}'
 
 
-def test_TupleLens_get():
+def test_TupleLens_get_with_BaseLens():
     data = {'hello': 0, 'world': 1}
     get = b.GetitemLens
     my_lens = b.TupleLens(get('hello'), get('world'))
     assert my_lens.get(data) == (0, 1)
 
 
-def test_TupleLens_set():
+def test_TupleLens_set_with_BaseLens():
     data = {'hello': 0, 'world': 1}
     get = b.GetitemLens
     my_lens = b.TupleLens(get('hello'), get('world'))
+    assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
+
+
+def test_TupleLens_get_with_Lens():
+    data = {'hello': 0, 'world': 1}
+    my_lens = b.TupleLens(lens()['hello'], lens()['world'])
+    assert my_lens.get(data) == (0, 1)
+
+
+def test_TupleLens_set_with_Lens():
+    data = {'hello': 0, 'world': 1}
+    my_lens = b.TupleLens(lens()['hello'], lens()['world'])
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
 
 
