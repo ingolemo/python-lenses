@@ -12,6 +12,7 @@ lens_methods = [
     ('getitem_', baselens.GetitemLens),
     ('getter_', baselens.GetterLens),
     ('getter_setter_', baselens.GetterSetterLens),
+    ('iso_', baselens.IsomorphismLens),
     ('item_', baselens.ItemLens),
     ('item_by_value_', baselens.ItemByValueLens),
     ('items_', baselens.ItemsLens),

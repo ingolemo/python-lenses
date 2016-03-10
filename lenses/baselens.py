@@ -171,6 +171,45 @@ class GetterSetterLens(BaseLens):
         return 'GetterSetterLens({!r}, {!r})'.format(self.getter, self.setter)
 
 
+class IsomorphismLens(BaseLens):
+    '''A lens based on an isomorphism. An isomorphism can be formed by
+    two functions that are mirror each other; they can convert forwards
+    and backwards between a state and a focus without losing
+    information. The difference between this and a GetterSetterLens is
+    that here the backwards functions don't need to know anything about
+    the original state in order to produce a new state.
+
+    These two equalities should hold for the functions you supply (given
+    a reasonable definition for __eq__):
+
+        backwards(forwards(state)) == state
+        forwards(backwards(focus)) == focus
+
+        >>> from lenses import lens
+        >>> import json
+        >>> lens().iso_(int, str)
+        Lens(None, IsomorphismLens(<class 'int'>, <class 'str'>))
+        >>> lens('1').iso_(int, str).get()
+        1
+        >>> lens('1').iso_(int, str).set(2)
+        '2'
+    '''
+
+    def __init__(self, forwards, backwards):
+        self.forwards = forwards
+        self.backwards = backwards
+
+    def flip(self):
+        return IsomorphismLens(self.backwards, self.forwards)
+
+    def func(self, f, state):
+        return fmap(f(self.forwards(state)), self.backwards)
+
+    def __repr__(self):
+        return 'IsomorphismLens({!r}, {!r})'.format(self.forwards,
+                                                    self.backwards)
+
+
 class BothLens(BaseLens):
     '''A traversal that focuses both items [0] and [1].
 
@@ -382,12 +421,12 @@ class GetitemLens(GetterSetterLens):
         return 'GetitemLens({!r})'.format(self.key)
 
 
-class GetterLens(GetterSetterLens):
+class GetterLens(IsomorphismLens):
     '''A lens that applies a function to its focus when the focus is
     retrieved, but will just set whatever it is asked. This lens
     allows you to pre-process values before you retrieve them, but still
     lets you set values directly. Equivalent to
-    `GetterSetterLens(getter, (lambda s, f: f))'.
+    `IsomorphismLens(getter, (lambda f: f))`.
 
     Note that modify does both a get and a set.
 
@@ -403,13 +442,13 @@ class GetterLens(GetterSetterLens):
     '''
 
     def __init__(self, getter):
-        self.getter = getter
+        self.forwards = getter
 
-    def setter(self, state, focus):
+    def backwards(self, focus):
         return focus
 
     def __repr__(self):
-        return 'GetterLens({!r})'.format(self.getter)
+        return 'GetterLens({!r})'.format(self.forwards)
 
 
 class ItemLens(GetterSetterLens):
@@ -527,7 +566,7 @@ class ItemsLens(BaseLens):
         return 'ItemsLens()'
 
 
-class JsonLens(GetterSetterLens):
+class JsonLens(IsomorphismLens):
     '''A lens that focuses a string containing json data as its parsed
     equivalent. Analogous to `json.loads`.
 
@@ -544,10 +583,10 @@ class JsonLens(GetterSetterLens):
     def __init__(self):
         self.json_mod = __import__('json')
 
-    def getter(self, state):
+    def forwards(self, state):
         return self.json_mod.loads(state)
 
-    def setter(self, state, focus):
+    def backwards(self, focus):
         return self.json_mod.dumps(focus)
 
     def __repr__(self):
@@ -576,7 +615,7 @@ class KeysLens(ComposedLens):
         return 'KeysLens()'
 
 
-class NormalisingLens(GetterSetterLens):
+class NormalisingLens(IsomorphismLens):
     '''A lens that applies a function as it sets a new focus without
     regard to the old state. It will get foci without transformation.
     This lens allows you to post-process values before you set them
@@ -584,6 +623,7 @@ class NormalisingLens(GetterSetterLens):
     type conversions or normalising data. This lens is similar to the
     SetterLens, but this setter function has a more convenient
     signature, applicable to most built-in functions/constructors.
+    Equivalent to `IsomophismLens((lambda s: s), setter)`.
 
         >>> from lenses import lens
         >>> lens().norm_(int)
@@ -597,16 +637,13 @@ class NormalisingLens(GetterSetterLens):
     '''
 
     def __init__(self, setter):
-        self.raw_setter = setter
+        self.backwards = setter
 
-    def getter(self, state):
+    def forwards(self, state):
         return state
 
-    def setter(self, state, focus):
-        return self.raw_setter(focus)
-
     def __repr__(self):
-        return 'NormalisingLens({!r})'.format(self.raw_setter)
+        return 'NormalisingLens({!r})'.format(self.backwards)
 
 
 class SetterLens(GetterSetterLens):
