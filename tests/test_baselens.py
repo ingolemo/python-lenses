@@ -65,6 +65,14 @@ def test_lens_and():
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
+def test_BothLens_get():
+    assert b.BothLens().get(['1', '2']) == '12'
+
+
+def test_BothLens_set():
+    assert b.BothLens().set(['1', '2'], 4) == [4, 4]
+
+
 def test_ComposedLens_nolenses_get():
     obj = object()
     assert b.ComposedLens([]).get(obj) is obj
@@ -159,42 +167,6 @@ def test_EachLens_set_filtered():
     assert b.EachLens(f).set([1, 2, 3], 4) == []
 
 
-def test_GetattrLens_get():
-    Tup = collections.namedtuple('Tup', 'attr')
-    assert b.GetattrLens('attr').get(Tup(1)) == 1
-
-
-def test_GetattrLens_set():
-    Tup = collections.namedtuple('Tup', 'attr')
-    assert b.GetattrLens('attr').set(Tup(1), 2) == Tup(2)
-
-
-def test_GetitemLens_get():
-    assert b.GetitemLens(0).get([1, 2, 3]) == 1
-
-
-def test_GetitemLens_set():
-    assert b.GetitemLens(0).set([1, 2, 3], 4) == [4, 2, 3]
-
-
-def test_TrivialLens_get():
-    obj = object()
-    assert b.TrivialLens().get(obj) is obj
-
-
-def test_TrivialLens_set():
-    obj1, obj2 = object(), object()
-    assert b.TrivialLens().set(obj1, obj2) is obj2
-
-
-def test_BothLens_get():
-    assert b.BothLens().get(['1', '2']) == '12'
-
-
-def test_BothLens_set():
-    assert b.BothLens().set(['1', '2'], 4) == [4, 4]
-
-
 def test_ErrorLens_get():
     with pytest.raises(Exception):
         b.ErrorLens(Exception('a message')).get(object())
@@ -213,6 +185,24 @@ def test_FilteringLens_get():
 def test_FilteringLens_set():
     l = b.TraverseLens() & b.FilteringLens(lambda a: a > 0)
     assert l.get_all([1, -1, 1]) == (1, 1)
+
+
+def test_GetattrLens_get():
+    Tup = collections.namedtuple('Tup', 'attr')
+    assert b.GetattrLens('attr').get(Tup(1)) == 1
+
+
+def test_GetattrLens_set():
+    Tup = collections.namedtuple('Tup', 'attr')
+    assert b.GetattrLens('attr').set(Tup(1), 2) == Tup(2)
+
+
+def test_GetitemLens_get():
+    assert b.GetitemLens(0).get([1, 2, 3]) == 1
+
+
+def test_GetitemLens_set():
+    assert b.GetitemLens(0).set([1, 2, 3], 4) == [4, 2, 3]
 
 
 def test_GetterSetterLens_get():
@@ -313,6 +303,16 @@ def test_JsonLens_set():
     l = b.JsonLens()
     data = '{"numbers":[1, 2, 3]}'
     assert l.set(data, {'numbers': []}) == '{"numbers": []}'
+
+
+def test_TrivialLens_get():
+    obj = object()
+    assert b.TrivialLens().get(obj) is obj
+
+
+def test_TrivialLens_set():
+    obj1, obj2 = object(), object()
+    assert b.TrivialLens().set(obj1, obj2) is obj2
 
 
 def test_TupleLens_get_with_BaseLens():
