@@ -39,6 +39,7 @@ def collect_args(n):
             return tuple(args)
         else:
             return arg_collector
+
     return arg_collector
 
 
@@ -60,30 +61,29 @@ class BaseLens:
         focused then it will attempt to join them together with
         `lenses.typeclass.mappend`. The lens must have at least one
         focus.'''
+
         def func_pure(a):
             # it's a shame that we can't get values from types that have
             # no focus, but nothing can be done short of carrying type
             # information around all the way through the library.
             raise ValueError('No focus to get')
+
         const = Functorisor(func_pure, lambda a: Const(a))
         return self.func(const, state).item
 
     def get_all(self, state):
         'Returns a tuple of all the focuses within `state`.'
-        consttup = Functorisor(
-            lambda a: Const(()), lambda a: Const((a,)))
+        consttup = Functorisor(lambda a: Const(()), lambda a: Const((a, )))
         return self.func(consttup, state).item
 
     def modify(self, state, fn):
         'Applies a function `fn` to the focus within `state`.'
-        identfn = Functorisor(lambda a: Identity(a),
-                              lambda a: Identity(fn(a)))
+        identfn = Functorisor(lambda a: Identity(a), lambda a: Identity(fn(a)))
         return self.func(identfn, state).item
 
     def set(self, state, value):
         'Sets the focus within `state` to `value`.'
-        ident = Functorisor(lambda a: Identity(a),
-                            lambda a: Identity(value))
+        ident = Functorisor(lambda a: Identity(a), lambda a: Identity(value))
         return self.func(ident, state).item
 
     def compose(self, other):
@@ -128,9 +128,11 @@ class ComposedLens(BaseLens):
 
         res = f
         for lens in reversed(self.lenses):
+
             @res.replace_func
             def res(st, res=res, lens=lens):
                 return lens.func(res, st)
+
         return res(state)
 
     def compose(self, other):
@@ -186,8 +188,10 @@ class BothLens(BaseLens):
             s = setter.setitem_immutable(state, 0, items[0])
             s = setter.setitem_immutable(s, 1, items[1])
             return s
-        return fmap(multiap(collect_args(2), f(state[0]), f(state[1])),
-                    multisetter)
+
+        f0 = f(state[0])
+        f1 = f(state[1])
+        return fmap(multiap(collect_args(2), f0, f1), multisetter)
 
     def __repr__(self):
         return 'BothLens()'
@@ -218,8 +222,7 @@ class DecodeLens(GetterSetterLens):
 
     def __repr__(self):
         args = [repr(item) for item in self.args]
-        kwargs = ['{}={!r}'.format(k, v)
-                  for k, v in self.kwargs.items()]
+        kwargs = ['{}={!r}'.format(k, v) for k, v in self.kwargs.items()]
         return 'DecodeLens({})'.format(', '.join(args + kwargs))
 
 
@@ -241,7 +244,7 @@ class EachLens(BaseLens):
         []
     '''
 
-    def __init__(self, filter_func=None,  *, filter_none=False):
+    def __init__(self, filter_func=None, *, filter_none=False):
         if filter_none:
             self.filter_func = lambda a: a is not None
         elif filter_func is None:
@@ -258,8 +261,9 @@ class EachLens(BaseLens):
         if items == []:
             return f.get_pure(build_new_state_from_iter(items))
 
-        return fmap(multiap(collect_args(len(items)), *map(f, items)),
-                    build_new_state_from_iter)
+        collector = collect_args(len(items))
+        applied = multiap(collector, *map(f, items))
+        return fmap(applied, build_new_state_from_iter)
 
     def __repr__(self):
         return 'EachLens()'
@@ -380,8 +384,8 @@ class GetitemLens(GetterSetterLens):
 
 class GetterLens(GetterSetterLens):
     '''A lens that applies a function to its focus when the focus is
-    retrieved, but will just sets whatever it is asked. This lens
-    allows you to post-process values as you retrieve them, but still
+    retrieved, but will just set whatever it is asked. This lens
+    allows you to pre-process values before you retrieve them, but still
     lets you set values directly. Equivalent to
     `GetterSetterLens(getter, (lambda s, f: f))'.
 
@@ -516,8 +520,8 @@ class ItemsLens(BaseLens):
             data.update(a for a in args if a is not None)
             return data
 
-        return fmap(multiap(collect_args(len(items)), *map(f, items)),
-                    dict_builder)
+        collector = collect_args(len(items))
+        return fmap(multiap(collector, *map(f, items)), dict_builder)
 
     def __repr__(self):
         return 'ItemsLens()'
@@ -578,8 +582,8 @@ class NormalisingLens(GetterSetterLens):
     This lens allows you to post-process values before you set them
     them, but still get value as they exist in the state. Useful for
     type conversions or normalising data. This lens is similar to the
-    SetterLens, but the setter function has a more convenient signature,
-    applicable to most built-in functions/constructors.
+    SetterLens, but this setter function has a more convenient
+    signature, applicable to most built-in functions/constructors.
 
         >>> from lenses import lens
         >>> lens().norm_(int)
@@ -607,8 +611,9 @@ class NormalisingLens(GetterSetterLens):
 
 class SetterLens(GetterSetterLens):
     '''A lens that applies a function as it sets a new focus, but will
-    get foci without transformation. Note that modify does both a get
-    and a set.
+    get foci without transformation. Equivalent to
+    `GetterSetterLens((lambda s: s), setter)`. Note that modify does
+    both a get and a set.
 
         >>> from lenses import lens
         >>> def setter(state, focus):
@@ -636,8 +641,8 @@ class SetterLens(GetterSetterLens):
 
 class TraverseLens(BaseLens):
     '''A traversal that focuses everything in a data structure depending
-    on how that data structure defines `lenses.typeclass.traverse`. Usually
-    somewhat similar to iterating over it.
+    on how that data structure defines `lenses.typeclass.traverse`.
+    Usually somewhat similar to iterating over it.
 
         >>> from lenses import lens
         >>> lens().traverse_()
@@ -656,7 +661,7 @@ class TraverseLens(BaseLens):
 
 
 class TrivialLens(BaseLens):
-    '''A trivial lens that focuses the whole state. It doesn't do
+    '''A trivial lens that focuses the whole state. It doesn't
     manipulate the state. Mostly used as a "null" lens. Analogous to
     `lambda a: a`.
 
@@ -759,14 +764,14 @@ class ZoomAttrLens(BaseLens):
 
     def func(self, f, state):
         l = getattr(state, self.name)
-        return l.lens.func(f, state)
+        return l._underlying_lens().func(f, state)
 
     def __repr__(self):
         return 'ZoomAttrLens({!r})'.format(self.name)
 
 
 class ZoomLens(BaseLens):
-    '''Follows its state as it were a bound `Lens` object.
+    '''Follows its state as if it were a bound `Lens` object.
 
         >>> from lenses import lens
         >>> data = [lens([1, 2])[1], 4]
@@ -779,7 +784,7 @@ class ZoomLens(BaseLens):
     '''
 
     def func(self, f, state):
-        return state.lens.func(f, state.state)
+        return state._underlying_lens().func(f, state.state)
 
     def __repr__(self):
         return 'ZoomLens()'
