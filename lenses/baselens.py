@@ -173,7 +173,7 @@ class GetterSetterLens(BaseLens):
 
 class IsomorphismLens(BaseLens):
     '''A lens based on an isomorphism. An isomorphism can be formed by
-    two functions that are mirror each other; they can convert forwards
+    two functions that mirror each other; they can convert forwards
     and backwards between a state and a focus without losing
     information. The difference between this and a GetterSetterLens is
     that here the backwards functions don't need to know anything about
@@ -186,7 +186,6 @@ class IsomorphismLens(BaseLens):
         forwards(backwards(focus)) == focus
 
         >>> from lenses import lens
-        >>> import json
         >>> lens().iso_(int, str)
         Lens(None, IsomorphismLens(<class 'int'>, <class 'str'>))
         >>> lens('1').iso_(int, str).get()
@@ -236,9 +235,9 @@ class BothLens(BaseLens):
         return 'BothLens()'
 
 
-class DecodeLens(GetterSetterLens):
-    '''A lens that decodes and encodes its focus on the fly. Lets you
-    focus a byte string as a unicode string.
+class DecodeLens(IsomorphismLens):
+    '''An isomorphism that decodes and encodes its focus on the fly.
+    Lets you focus a byte string as a unicode string.
 
         >>> from lenses import lens
         >>> lens().decode_(encoding='utf8')
@@ -253,10 +252,10 @@ class DecodeLens(GetterSetterLens):
         self.args = args
         self.kwargs = kwargs
 
-    def getter(self, state):
+    def forwards(self, state):
         return state.decode(*self.args, **self.kwargs)
 
-    def setter(self, state, focus):
+    def backwards(self, focus):
         return focus.encode(*self.args, **self.kwargs)
 
     def __repr__(self):
@@ -422,10 +421,10 @@ class GetitemLens(GetterSetterLens):
 
 
 class GetterLens(IsomorphismLens):
-    '''A lens that applies a function to its focus when the focus is
-    retrieved, but will just set whatever it is asked. This lens
-    allows you to pre-process values before you retrieve them, but still
-    lets you set values directly. Equivalent to
+    '''An isomorphism that applies a function to its focus when the
+    focus is retrieved, but will just set whatever it is asked. This
+    lens allows you to pre-process values before you retrieve them, but
+    still lets you set values directly. Equivalent to
     `IsomorphismLens(getter, (lambda f: f))`.
 
     Note that modify does both a get and a set.
@@ -567,8 +566,8 @@ class ItemsLens(BaseLens):
 
 
 class JsonLens(IsomorphismLens):
-    '''A lens that focuses a string containing json data as its parsed
-    equivalent. Analogous to `json.loads`.
+    '''An isomorphism that focuses a string containing json data as its
+    parsed equivalent. Analogous to `json.loads`.
 
         >>> from lenses import lens
         >>> data = '[{"points": [4, 7]}]'
@@ -616,14 +615,15 @@ class KeysLens(ComposedLens):
 
 
 class NormalisingLens(IsomorphismLens):
-    '''A lens that applies a function as it sets a new focus without
-    regard to the old state. It will get foci without transformation.
-    This lens allows you to post-process values before you set them
-    them, but still get value as they exist in the state. Useful for
-    type conversions or normalising data. This lens is similar to the
-    SetterLens, but this setter function has a more convenient
-    signature, applicable to most built-in functions/constructors.
-    Equivalent to `IsomophismLens((lambda s: s), setter)`.
+    '''An isomorphism that applies a function as it sets a new focus
+    without regard to the old state. It will get foci without
+    transformation. This lens allows you to post-process values before
+    you set them them, but still get value as they exist in the state.
+    Useful for type conversions or normalising data. This lens is
+    similar to the SetterLens, but this setter function has a more
+    convenient signature, applicable to most built-in
+    functions/constructors. Equivalent to
+    `IsomophismLens((lambda s: s), setter)`.
 
         >>> from lenses import lens
         >>> lens().norm_(int)
