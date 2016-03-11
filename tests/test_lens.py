@@ -75,6 +75,31 @@ def test_lens_no_double_bind():
         lens(1).bind(2)
 
 
+def test_lens_flip():
+    l = lens().iso_(str, int).flip()
+    assert l.bind('1').get() == 1
+
+
+def test_lens_flip_composed():
+    l = lens().decode_().json_().flip()
+    assert l.bind([1, 2, 3]).get() == b'[1, 2, 3]'
+
+
+def test_lens_flip_composed_not_isomorphism():
+    with pytest.raises(TypeError):
+        lens().decode_()[0].flip()
+
+
+def test_lens_flip_bound():
+    with pytest.raises(ValueError):
+        lens(1).iso_(str, int).flip()
+
+
+def test_lens_flip_not_isomorphism():
+    with pytest.raises(TypeError):
+        lens()[1].flip()
+
+
 def test_lens_descriptor():
     class MyClass:
         def __init__(self, items):

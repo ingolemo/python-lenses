@@ -100,6 +100,10 @@ class BaseLens:
         '''
         return ComposedLens([self]).compose(other)
 
+    def flip(self):
+        message = 'Cannot flip: {} is not an isomorphism.'
+        raise TypeError(message.format(type(self)))
+
     def _underlying_lens(self):
         return self
 
@@ -134,6 +138,9 @@ class ComposedLens(BaseLens):
                 return lens.func(res, st)
 
         return res(state)
+
+    def flip(self):
+        return ComposedLens([l.flip() for l in reversed(self.lenses)])
 
     def compose(self, other):
         result = ComposedLens(self.lenses + [other])

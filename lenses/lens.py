@@ -110,6 +110,10 @@ class Lens(object):
         if self.state is None:
             raise ValueError('Operation requires a bound lens')
 
+    def _assert_no_state(self):
+        if self.state is not None:
+            raise ValueError('Operation requires an unbound lens')
+
     def get(self):
         '''Get the first value focused by the lens.
 
@@ -211,6 +215,13 @@ class Lens(object):
         if self.state is not None:
             raise ValueError('Trying to bind an already bound lens')
         return Lens(state, self.lens)
+
+    def flip(self):
+        '''Flips the direction of the lens. The lens must be unbound and
+        all the underlying operations must be isomorphisms.
+        '''
+        self._assert_no_state()
+        return Lens(self.state, self.lens.flip())
 
     def __get__(self, obj, type=None):
         return self.bind(obj)
