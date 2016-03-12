@@ -71,6 +71,14 @@ def fromiter(self, iterable):
         return self._lens_fromiter(iterable)
 
 
+@fromiter.register(dict)
+def _dict_fromiter(self, iterable):
+    new = self.copy()
+    new.clear()
+    new.update(zip(iterable, self.values()))
+    return new
+
+
 @fromiter.register(list)
 def _list_fromiter(self, iterable):
     return list(iterable)

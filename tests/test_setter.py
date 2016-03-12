@@ -90,6 +90,12 @@ def test_fromiter_tuple():
     assert s.fromiter((), [1, 2, 3]) == (1, 2, 3)
 
 
+def test_fromiter_dict():
+    data = {'jane': 5, 'jim': 6, 'joanne': 8}
+    new_keys = [k.capitalize() for k in data]
+    assert s.fromiter(data, new_keys) == {'Jane': 5, 'Jim': 6, 'Joanne': 8}
+
+
 def test_fromiter_unknown():
     with pytest.raises(NotImplementedError):
-        s.fromiter({}, [1, 2, 3])
+        s.fromiter(object(), [1, 2, 3])
