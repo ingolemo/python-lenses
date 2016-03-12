@@ -233,6 +233,11 @@ class Lens(object):
         if name.endswith('_l'):
             return self.add_lens(baselens.ZoomAttrLens(name[:-2]))
 
+        if name.endswith('_m'):
+            def caller(*args, **kwargs):
+                return self.call(name[:-2], *args, **kwargs)
+            return caller
+
         return self.add_lens(baselens.GetattrLens(name))
 
     def __getitem__(self, name):

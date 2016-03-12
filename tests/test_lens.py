@@ -33,12 +33,24 @@ def test_lens_call():
     assert lens('hello').call('upper') == 'HELLO'
 
 
+def test_lens_call_implicitly():
+    assert lens('hello').upper_m() == 'HELLO'
+
+
 def test_lens_call_args():
     assert lens('h').call('center', 5) == '  h  '
 
 
+def test_lens_call_args_implicitly():
+    assert lens('h').center_m(5) == '  h  '
+
+
 def test_lens_call_kwargs():
     assert lens('h').call('encode', encoding='utf-8') == b'h'
+
+
+def test_lens_call_kwargs_implicitly():
+    assert lens('h').encode_m(encoding='utf-8') == b'h'
 
 
 def test_lens_add_lens_baselens():
