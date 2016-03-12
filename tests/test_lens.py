@@ -53,13 +53,19 @@ def test_lens_call_kwargs_implicitly():
     assert lens('h').encode_m(encoding='utf-8') == b'h'
 
 
-def test_lens_add_lens_baselens():
+def test_lens_add_lens_trivial_baselens():
     assert lens([1, 2]).add_lens(baselens.TrivialLens()) + [3] == [1, 2, 3]
+
+
+def test_lens_add_lens_nontrivial_baselens():
     assert lens([1, 2]).add_lens(baselens.GetitemLens(1)).set(3) == [1, 3]
 
 
-def test_lens_add_lens_lens():
+def test_lens_add_lens_trivial_lens():
     assert lens([1, 2]).add_lens(lens()) + [3] == [1, 2, 3]
+
+
+def test_lens_add_lens_nontrivial_lens():
     assert lens([1, 2]).add_lens(lens()[1]).set(3) == [1, 3]
 
 
