@@ -244,31 +244,31 @@ class BothLens(BaseLens):
 
 class DecodeLens(IsomorphismLens):
     '''An isomorphism that decodes and encodes its focus on the fly.
-    Lets you focus a byte string as a unicode string.
+    Lets you focus a byte string as a unicode string. The arguments have
+    the same meanings as `bytes.decode`. Analogous to `bytes.decode`.
 
         >>> from lenses import lens
         >>> lens().decode_(encoding='utf8')
-        Lens(None, DecodeLens(encoding='utf8'))
+        Lens(None, DecodeLens('utf8', 'strict'))
         >>> lens(b'hello').decode_().get()
         'hello'
         >>> lens(b'hello').decode_().set('world')
         b'world'
     '''
 
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
+    def __init__(self, encoding='utf-8', errors='strict'):
+        self.encoding = encoding
+        self.errors = errors
 
     def forwards(self, state):
-        return state.decode(*self.args, **self.kwargs)
+        return state.decode(self.encoding, self.errors)
 
     def backwards(self, focus):
-        return focus.encode(*self.args, **self.kwargs)
+        return focus.encode(self.encoding, self.errors)
 
     def __repr__(self):
-        args = [repr(item) for item in self.args]
-        kwargs = ['{}={!r}'.format(k, v) for k, v in self.kwargs.items()]
-        return 'DecodeLens({})'.format(', '.join(args + kwargs))
+        repr = 'DecodeLens({!r}, {!r})'
+        return repr.format(self.encoding, self.errors)
 
 
 class EachLens(BaseLens):
