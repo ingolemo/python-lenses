@@ -316,29 +316,44 @@ class EachLens(BaseLens):
 
 class ErrorLens(BaseLens):
     '''A lens that raises an exception whenever it tries to focus
-    something. Useful for debugging.
+    something. If `message is None` then the exception will be raised
+    unmodified. If `message is not None` then when the lens is asked to
+    focus something it will run `message.format(state)` and the
+    exception will be called with the resulting formatted message as
+    it's only argument. Useful for debugging.
 
         >>> from lenses import lens
         >>> lens().error_(Exception())
         Lens(None, ErrorLens(Exception()))
-        >>> lens(True).error_(Exception()).get()
+        >>> lens().error_(Exception, '{}')
+        Lens(None, ErrorLens(<class 'Exception'>, '{}'))
+        >>> lens(True).error_(Exception).get()
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?
         Exception
-        >>> lens(True).error_(Exception()).set(False)
+        >>> lens(True).error_(Exception('An error occurred')).set(False)
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?
-        Exception
+        Exception: An error occurred
+        >>> lens(True).error_(ValueError, 'applied to {}').get()
+        Traceback (most recent call last):
+          File "<stdin>", line 1, in ?
+        ValueError: applied to True
     '''
 
-    def __init__(self, exception):
+    def __init__(self, exception, message=None):
         self.exception = exception
+        self.message = message
 
     def func(self, f, state):
-        raise self.exception
+        if self.message is None:
+            raise self.exception
+        raise self.exception(self.message.format(state))
 
     def __repr__(self):
-        return 'ErrorLens({!r})'.format(self.exception)
+        if self.message is None:
+            return 'ErrorLens({!r})'.format(self.exception)
+        return 'ErrorLens({!r}, {!r})'.format(self.exception, self.message)
 
 
 class FilteringLens(BaseLens):
