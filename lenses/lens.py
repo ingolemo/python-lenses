@@ -71,7 +71,9 @@ def _carry_op(name):
     def operation(self, *args, **kwargs):
         return self.modify(lambda a: getattr(a, name)(*args, **kwargs))
 
+    doc = 'Equivalent to `self.modify(lambda a: a.{}(*args, **kwargs))`'
     operation.__name__ = name
+    operation.__doc__ = doc.format(name)
     return operation
 
 
