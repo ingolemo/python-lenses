@@ -28,43 +28,22 @@ lens_methods = [
     ('zoom_', baselens.ZoomLens),
 ]
 
-transparent_dunders = [
-    # '__new__', '__init__', '__del__', '__repr__', '__str__',
-    # '__bytes__', '__format__',
 
-    '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__',
+# we skip all the augmented artithmetic methods because the point of the
+# lenses library is not to mutate anything
+transparent_dunders = ('''
+    __lt__ __le__ __eq__ __ne__ __gt__ __ge__
 
-    # '__hash__',
+    __add__ __sub__ __mul__ __matmul__ __truediv__
+    __floordiv__ __div__ __mod__ __divmod__ __pow__
+    __lshift__ __rshift__ __and__ __xor__ __or__
 
-    '__bool__',
+    __radd__ __rsub__ __rmul__ __rmatmul__ __rtruediv__
+    __rfloordiv__ __rdiv__ __rmod__ __rdivmod__ __rpow__
+    __rlshift__ __rrshift__ __rand__ __rxor__ __ror__
 
-    # '__getattr__', '__getattribute__', '__setattr__', '__delattr__',
-    # '__dir__',
-    # '__get__', '__set__', '__delete__',
-    # '__slots__',
-    # '__instancecheck__', '__subclasscheck__',
-    # '__call__',
-    # '__len__', '__length_hint__',
-    # '__getitem__', '__missing__', '__setitem__', '__delitem__',
-    # '__iter__', '__next__', '__reversed__',
-    # '__contains__',
-
-    '__add__', '__sub__', '__mul__', '__matmul__', '__truediv__',
-    '__floordiv__', '__div__', '__mod__', '__divmod__', '__pow__',
-    '__lshift__', '__rshift__', '__and__', '__xor__', '__or__',
-
-    '__radd__', '__rsub__', '__rmul__', '__rmatmul__', '__rtruediv__',
-    '__rfloordiv__', '__rdiv__', '__rmod__', '__rdivmod__', '__rpow__',
-    '__rlshift__', '__rrshift__', '__rand__', '__rxor__', '__ror__',
-
-    # we skip all the augmented artithmetic methods because the point of the
-    # lenses library is not to mutate anything
-    '__neg__', '__pos__', '__abs__', '__invert__', '__complex__', '__int__',
-    '__long__', '__float__', '__round__', '__index__',
-
-    # '__enter__', '__exit__', '__await__', '__aiter__', '__anext__',
-    # '__aenter__', '__aexit__',
-]
+    __neg__ __pos__ __invert__
+''').split()
 
 
 def _carry_op(name):
