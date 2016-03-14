@@ -1,6 +1,8 @@
-import pytest
-
 from lenses.maybe import Nothing, Just
+
+
+def test_Maybe_mempty():
+    assert Just(object()).mempty() == Nothing()
 
 
 def test_Nothing_is_singleton():
@@ -9,6 +11,15 @@ def test_Nothing_is_singleton():
 
 def test_Nothing_fmap():
     assert Nothing().fmap(str) is Nothing()
+
+
+def test_Nothing_mappend_Nothing():
+    assert Nothing().mappend(Nothing()) == Nothing()
+
+
+def test_Nothing_mappend_Just():
+    obj = object()
+    assert Nothing().mappend(Just(obj)) == Just(obj)
 
 
 def test_Nothing_pure():
@@ -47,6 +58,15 @@ def test_Just_fmap():
     assert Just(1).fmap(str) == Just(str(1))
 
 
+def test_Just_mappend_Nothing():
+    obj = object()
+    assert Just(obj).mappend(Nothing()) == Just(obj)
+
+
+def test_Just_mappend_Just():
+    assert Just([1]).mappend(Just([2])) == Just([1, 2])
+
+
 def test_Just_pure():
     obj = object()
     assert Just(object()).pure(obj) == Just(obj)
@@ -58,11 +78,6 @@ def test_Just_ap_Just():
 
 def test_Just_ap_Nothing():
     assert Just(1).ap(Nothing()) == Nothing()
-
-
-def test_Just_ap_object():
-    with pytest.raises(TypeError):
-        Just(1).ap(object())
 
 
 def test_Just_repr_conatins_subobject():

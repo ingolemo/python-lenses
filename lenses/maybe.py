@@ -1,6 +1,58 @@
 from . import typeclass
 
-class Nothing:
+
+class Maybe:
+    def __init__(self, item, is_nothing):
+        self.item = item
+        self.is_nothing = is_nothing
+
+    def __eq__(self, other):
+        if self.is_nothing and other.is_nothing:
+            return True
+        if not self.is_nothing and not other.is_nothing:
+            return self.item == other.item
+        return False
+
+    def __repr__(self):
+        if self.is_nothing:
+            return 'Nothing()'
+        return 'Just({!r})'.format(self.item)
+
+    def ap(self, fn):
+        if self.is_nothing or fn.is_nothing:
+            return Nothing()
+        return Just(fn.item(self.item))
+
+    def fmap(self, fn):
+        if self.is_nothing:
+            return Nothing()
+        return Just(fn(self.item))
+
+    def mappend(self, other):
+        if self.is_nothing:
+            return other
+        if other.is_nothing:
+            return self
+        return Just(typeclass.mappend(self.item, other.item))
+
+    def maybe(self, guard=None):
+        if self.is_nothing:
+            return guard
+        return self.item
+
+    def mempty(self):
+        return Nothing()
+
+    def pure(self, item):
+        return Just(item)
+
+    def traverse(self, func):
+        if self.is_nothing:
+            return func.get_pure(self)
+        return typeclass.fmap(func(self.item), Just)
+
+
+class Nothing(Maybe):
     instance = None
 
     def __new__(cls):
@@ -8,47 +60,10 @@ class Nothing:
             cls.instance = super().__new__(cls)
         return cls.instance
 
-    def __repr__(self):
-        return 'Nothing()'
-
-    def fmap(self, func):
-        return self
-
-    def pure(self, item):
-        return Just(item)
-
-    def ap(self, wrapped_func):
-        return self
-
-    def traverse(self, func):
-        return func.get_pure(self)
+    def __init__(self):
+        super().__init__(None, True)
 
 
-class Just:
-
+class Just(Maybe):
     def __init__(self, item):
-        self.item = item
-
-    def __eq__(self, other):
-        if isinstance(other, Just):
-            return self.item == other.item
-        return NotImplemented
-
-    def __repr__(self):
-        return 'Just({!r})'.format(self.item)
-
-    def fmap(self, func):
-        return Just(func(self.item))
-
-    def pure(self, item):
-        return Just(item)
-
-    def ap(self, wrapped_func):
-        if isinstance(wrapped_func, Just):
-            return Just(wrapped_func.item(self.item))
-        elif isinstance(wrapped_func, Nothing):
-            return Nothing()
-        raise TypeError('must be Nothing or Just')
-
-    def traverse(self, func):
-        return typeclass.fmap(func(self.item), Just)
+        super().__init__(item, False)
