@@ -45,14 +45,17 @@ def collect_args(n):
 
 class BaseLens:
     '''A BaseLens. Serves as the backbone of the lenses library. Acts as an
-    object-oriented wrapper around a function that does all the hard
-    work. This function is a van Laarhoven lens and has the following
-    type (in ML-style notation):
+    object-oriented wrapper around a function (`BaseLens.func`) that
+    does all the hard work. This function is an uncurried form of the
+    van Laarhoven lens and has the following type (in ML-style
+    notation):
 
     func :: (value -> functor value), state -> functor state
     '''
 
     def func(self, f, state):
+        '''Intended to be overridden by subclasses. Raises
+        NotImplementedError.'''
         message = 'Tried to use unimplemented lens {}.'
         raise NotImplementedError(message.format(type(self)))
 
@@ -63,6 +66,7 @@ class BaseLens:
         focus.'''
 
         def func_pure(a):
+            # FIXME:
             # it's a shame that we can't get values from types that have
             # no focus, but nothing can be done short of carrying type
             # information around all the way through the library.
@@ -77,30 +81,26 @@ class BaseLens:
         return self.func(consttup, state).item
 
     def modify(self, state, fn):
-        'Applies a function `fn` to the focus within `state`.'
+        'Applies a function `fn` to all the foci within `state`.'
         identfn = Functorisor(lambda a: Identity(a), lambda a: Identity(fn(a)))
         return self.func(identfn, state).item
 
     def set(self, state, value):
-        'Sets the focus within `state` to `value`.'
+        'Sets all the foci within `state` to `value`.'
         ident = Functorisor(lambda a: Identity(a), lambda a: Identity(value))
         return self.func(ident, state).item
 
     def compose(self, other):
-        '''Composes another lens with this one.
-
-        The `other` lens is used to refine the focus of this lens. The
-        following two pieces of code should be equivalent:
-
-        ```
-        self.compose(other).get(state)
-
-        other.get(self.get(state))
-        ```
+        '''Composes another lens with this one. The result is a lens
+        that feeds the foci of `self` into the state of `other`.
         '''
         return ComposedLens([self]).compose(other)
 
     def flip(self):
+        '''Flips an isomorphism so that it works in the opposite
+        direction. only works if the lens is actually an isomorphism.
+        Intended to be overridden by such subclasses. Raises
+        TypeError for non-isomorphic lenses.'''
         message = 'Cannot flip: {} is not an isomorphism.'
         raise TypeError(message.format(type(self)))
 
@@ -194,11 +194,17 @@ class IsomorphismLens(BaseLens):
     that here the backwards functions don't need to know anything about
     the original state in order to produce a new state.
 
-    These two equalities should hold for the functions you supply (given
+    These equalities should hold for the functions you supply (given
     a reasonable definition for __eq__):
 
         backwards(forwards(state)) == state
         forwards(backwards(focus)) == focus
+
+    These kinds of conversion functions are very common across the
+    python ecosystem. For example, NumPy has `np.array` and
+    `np.ndarray.tolist` for converting between python lists and its own
+    arrays. IsomorphismLens makes it easy to store data in one form, but
+    interact with it in a more convenient form.
 
         >>> from lenses import lens
         >>> lens().iso_(int, str)
@@ -282,7 +288,7 @@ class DecodeLens(IsomorphismLens):
 class EachLens(BaseLens):
     '''A traversal that iterates over its state, focusing everything it
     iterates over. It uses `setter.fromiter` to reform the state
-    afterwards so it should work with an iterable that function
+    afterwards so it should work with any iterable that function
     supports. Analogous to `iter`.
 
         >>> from lenses import lens
@@ -366,16 +372,25 @@ class ErrorLens(BaseLens):
 
 class FilteringLens(BaseLens):
     '''A traversal that only traverses a focus if the predicate returns
-    when called with that focus as an argument. Best used when composed
-    after a traversal.
+    `True` when called with that focus as an argument. Best used when
+    composed after a traversal. It only prevents the traversal from
+    visiting foci, it does not filter out values the way that python's
+    regular `filter` function does.
 
         >>> from lenses import lens
         >>> lens().filter_(bool)
         Lens(None, FilteringLens(<class 'bool'>))
-        >>> lens([0, 1, '', 'hi']).traverse_().filter_(bool).get_all()
+        >>> lens([0, 1, '', 'hi']).each_().filter_(bool).get_all()
         (1, 'hi')
-        >>> lens([0, 1, '', 'hi']).traverse_().filter_(bool).set(2)
+        >>> lens([0, 1, '', 'hi']).each_().filter_(bool).set(2)
         [0, 2, '', 2]
+
+    The filtering is done to foci before the lens' manipulation is
+    applied. This means that the resulting foci can still violate the
+    predicate if the manipulating function doesn't respect it:
+
+        >>> lens(['', 2, '']).each_().filter_(bool).set(None)
+        ['', None, '']
     '''
 
     def __init__(self, predicate):
@@ -492,6 +507,8 @@ class ItemLens(GetterSetterLens):
         Lens(None, ItemLens(1))
         >>> lens(data).item_(1).get()
         (1, 10)
+        >>> lens(data).item_(3).get() is None
+        True
         >>> lens(data).item_(1).set((1, 11))
         OrderedDict([(1, 11), (2, 20)])
         >>> lens(data).item_(1).set(None)
@@ -525,8 +542,8 @@ class ItemByValueLens(GetterSetterLens):
     '''A lens that focuses a single item (key-value pair) in a
     dictionary by its value. Set an item to `None` to remove it from the
     dictionary. This lens assumes that there will only be a single key
-    with that particular value. The results of this lens are not defined
-    when that assumption is broken.
+    with that particular value. If you violate that assumption then
+    you're on your own.
 
         >>> from lenses import lens
         >>> from collections import OrderedDict
@@ -535,6 +552,8 @@ class ItemByValueLens(GetterSetterLens):
         Lens(None, ItemByValueLens(10))
         >>> lens(data).item_by_value_(10).get()
         (1, 10)
+        >>> lens(data).item_by_value_(30).get() is None
+        True
         >>> lens(data).item_by_value_(10).set((3, 10))
         OrderedDict([(2, 20), (3, 10)])
         >>> lens(data).item_by_value_(10).set(None)
