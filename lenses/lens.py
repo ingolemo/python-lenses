@@ -87,13 +87,13 @@ class Lens(object):
         return '{}({!r}, {!r})'.format(self.__class__.__name__,
                                        self.state, self.lens)
 
-    def _assert_state(self):
+    def _assert_bound(self, name):
         if self.state is None:
-            raise ValueError('Operation requires a bound lens')
+            raise ValueError('{} requires a bound lens'.format(name))
 
-    def _assert_no_state(self):
+    def _assert_unbound(self, name):
         if self.state is not None:
-            raise ValueError('Operation requires an unbound lens')
+            raise ValueError('{} requires an unbound lens'.format(name))
 
     def get(self):
         '''Get the first value focused by the lens.
@@ -104,7 +104,7 @@ class Lens(object):
             >>> lens([1, 2, 3])[0].get()
             1
         '''
-        self._assert_state()
+        self._assert_bound('Lens.get')
         return self.lens.get_all(self.state)[0]
 
     def get_all(self):
@@ -117,7 +117,7 @@ class Lens(object):
             >>> lens([1, 2, 3]).both_().get_all()
             (1, 2)
         '''
-        self._assert_state()
+        self._assert_bound('Lens.get_all')
         return self.lens.get_all(self.state)
 
     def get_monoid(self):
@@ -128,7 +128,7 @@ class Lens(object):
             >>> lens([[], [1], [2, 3]]).traverse_().get_monoid()
             [1, 2, 3]
         '''
-        self._assert_state()
+        self._assert_bound('Lens.get_monoid')
         return self.lens.get(self.state)
 
     def set(self, newvalue):
@@ -138,7 +138,7 @@ class Lens(object):
             >>> lens([1, 2, 3])[1].set(4)
             [1, 4, 3]
         '''
-        self._assert_state()
+        self._assert_bound('Lens.set')
         return self.lens.set(self.state, newvalue)
 
     def modify(self, func):
@@ -150,7 +150,7 @@ class Lens(object):
             >>> lens([1, 2, 3])[1].modify(lambda n: n + 10)
             [1, 12, 3]
         '''
-        self._assert_state()
+        self._assert_bound('Lens.modify')
         return self.lens.modify(self.state, func)
 
     def call(self, method_name, *args, **kwargs):
@@ -178,8 +178,7 @@ class Lens(object):
         if isinstance(other, baselens.BaseLens):
             return Lens(self.state, self.lens.compose(other))
         elif isinstance(other, Lens):
-            if other.state is not None:
-                raise ValueError('Other lens has a state bound to it.')
+            other._assert_unbound('Lens.add_lens')
             return Lens(self.state, self.lens.compose(other.lens))
         else:
             raise TypeError('''Cannot add lens of type {!r}.'''
@@ -193,15 +192,14 @@ class Lens(object):
             >>> lens()[1].bind([1, 2, 3]).get()
             2
         '''
-        if self.state is not None:
-            raise ValueError('Trying to bind an already bound lens')
+        self._assert_unbound('Lens.bind')
         return Lens(state, self.lens)
 
     def flip(self):
         '''Flips the direction of the lens. The lens must be unbound and
         all the underlying operations must be isomorphisms.
         '''
-        self._assert_no_state()
+        self._assert_unbound('Lens.flip')
         return Lens(self.state, self.lens.flip())
 
     def __get__(self, obj, type=None):
