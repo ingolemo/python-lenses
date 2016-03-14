@@ -2,6 +2,7 @@ from . import setter
 from .identity import Identity
 from .const import Const
 from .functorisor import Functorisor
+from .maybe import Just, Nothing
 from .typeclass import fmap, pure, ap, traverse
 
 
@@ -65,15 +66,13 @@ class BaseLens:
         `lenses.typeclass.mappend`. The lens must have at least one
         focus.'''
 
-        def func_pure(a):
-            # FIXME:
-            # it's a shame that we can't get values from types that have
-            # no focus, but nothing can be done short of carrying type
-            # information around all the way through the library.
+        guard = object()
+        const = Functorisor(lambda a: Const(Nothing()),
+                            lambda a: Const(Just(a)))
+        result = self.func(const, state).unwrap().maybe(guard)
+        if result is guard:
             raise ValueError('No focus to get')
-
-        const = Functorisor(func_pure, lambda a: Const(a))
-        return self.func(const, state).unwrap()
+        return result
 
     def get_all(self, state):
         'Returns a tuple of all the focuses within `state`.'
