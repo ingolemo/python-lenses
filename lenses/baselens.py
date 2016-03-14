@@ -111,7 +111,15 @@ class BaseLens:
 
 
 class ComposedLens(BaseLens):
-    '''A lenses representing the composition of several sublenses.'''
+    '''A lenses representing the composition of several sub-lenses. This
+    class tries to just pass operations down to the sublenses without
+    imposing any constraints on what can happen. The sublenses are in
+    charge of what capabilities they support.
+
+        >>> from lenses import lens
+        >>> lens()[0][1]
+        Lens(None, GetitemLens(0) & GetitemLens(1))
+    '''
 
     def __init__(self, lenses=()):
         self.lenses = list(self._filter_lenses(lenses))
@@ -151,7 +159,7 @@ class ComposedLens(BaseLens):
         return result
 
     def __repr__(self):
-        return 'ComposedLens({!r})'.format(self.lenses)
+        return ' & '.join(str(l) for l in self.lenses)
 
 
 class GetterSetterLens(BaseLens):

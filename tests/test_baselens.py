@@ -92,11 +92,6 @@ def test_ComposedLens_compose_simplifies():
     assert type(l & l) == b.TrivialLens
 
 
-def test_ComposedLens_meaningful_repr():
-    l = b.ComposedLens([])
-    assert repr(l.lenses) in repr(l)
-
-
 def test_DecodeLens_get():
     assert b.DecodeLens().get(b'hello') == 'hello'
 
