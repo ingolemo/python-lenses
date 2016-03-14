@@ -130,6 +130,19 @@ def test_lens_descriptor():
     assert MyClass([1, 2, 3]).first.set(4) == MyClass([4, 2, 3])
 
 
+def test_lens_descriptor_doesnt_bind_from_class():
+    class MyClass:
+        def __init__(self, items):
+            self._private_items = items
+
+        def __eq__(self, other):
+            return self._private_items == other._private_items
+
+        first = lens()._private_items[0]
+
+    assert MyClass.first.state is None
+
+
 def test_lens_descriptor_zoom():
     class MyClass:
         def __init__(self, items):
