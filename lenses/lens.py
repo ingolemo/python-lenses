@@ -200,6 +200,11 @@ class Lens(object):
     def flip(self):
         '''Flips the direction of the lens. The lens must be unbound and
         all the underlying operations must be isomorphisms.
+
+            >>> from lenses import lens
+            >>> json_encoder = lens().decode_().json_().flip()
+            >>> json_encoder.bind(['hello', 'world']).get()
+            b'["hello", "world"]'
         '''
         self._assert_unbound('Lens.flip')
         return Lens(self.state, self.lens.flip())
