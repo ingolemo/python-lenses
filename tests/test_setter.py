@@ -19,8 +19,16 @@ def test_setitem_imm_custom_class():
     assert s.setitem_immutable(C(1), 0, 2) == C(2)
 
 
+def test_setitem_imm_bytes():
+    assert s.setitem_immutable(b'hello', 0, ord(b'j')) == b'jello'
+
+
 def test_setitem_imm_list():
     assert s.setitem_immutable([1, 2, 3], 0, 4) == [4, 2, 3]
+
+
+def test_setitem_imm_str():
+    assert s.setitem_immutable('hello', 0, 'j') == 'jello'
 
 
 def test_setitem_imm_tuple():
@@ -74,6 +82,10 @@ def test_fromiter_custom_class():
     assert s.fromiter(C(1), [2]) == C(2)
 
 
+def test_fromiter_bytes():
+    assert s.fromiter(b'', [49, 50, 51]) == b'123'
+
+
 def test_fromiter_list():
     assert s.fromiter([], (1, 2, 3)) == [1, 2, 3]
 
@@ -83,7 +95,7 @@ def test_fromiter_set():
 
 
 def test_fromiter_str():
-    assert s.fromiter('hello', ['1', '2', '3']) == '123'
+    assert s.fromiter('', ['1', '2', '3']) == '123'
 
 
 def test_fromiter_tuple():

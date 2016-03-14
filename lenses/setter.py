@@ -41,6 +41,20 @@ def setitem_immutable(self, key, value):
         return self._lens_setitem(key, value)
 
 
+@setitem_immutable.register(bytes)
+def _bytes_setitem_immutable(self, key, value):
+    data = bytearray(self)
+    data[key] = value
+    return bytes(data)
+
+
+@setitem_immutable.register(str)
+def _str_setitem_immutable(self, key, value):
+    data = list(self)
+    data[key] = value
+    return ''.join(data)
+
+
 @setitem_immutable.register(tuple)
 def _tuple_setitem_immutable(self, key, value):
     return tuple(value if i == key else item
@@ -125,6 +139,11 @@ def fromiter(self, iterable):
         raise NotImplementedError(message.format(type(self)))
     else:
         return self._lens_fromiter(iterable)
+
+
+@fromiter.register(bytes)
+def _bytes_fromiter(self, iterable):
+    return bytes(iterable)
 
 
 @fromiter.register(dict)
