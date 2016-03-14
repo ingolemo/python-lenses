@@ -719,8 +719,8 @@ class TraverseLens(BaseLens):
         return 'TraverseLens()'
 
 
-class TrivialLens(BaseLens):
-    '''A trivial lens that focuses the whole state. It doesn't
+class TrivialLens(IsomorphismLens):
+    '''A trivial isomorphism that focuses the whole state. It doesn't
     manipulate the state. Mostly used as a "null" lens. Analogous to
     `lambda a: a`.
 
@@ -732,9 +732,14 @@ class TrivialLens(BaseLens):
         >>> lens(True).set(False)
         False
     '''
+    def __init__(self):
+        pass
 
-    def func(self, f, state):
-        return fmap(f(state), lambda newvalue: newvalue)
+    def forwards(self, state):
+        return state
+
+    def backwards(self, focus):
+        return focus
 
     def __repr__(self):
         return 'TrivialLens()'
