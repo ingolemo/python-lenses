@@ -26,3 +26,6 @@ class Identity(object):
     def traverse(self, fn):
         applicative = fn(self.item)
         return ap(applicative, pure(applicative, Identity))
+
+    def unwrap(self):
+        return self.item

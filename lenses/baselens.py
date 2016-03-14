@@ -73,22 +73,25 @@ class BaseLens:
             raise ValueError('No focus to get')
 
         const = Functorisor(func_pure, lambda a: Const(a))
-        return self.func(const, state).item
+        return self.func(const, state).unwrap()
 
     def get_all(self, state):
         'Returns a tuple of all the focuses within `state`.'
-        consttup = Functorisor(lambda a: Const(()), lambda a: Const((a, )))
-        return self.func(consttup, state).item
+        consttup = Functorisor(lambda a: Const(()),
+                               lambda a: Const((a, )))
+        return self.func(consttup, state).unwrap()
 
     def modify(self, state, fn):
         'Applies a function `fn` to all the foci within `state`.'
-        identfn = Functorisor(lambda a: Identity(a), lambda a: Identity(fn(a)))
-        return self.func(identfn, state).item
+        identfn = Functorisor(lambda a: Identity(a),
+                              lambda a: Identity(fn(a)))
+        return self.func(identfn, state).unwrap()
 
     def set(self, state, value):
         'Sets all the foci within `state` to `value`.'
-        ident = Functorisor(lambda a: Identity(a), lambda a: Identity(value))
-        return self.func(ident, state).item
+        ident = Functorisor(lambda a: Identity(a),
+                            lambda a: Identity(value))
+        return self.func(ident, state).unwrap()
 
     def compose(self, other):
         '''Composes another lens with this one. The result is a lens
@@ -759,6 +762,7 @@ class TrivialLens(IsomorphismLens):
         >>> lens(True).set(False)
         False
     '''
+
     def __init__(self):
         pass
 

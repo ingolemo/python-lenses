@@ -21,3 +21,6 @@ class Const(object):
 
     def ap(self, fn):
         return Const(mappend(fn.item, self.item))
+
+    def unwrap(self):
+        return self.item
