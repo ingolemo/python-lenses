@@ -204,8 +204,10 @@ class Lens(object):
         self._assert_unbound('Lens.flip')
         return Lens(self.state, self.lens.flip())
 
-    def __get__(self, obj, type=None):
-        return self.bind(obj)
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        return self.bind(instance)
 
     def __getattr__(self, name):
         if name.endswith('_'):
