@@ -79,9 +79,11 @@ class Lens(object):
     'A user-friendly object for interacting with the lenses library'
     __slots__ = ['state', 'lens']
 
-    def __init__(self, state, sublens=None):
+    def __init__(self, state=None, lens=None):
+        if lens is None:
+            lens = baselens.TrivialLens()
         self.state = state
-        self.lens = baselens.TrivialLens() if sublens is None else sublens
+        self.lens = lens
 
     def __repr__(self):
         return '{}({!r}, {!r})'.format(self.__class__.__name__,
