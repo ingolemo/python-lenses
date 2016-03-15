@@ -1,77 +1,93 @@
 import hypothesis
 import hypothesis.strategies as strat
+from hypothesis.strategies import just, one_of, sampled_from, streaming
 
 import lenses
 import lenses.typeclass as tc
 
 
-class MonoidAdd:
+class MonoidProduct:
     def __init__(self, n):
         self.n = n
 
-    def mempty(self):
-        return MonoidAdd(0)
-
-    def mappend(self, other):
-        return MonoidAdd(self.n + other.n)
+    def __add__(self, other):
+        return MonoidProduct(self.n * other.n)
 
     def __eq__(self, other):
         return self.n == other.n
 
-monoids = [
-    strat.lists(strat.integers()),
-    strat.lists(strat.integers()).map(tuple),
-    strat.text(),
-    strat.integers().map(MonoidAdd),
-    strat.dictionaries(strat.integers(), strat.integers()),
-]
+    def mempty(self):
+        return MonoidProduct(1)
 
 
 def many_one_of(*strategies):
-    return strat.one_of(*(strat.streaming(s) for s in strategies))
+    return one_of(*(streaming(s) for s in strategies))
+
+
+def apply_strat(funcstrat, substrat):
+    return substrat.flatmap(lambda a: funcstrat.map(lambda f: f(a)))
+
+
+def stream_apply_strat(funcstrat, substrat):
+    return funcstrat.flatmap(lambda fn: substrat.map(lambda s: s.map(fn)))
+
+
+def maybes():
+    return strat.sampled_from([
+        lambda a: lenses.maybe.Nothing(),
+        lenses.maybe.Just,
+    ])
+
+
+def monoids():
+    base = many_one_of(
+        strat.integers(),
+        strat.lists(strat.integers()),
+        strat.lists(strat.integers()).map(tuple),
+        strat.text(),
+        strat.integers().map(MonoidProduct),
+        strat.dictionaries(strat.integers(), strat.integers()),
+    )
+
+    def recurse(substrat):
+        return stream_apply_strat(maybes(), substrat)
+
+    return strat.recursive(base, recurse)
 
 
 def applicatives(substrat):
-    return strat.one_of(
+    return one_of(
         strat.lists(substrat),
         strat.lists(substrat).map(tuple),
         substrat.map(lenses.identity.Identity),
+        apply_strat(maybes(), substrat),
     )
 
 
 def functors(substrat):
-    return strat.one_of(
-        applicatives(substrat),
-    )
+    return one_of(applicatives(substrat), )
 
 
 def data_funcs(wrapper):
-    intfuncs = strat.streaming(strat.one_of(
-        strat.just(lambda a: a * 2),
-        strat.just(lambda a: a + 1),
-    ))
-    floatfuncs = strat.streaming(strat.one_of(
-        strat.just(lambda a: a / 2),
-        strat.just(lambda a: a + 1.5),
-    ))
-    stringfuncs = strat.streaming(strat.one_of(
-        strat.just(lambda a: a + '!'),
-        strat.just(lambda a: (a+'#')[0]),
-    ))
-    return strat.one_of(
-        strat.tuples(strat.integers(),
-                     wrapper(strat.integers()),
-                     intfuncs),
-        strat.tuples(strat.floats(allow_nan=False),
-                     wrapper(strat.floats(allow_nan=False)),
-                     floatfuncs),
-        strat.tuples(strat.text(),
-                     wrapper(strat.text()),
-                     stringfuncs),
-    )
+    intfuncs = streaming(sampled_from([lambda a: a * 2, lambda a: a + 1, ]))
+    floatfuncs = streaming(sampled_from([
+        lambda a: a / 2,
+        lambda a: a + 1.5,
+    ]))
+    stringfuncs = streaming(sampled_from([
+        lambda a: a + '!',
+        lambda a: (a + '#')[0],
+    ]))
+    return one_of(
+        strat.tuples(strat.integers(), wrapper(strat.integers()), intfuncs),
+        strat.tuples(
+            strat.floats(allow_nan=False),
+            wrapper(strat.floats(allow_nan=False)),
+            floatfuncs),
+        strat.tuples(strat.text(), wrapper(strat.text()), stringfuncs), )
 
 
-@hypothesis.given(many_one_of(*monoids))
+@hypothesis.given(monoids())
 def test_monoid_law_associativity(monoids):
     # (a + b) + c = a + (b + c)
     m1, m2, m3 = monoids[0], monoids[1], monoids[2]
@@ -79,19 +95,21 @@ def test_monoid_law_associativity(monoids):
     assert add(add(m1, m2), m3) == add(m1, add(m2, m3))
 
 
-@hypothesis.given(strat.one_of(*monoids))
-def test_monoid_law_left_identity(monoid):
+@hypothesis.given(monoids())
+def test_monoid_law_left_identity(monoids):
     # mempty + a = a
+    monoid = monoids[0]
     assert tc.mappend(tc.mempty(monoid), monoid) == monoid
 
 
-@hypothesis.given(strat.one_of(*monoids))
-def test_monoid_law_right_identity(monoid):
+@hypothesis.given(monoids())
+def test_monoid_law_right_identity(monoids):
     # a + mempty = a
+    monoid = monoids[0]
     assert tc.mappend(monoid, tc.mempty(monoid)) == monoid
 
 
-@hypothesis.given(functors(strat.just(object())))
+@hypothesis.given(functors(just(object())))
 def test_functor_law_identity(data):
     # fmap id = id
     def identity(a):

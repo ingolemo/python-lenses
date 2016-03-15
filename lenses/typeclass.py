@@ -9,7 +9,12 @@ def mempty(monoid):
 
 @singledispatch
 def mappend(monoid, other):
-    return monoid.mappend(other)
+    return monoid + other
+
+
+@mempty.register(int)
+def _mempty_int(self):
+    return 0
 
 
 @mempty.register(str)
@@ -17,29 +22,14 @@ def _mempty_str(string):
     return ''
 
 
-@mappend.register(str)
-def _mappend_str(string, other):
-    return string + other
-
-
 @mempty.register(list)
 def _mempty_list(lst):
     return []
 
 
-@mappend.register(list)
-def _mappend_list(lst, other):
-    return lst + other
-
-
 @mempty.register(tuple)
 def _mempty_tuple(tup):
     return ()
-
-
-@mappend.register(tuple)
-def _mappend_tuple(tup, other):
-    return tup + other
 
 
 @mempty.register(dict)
