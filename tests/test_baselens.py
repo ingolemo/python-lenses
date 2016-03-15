@@ -55,9 +55,9 @@ from lenses import baselens as b
 #     assert ls.set(ls.set(state, obj), obj) == ls.set(state, obj)
 
 
-def test_BaseLens():
+def test_LensLike():
     with pytest.raises(NotImplementedError):
-        b.BaseLens().get(None)
+        b.LensLike().get(None)
 
 
 def test_lens_and():
@@ -326,14 +326,14 @@ def test_TrivialLens_set():
     assert b.TrivialLens().set(obj1, obj2) is obj2
 
 
-def test_TupleLens_get_with_BaseLens():
+def test_TupleLens_get_with_LensLike():
     data = {'hello': 0, 'world': 1}
     get = b.GetitemLens
     my_lens = b.TupleLens(get('hello'), get('world'))
     assert my_lens.get(data) == (0, 1)
 
 
-def test_TupleLens_set_with_BaseLens():
+def test_TupleLens_set_with_LensLike():
     data = {'hello': 0, 'world': 1}
     get = b.GetitemLens
     my_lens = b.TupleLens(get('hello'), get('world'))

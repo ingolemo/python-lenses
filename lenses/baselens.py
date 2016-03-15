@@ -44,9 +44,9 @@ def collect_args(n):
     return arg_collector
 
 
-class BaseLens:
-    '''A BaseLens. Serves as the backbone of the lenses library. Acts as an
-    object-oriented wrapper around a function (`BaseLens.func`) that
+class LensLike:
+    '''A LensLike. Serves as the backbone of the lenses library. Acts as an
+    object-oriented wrapper around a function (`LensLike.func`) that
     does all the hard work. This function is an uncurried form of the
     van Laarhoven lens and has the following type (in ML-style
     notation):
@@ -112,7 +112,7 @@ class BaseLens:
     __and__ = compose
 
 
-class ComposedLens(BaseLens):
+class ComposedLens(LensLike):
     '''A lenses representing the composition of several sub-lenses. This
     class tries to just pass operations down to the sublenses without
     imposing any constraints on what can happen. The sublenses are in
@@ -164,7 +164,7 @@ class ComposedLens(BaseLens):
         return ' & '.join(str(l) for l in self.lenses)
 
 
-class GetterSetterLens(BaseLens):
+class GetterSetterLens(LensLike):
     '''Turns a pair of getter and setter functions into a van
     Laarhoven lens. A getter function is one that takes a state and
     returns a value derived from that state. A setter function takes
@@ -188,7 +188,7 @@ class GetterSetterLens(BaseLens):
         return 'GetterSetterLens({!r}, {!r})'.format(self.getter, self.setter)
 
 
-class IsomorphismLens(BaseLens):
+class IsomorphismLens(LensLike):
     '''A lens based on an isomorphism. An isomorphism can be formed by
     two functions that mirror each other; they can convert forwards
     and backwards between a state and a focus without losing
@@ -232,7 +232,7 @@ class IsomorphismLens(BaseLens):
                                                     self.backwards)
 
 
-class BothLens(BaseLens):
+class BothLens(LensLike):
     '''A traversal that focuses both items [0] and [1].
 
         >>> from lenses import lens
@@ -287,7 +287,7 @@ class DecodeLens(IsomorphismLens):
         return repr.format(self.encoding, self.errors)
 
 
-class EachLens(BaseLens):
+class EachLens(LensLike):
     '''A traversal that iterates over its state, focusing everything it
     iterates over. It uses `setter.fromiter` to reform the state
     afterwards so it should work with any iterable that function
@@ -330,7 +330,7 @@ class EachLens(BaseLens):
         return 'EachLens()'
 
 
-class ErrorLens(BaseLens):
+class ErrorLens(LensLike):
     '''A lens that raises an exception whenever it tries to focus
     something. If `message is None` then the exception will be raised
     unmodified. If `message is not None` then when the lens is asked to
@@ -372,7 +372,7 @@ class ErrorLens(BaseLens):
         return 'ErrorLens({!r}, {!r})'.format(self.exception, self.message)
 
 
-class FilteringLens(BaseLens):
+class FilteringLens(LensLike):
     '''A traversal that only traverses a focus if the predicate returns
     `True` when called with that focus as an argument. Best used when
     composed after a traversal. It only prevents the traversal from
@@ -583,7 +583,7 @@ class ItemByValueLens(GetterSetterLens):
         return 'ItemByValueLens({!r})'.format(self.value)
 
 
-class ItemsLens(BaseLens):
+class ItemsLens(LensLike):
     '''A traversal focusing key-value tuples that are the items of a
     dictionary. Analogous to `dict.items`.
 
@@ -727,7 +727,7 @@ class SetterLens(GetterSetterLens):
         return 'SetterLens({!r})'.format(self.setter)
 
 
-class TraverseLens(BaseLens):
+class TraverseLens(LensLike):
     '''A traversal that focuses everything in a data structure depending
     on how that data structure defines `lenses.typeclass.traverse`.
     Usually somewhat similar to iterating over it.
@@ -829,7 +829,7 @@ class ValuesLens(ComposedLens):
         return 'ValuesLens()'
 
 
-class ZoomAttrLens(BaseLens):
+class ZoomAttrLens(LensLike):
     '''A lens that looks up an attribute on its target and follows it as
     if were a bound `Lens` object. Ignores the state, if any, of the
     lens that is being looked up.
@@ -864,7 +864,7 @@ class ZoomAttrLens(BaseLens):
         return 'ZoomAttrLens({!r})'.format(self.name)
 
 
-class ZoomLens(BaseLens):
+class ZoomLens(LensLike):
     '''Follows its state as if it were a bound `Lens` object.
 
         >>> from lenses import lens

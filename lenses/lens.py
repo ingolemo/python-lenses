@@ -169,7 +169,7 @@ class Lens(object):
 
     def add_lens(self, other):
         '''Refine the current focus of this lens by composing it with
-        another lens object. Can be a `lenses.BaseLens` or an unbound
+        another lens object. Can be a `lenses.LensLike` or an unbound
         `lenses.Lens`.
 
             >>> from lenses import lens
@@ -177,7 +177,7 @@ class Lens(object):
             >>> lens([[0, 1], [2, 3]]).add_lens(second_first).get()
             2
         '''
-        if isinstance(other, baselens.BaseLens):
+        if isinstance(other, baselens.LensLike):
             return Lens(self.state, self.lens.compose(other))
         elif isinstance(other, Lens):
             other._assert_unbound('Lens.add_lens')
