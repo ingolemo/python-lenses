@@ -105,7 +105,7 @@ def test_DecodeLens_set():
 
 
 def test_EachLens_get_all():
-    assert b.EachLens().get_all([1, 2, 3]) == (1, 2, 3)
+    assert b.EachLens().get_all([1, 2, 3]) == [1, 2, 3]
 
 
 def test_EachLens_set():
@@ -125,7 +125,7 @@ def test_EachLens_modify_on_set():
 
 
 def test_EachLens_get_all_empty():
-    assert b.EachLens().get_all([]) == ()
+    assert b.EachLens().get_all([]) == []
 
 
 def test_EachLens_set_empty():
@@ -133,7 +133,7 @@ def test_EachLens_set_empty():
 
 
 def test_EachLens_get_all_with_starting_None():
-    assert b.EachLens(filter_none=True).get_all([None, None]) == ()
+    assert b.EachLens(filter_none=True).get_all([None, None]) == []
 
 
 def test_EachLens_set_with_starting_None():
@@ -147,7 +147,7 @@ def test_EachLens_set_None():
 def test_EachLens_get_all_with_starting_filtered():
     def f(a):
         return a != 2
-    assert b.EachLens(f).get_all([1, 2, 3]) == (1, 3)
+    assert b.EachLens(f).get_all([1, 2, 3]) == [1, 3]
 
 
 def test_EachLens_set_with_starting_filtered():
@@ -179,7 +179,7 @@ def test_FilteringLens_get():
 
 def test_FilteringLens_set():
     l = b.TraverseLens() & b.FilteringLens(lambda a: a > 0)
-    assert l.get_all([1, -1, 1]) == (1, 1)
+    assert l.get_all([1, -1, 1]) == [1, 1]
 
 
 def test_GetattrLens_get():
@@ -362,11 +362,11 @@ def test_TraverseLens_get_empty():
 
 
 def test_TraverseLens_get_all():
-    assert b.TraverseLens().get_all([0, 1, 2, 3]) == (0, 1, 2, 3)
+    assert b.TraverseLens().get_all([0, 1, 2, 3]) == [0, 1, 2, 3]
 
 
 def test_TraverseLens_get_all_empty():
-    assert b.TraverseLens().get_all([]) == ()
+    assert b.TraverseLens().get_all([]) == []
 
 
 def test_TraverseLens_set():
@@ -379,12 +379,12 @@ def test_TraverseLens_set_empty():
 
 def test_TraverseLens_get_all_double():
     l = b.TraverseLens() & b.TraverseLens()
-    assert l.get_all([[0, 1], [2, 3]]) == (0, 1, 2, 3)
+    assert l.get_all([[0, 1], [2, 3]]) == [0, 1, 2, 3]
 
 
 def test_TraverseLens_get_all_double_empty():
     l = b.TraverseLens() & b.TraverseLens()
-    assert l.get_all([[0, 1], []]) == (0, 1)
+    assert l.get_all([[0, 1], []]) == [0, 1]
 
 
 def test_TraverseLens_set_double():

@@ -111,13 +111,13 @@ class Lens(object):
 
     def get_all(self):
         '''Get multiple values focused by the lens. Returns them as a
-        tuple.
+        list.
 
             >>> from lenses import lens
             >>> lens([1, 2, 3])[0].get_all()
-            (1,)
+            [1]
             >>> lens([1, 2, 3]).both_().get_all()
-            (1, 2)
+            [1, 2]
         '''
         self._assert_bound('Lens.get_all')
         return self.lens.get_all(self.state)

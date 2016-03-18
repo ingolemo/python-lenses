@@ -246,10 +246,10 @@ returns a single focus. It will return the _first_ item focused by the
 traversal.
 
 If you want to get all the items focused by a lens then you can use the
-`get_all` method which will return those objects in a tuple:
+`get_all` method which will return those objects in a list:
 
 	>>> lens([0, 1, 2, 3]).both_().get_all()
-	(0, 1)
+	[0, 1]
 
 Setting works with a traversal, though all foci will be set to the same
 object.
@@ -278,18 +278,18 @@ with the lens applied to each of its original foci:
 
 	>>> both_first = lens([[0, 1], [2, 3]]).both_()[0]
 	>>> both_first.get_all()
-	(0, 2)
+	[0, 2]
 	>>> both_first + 10
 	[[10, 1], [12, 3]]
 
 Traversals can also be composed with other traversals just fine. They
 will simply increase the number of foci targeted. Note that `get_all`
-returns a flat tuple of foci; none of the structure of the state is
+returns a flat list of foci; none of the structure of the state is
 preserved.
 
 	>>> both_twice = lens([[0, 1], [2, 3]]).both_().both_()
 	>>> both_twice.get_all()
-	(0, 1, 2, 3)
+	[0, 1, 2, 3]
 	>>> both_twice + 10
 	[[10, 11], [12, 13]]
 

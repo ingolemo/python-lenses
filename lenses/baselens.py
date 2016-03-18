@@ -75,9 +75,9 @@ class LensLike:
         return result
 
     def get_all(self, state):
-        'Returns a tuple of all the focuses within `state`.'
-        consttup = Functorisor(lambda a: Const(()),
-                               lambda a: Const((a, )))
+        'Returns a list of all the foci within `state`.'
+        consttup = Functorisor(lambda a: Const([]),
+                               lambda a: Const([a]))
         return self.func(consttup, state).unwrap()
 
     def modify(self, state, fn):
@@ -239,7 +239,7 @@ class BothLens(LensLike):
         >>> lens().both_()
         Lens(None, BothLens())
         >>> lens([1, 2, 3]).both_().get_all()
-        (1, 2)
+        [1, 2]
         >>> lens([1, 2, 3]).both_().set(4)
         [4, 4, 3]
     '''
@@ -298,7 +298,7 @@ class EachLens(LensLike):
         >>> lens().each_()
         Lens(None, EachLens())
         >>> lens(data).each_().get_all()
-        (1, 2, 3)
+        [1, 2, 3]
         >>> lens(data).each_().modify(lambda n: n + 1)
         [2, 3, 4]
         >>> lens(data).each_(filter_none=True).set(None)
@@ -383,7 +383,7 @@ class FilteringLens(LensLike):
         >>> lens().filter_(bool)
         Lens(None, FilteringLens(<class 'bool'>))
         >>> lens([0, 1, '', 'hi']).each_().filter_(bool).get_all()
-        (1, 'hi')
+        [1, 'hi']
         >>> lens([0, 1, '', 'hi']).each_().filter_(bool).set(2)
         [0, 2, '', 2]
 
@@ -593,7 +593,7 @@ class ItemsLens(LensLike):
         >>> lens().items_()
         Lens(None, ItemsLens())
         >>> lens(data).items_().get_all()
-        ((1, 10), (2, 20))
+        [(1, 10), (2, 20)]
         >>> lens(data).items_()[1].modify(lambda n: n + 1)
         OrderedDict([(1, 11), (2, 21)])
     '''
@@ -653,7 +653,7 @@ class KeysLens(ComposedLens):
         >>> lens().keys_()
         Lens(None, KeysLens())
         >>> lens(data).keys_().get_all()
-        (1, 2)
+        [1, 2]
         >>> lens(data).keys_().modify(lambda n: n + 1)
         OrderedDict([(2, 10), (3, 20)])
     '''
@@ -736,7 +736,7 @@ class TraverseLens(LensLike):
         >>> lens().traverse_()
         Lens(None, TraverseLens())
         >>> lens([1, 2, 3]).traverse_().get_all()
-        (1, 2, 3)
+        [1, 2, 3]
         >>> lens([1, 2, 3]).traverse_().modify(lambda n: n + 1)
         [2, 3, 4]
     '''
@@ -817,7 +817,7 @@ class ValuesLens(ComposedLens):
         >>> lens().values_()
         Lens(None, ValuesLens())
         >>> lens(data).values_().get_all()
-        (10, 20)
+        [10, 20]
         >>> lens(data).values_().modify(lambda n: n + 1)
         OrderedDict([(1, 11), (2, 21)])
     '''
