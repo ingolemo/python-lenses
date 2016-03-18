@@ -71,9 +71,9 @@ data changed. tuples and namedtuples are supported out of the box.
 	...     def __repr__(self):
 	...         return 'MyClass(' + repr(self.attr) + ')'
 	...
-	>>> data = (0, MyClass({'first': 'hello', 'second': 'world'}))
-	>>> lens(data)[1].attr['first'].set('goodbye')
-	(0, MyClass({'second': 'world', 'first': 'goodbye'}))
+	>>> data = (0, MyClass({'hello': 'world'}))
+	>>> lens(data)[1].attr['hello'].set('everyone')
+	(0, MyClass({'hello': 'everyone'}))
 
 If you wish to apply a function using a lens you can use the `modify`
 method:
@@ -84,8 +84,8 @@ method:
 You can call methods on the data using `call`. Note that this
 method should return new data to include in the data-structure:
 
-	>>> lens([1, {0, 3}, 2])[1].call('union', {3, 8})
-	[1, {0, 8, 3}, 2]
+	>>> lens([1, {3, 4}, 2])[1].call('intersection', {3, 5})
+	[1, {3}, 2]
 
 Lenses will also pass most operators through to the data they're focused
 on. This makes using lenses in your code much more readable:
@@ -200,11 +200,11 @@ A simple example is that of the `item_` method which returns a lens that
 focuses on a single key of a dictionary but returns both the key and the
 value:
 
-	>>> l = lens({'one': 1, 'two': 2})
+	>>> l = lens({'one': 1})
 	>>> l.item_('one').get()
 	('one', 1)
-	>>> l.item_('two').set(('three', 3))
-	{'one': 1, 'three': 3}
+	>>> l.item_('one').set(('three', 3))
+	{'three': 3}
 
 There are a number of such more complicated lenses defined on `Lens`. To
 help avoid collision with accessing attributes on the state, their names

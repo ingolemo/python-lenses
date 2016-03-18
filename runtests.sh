@@ -1,4 +1,7 @@
+python -m doctest readme.md
+test "$?" = '0' || exit
+
 coverage run -m pytest lenses tests --doctest-modules "$@"
-if [ "$?" = '0' ]; then
-	coverage report -m
-fi
+test "$?" = '0' || exit
+
+coverage report -m
