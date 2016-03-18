@@ -1,4 +1,5 @@
 from lenses.maybe import Nothing, Just
+import lenses
 
 
 def test_Nothing_is_singleton():
@@ -24,6 +25,10 @@ def test_Nothing_repr_invariant():
 
 def test_Nothing_iter():
     assert list(Nothing()) == []
+
+
+def test_Nothing_fromiter():
+    assert lenses.setter.fromiter(Just(1), []) == Nothing()
 
 
 def test_Nothing_not_equals_Just():
@@ -62,3 +67,8 @@ def test_Just_repr_conatins_subobject():
 def test_Just_iter():
     obj = object()
     assert list(Just(obj)) == [obj]
+
+
+def test_Just_fromiter():
+    obj = object()
+    assert lenses.setter.fromiter(Nothing(), [obj]) == Just(obj)
