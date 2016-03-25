@@ -69,8 +69,8 @@ def pure(applicative, item):
 
 
 @singledispatch
-def ap(applicative, func):
-    return applicative.ap(func)
+def apply(applicative, func):
+    return applicative.apply(func)
 
 
 @pure.register(list)
@@ -78,8 +78,8 @@ def _pure_list(lst, item):
     return [item]
 
 
-@ap.register(list)
-def _ap_list(lst, funcs):
+@apply.register(list)
+def _apply_list(lst, funcs):
     return [f(i) for i in lst for f in funcs]
 
 
@@ -88,8 +88,8 @@ def _pure_tuple(tup, item):
     return (item,)
 
 
-@ap.register(tuple)
-def _ap_tuple(tup, funcs):
+@apply.register(tuple)
+def _apply_tuple(tup, funcs):
     return tuple(f(i) for i in tup for f in funcs)
 
 
@@ -109,6 +109,6 @@ def _traverse_list(lst, func):
         return lambda b: [a] + b
 
     if rest:
-        return ap(traverse(rest, func), fmap(func(head), cons))
+        return apply(traverse(rest, func), fmap(func(head), cons))
     else:
         return fmap(func(head), lambda a: [a])

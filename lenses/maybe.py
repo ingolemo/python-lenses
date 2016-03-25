@@ -97,8 +97,8 @@ def _maybe_pure(self, item):
     return Just(item)
 
 
-@typeclass.ap.register(Maybe)
-def _maybe_ap(self, fn):
+@typeclass.apply.register(Maybe)
+def _maybe_apply(self, fn):
     if self.is_nothing or fn.is_nothing:
         return Nothing()
     return Just(fn.item(self.item))

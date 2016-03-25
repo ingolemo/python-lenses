@@ -3,7 +3,7 @@ from .identity import Identity
 from .const import Const
 from .functorisor import Functorisor
 from .maybe import Just, Nothing
-from .typeclass import fmap, pure, ap, traverse
+from .typeclass import fmap, pure, apply, traverse
 
 
 def multiap(func, *args):
@@ -17,7 +17,7 @@ def multiap(func, *args):
     '''
     functor = fmap(args[0], func)
     for arg in args[1:]:
-        functor = ap(arg, functor)
+        functor = apply(arg, functor)
     return functor
 
 

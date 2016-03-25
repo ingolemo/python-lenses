@@ -137,7 +137,7 @@ def test_applicative_law_identity(data):
     def identity(a):
         return a
 
-    assert tc.ap(data, tc.pure(data, identity)) == data
+    assert tc.apply(data, tc.pure(data, identity)) == data
 
 
 @hypothesis.given(data_funcs(applicatives))
@@ -146,7 +146,7 @@ def test_applicative_law_homomorphism(datas):
     x, appl, funcs = datas
     f = funcs[0]
 
-    left = tc.ap(tc.pure(appl, x), tc.pure(appl, f))
+    left = tc.apply(tc.pure(appl, x), tc.pure(appl, f))
     right = tc.pure(appl, f(x))
     assert left == right
 
@@ -157,8 +157,8 @@ def test_applicative_law_interchange(datas):
     y, appl, funcs = datas
     u = tc.pure(appl, funcs[0])
 
-    left = tc.ap(tc.pure(appl, y), u)
-    right = tc.ap(u, tc.pure(appl, lambda a: a(y)))
+    left = tc.apply(tc.pure(appl, y), u)
+    right = tc.apply(u, tc.pure(appl, lambda a: a(y)))
     assert left == right
 
 
@@ -173,6 +173,6 @@ def test_applicative_law_composition(datas):
     def compose(f1):
         return lambda f2: lambda a: f1(f2(a))
 
-    left = tc.ap(w, tc.ap(v, tc.ap(u, tc.pure(appl, compose))))
-    right = tc.ap(tc.ap(w, v), u)
+    left = tc.apply(w, tc.apply(v, tc.apply(u, tc.pure(appl, compose))))
+    right = tc.apply(tc.apply(w, v), u)
     assert left == right

@@ -19,7 +19,7 @@ class Const(object):
     def pure(self, item):
         return Const(mempty(self.item))
 
-    def ap(self, fn):
+    def apply(self, fn):
         return Const(mappend(fn.item, self.item))
 
     def unwrap(self):

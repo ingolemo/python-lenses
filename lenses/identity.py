@@ -1,4 +1,4 @@
-from .typeclass import ap, pure
+from .typeclass import apply, pure
 
 
 class Identity(object):
@@ -20,12 +20,12 @@ class Identity(object):
     def pure(cls, item):
         return cls(item)
 
-    def ap(self, fn):
+    def apply(self, fn):
         return Identity(fn.item(self.item))
 
     def traverse(self, fn):
         applicative = fn(self.item)
-        return ap(applicative, pure(applicative, Identity))
+        return apply(applicative, pure(applicative, Identity))
 
     def unwrap(self):
         return self.item
