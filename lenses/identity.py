@@ -13,7 +13,7 @@ class Identity(object):
             return NotImplemented
         return self.item == other.item
 
-    def fmap(self, fn):
+    def map(self, fn):
         return Identity(fn(self.item))
 
     @classmethod

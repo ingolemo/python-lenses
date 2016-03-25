@@ -13,7 +13,7 @@ class Const(object):
             return NotImplemented
         return self.item == other.item
 
-    def fmap(self, func):
+    def map(self, func):
         return Const(self.item)
 
     def pure(self, item):

@@ -49,7 +49,7 @@ def fmap(functor, func):
 
     Uses functools.singledispatch so you can write your own functors
     for use with the library.'''
-    return functor.fmap(func)
+    return functor.map(func)
 
 
 @fmap.register(list)
