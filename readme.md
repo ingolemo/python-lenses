@@ -84,8 +84,8 @@ method:
 You can call methods on the data using `call`. Note that this
 method should return new data to include in the data-structure:
 
-	>>> lens([1, {3, 4}, 2])[1].call('intersection', {3, 5})
-	[1, {3}, 2]
+	>>> lens([1, {2}, 3])[1].call('union', {4, 5})
+	[1, {2, 4, 5}, 3]
 
 Lenses will also pass most operators through to the data they're focused
 on. This makes using lenses in your code much more readable:
