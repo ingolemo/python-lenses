@@ -147,6 +147,12 @@ state manipulating methods as normal:
 	>>> key_one.bind({'one': 1, 'two': 2}).get()
 	1
 
+Alternatively, you can call the state manipulating method as normal and
+pass in a keyword-only `state` argument for the method to act on:
+
+	>>> key_one.get(state={'one': 1, 'two': 2})
+	1
+
 You can use unbound Lens objects as descriptors. That is, if you set a
 lens as a class attribute and you access that attribute from an
 instance, you will get a lens that has been bound to that instance. This

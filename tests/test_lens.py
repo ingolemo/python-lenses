@@ -161,6 +161,40 @@ def test_lens_descriptor_zoom():
     assert lens(data)[0].first_l.set(4) == (MyClass([4, 2, 3]),)
 
 
+def test_lens_get_state_keyword():
+    assert lens()[1].get(state=[1, 2, 3]) == 2
+
+
+def test_lens_get_all_state_keyword():
+    assert lens().each_().get_all(state=[1, 2, 3]) == [1, 2, 3]
+
+
+def test_lens_get_monoid_state_keyword():
+    assert lens().each_().get_monoid(state=[1, 2, 3]) == 6
+
+
+def test_lens_set_state_keyword():
+    assert lens()[1].set(4, state=[1, 2, 3]) == [1, 4, 3]
+
+
+def test_lens_modify_state_keyword():
+    assert lens()[1].modify(str, state=[1, 2, 3]) == [1, '2', 3]
+
+
+def test_lens_call_state_keyword():
+    assert lens()[1].call('union', {4}, state=[1, {2}, 3]) == [1, {2, 4}, 3]
+
+
+def test_lens_error_on_bound_and_state():
+    with pytest.raises(ValueError):
+        lens([1, 2, 3])[1].get(state=[4, 5, 6])
+
+
+def test_lens_error_on_unbound_and_no_state():
+    with pytest.raises(ValueError):
+        lens()[1].get()
+
+
 # Testing that Lens properly passes though dunder methods
 def test_lens_add():
     assert lens(2) + 1 == 3

@@ -97,7 +97,7 @@ class Lens(object):
         if self.state is not None:
             raise ValueError('{} requires an unbound lens'.format(name))
 
-    def get(self):
+    def get(self, *, state=None):
         '''Get the first value focused by the lens.
 
             >>> from lenses import lens
@@ -106,10 +106,12 @@ class Lens(object):
             >>> lens([1, 2, 3])[0].get()
             1
         '''
+        if state is not None:
+            self = self.bind(state)
         self._assert_bound('Lens.get')
         return self.lens.get_all(self.state)[0]
 
-    def get_all(self):
+    def get_all(self, *, state=None):
         '''Get multiple values focused by the lens. Returns them as a
         list.
 
@@ -119,10 +121,12 @@ class Lens(object):
             >>> lens([1, 2, 3]).both_().get_all()
             [1, 2]
         '''
+        if state is not None:
+            self = self.bind(state)
         self._assert_bound('Lens.get_all')
         return self.lens.get_all(self.state)
 
-    def get_monoid(self):
+    def get_monoid(self, *, state=None):
         '''Get the values focused by the lens, merging them together by
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
@@ -130,20 +134,24 @@ class Lens(object):
             >>> lens([[], [1], [2, 3]]).traverse_().get_monoid()
             [1, 2, 3]
         '''
+        if state is not None:
+            self = self.bind(state)
         self._assert_bound('Lens.get_monoid')
         return self.lens.get(self.state)
 
-    def set(self, newvalue):
+    def set(self, newvalue, *, state=None):
         '''Set the focus to `newvalue`.
 
             >>> from lenses import lens
             >>> lens([1, 2, 3])[1].set(4)
             [1, 4, 3]
         '''
+        if state is not None:
+            self = self.bind(state)
         self._assert_bound('Lens.set')
         return self.lens.set(self.state, newvalue)
 
-    def modify(self, func):
+    def modify(self, func, *, state=None):
         '''Apply a function to the focus.
 
             >>> from lenses import lens
@@ -152,10 +160,12 @@ class Lens(object):
             >>> lens([1, 2, 3])[1].modify(lambda n: n + 10)
             [1, 12, 3]
         '''
+        if state is not None:
+            self = self.bind(state)
         self._assert_bound('Lens.modify')
         return self.lens.modify(self.state, func)
 
-    def call(self, method_name, *args, **kwargs):
+    def call(self, method_name, *args, state=None, **kwargs):
         '''Call a method on the focus. The method must return a new
         value for the focus.
 
@@ -165,6 +175,8 @@ class Lens(object):
         '''
         def func(a):
             return getattr(a, method_name)(*args, **kwargs)
+        if state is not None:
+            self = self.bind(state)
         return self.modify(func)
 
     def add_lens(self, other):
