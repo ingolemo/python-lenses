@@ -240,19 +240,15 @@ to use `Lens.getter_setter_`.
 
 All the lenses so far have focused a single object inside a state, but
 it is possible for a lens to have more than one focus. A lens with
-multiple foci is usually referred to as a traversal.
-
-A simple traversal can be made with the `_both` method. `Lens.both_`
-focuses the two objects at indices `0` and `1` within the state. It is
-intended to be used with tuples of length 2, but will work on any
-indexable object.
+multiple foci is usually referred to as a traversal. A simple traversal
+can be made with the `_both` method. `Lens.both_` focuses the two
+objects at indices `0` and `1` within the state. It is intended to be
+used with tuples of length 2, but will work on any indexable object.
 
 One issue with multi-focus lenses is that the `get` method only ever
 returns a single focus. It will return the _first_ item focused by the
-traversal.
-
-If you want to get all the items focused by a lens then you can use the
-`get_all` method which will return those objects in a list:
+traversal. If you want to get all the items focused by a lens then you
+can use the `get_all` method which will return those objects in a list:
 
 	>>> lens([0, 1, 2, 3]).both_().get_all()
 	[0, 1]
