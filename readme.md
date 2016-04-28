@@ -19,6 +19,21 @@ You can uninstall similarly:
 
 ## How to Use
 
+The lenses library makes liberal use of docstrings, which you can access
+as normal with the `pydoc` shell command, the `help` function in the
+repl, or by reading the source yourself.
+
+Most users will only need the docs from `lenses.Lens`. If you want to
+add hooks to allow parts of the library to work with custom objects then
+you should check out the `lenses.setters` module. Most of the fancy lens
+code is in the `lenses.baselens` module for those who are curious how
+everything works.
+
+An example is given in the `examples` folder.
+
+
+### The Basics
+
 For most users, the lenses library exports only one thing worth knowing
 about; a `lens` function:
 
@@ -133,6 +148,9 @@ copies are made. This makes lenses more memory efficient than using
 	>>> old_state.worlds[2] is new_state.worlds[2]
 	False
 
+
+### Unbound Lenses
+
 If you pass no arguments to the `lens` function then you will get an
 unbound `Lens` object. An unbound lens can be manipulated in all the
 ways that a bound lens can except that you can't call any of the methods
@@ -180,6 +198,9 @@ an extra `_l` at the end:
 	>>> lens(data)[1].first_l.set(7)
 	[ClassWithLens([1, 2, 3]), ClassWithLens([7, 5, 6])]
 
+
+### Composing Lenses
+
 If you have two lenses, you can join them together using the `add_lens`
 method. Joining lenses means that one of the lenses is placed "inside"
 of the other so that the focus of one lens is fed into the other one as
@@ -196,6 +217,9 @@ its state:
 
 When you call `a.add_lens(b)`, `b` must be an unbound lens and the
 resulting lens will be bound to the same object as `a`, if any.
+
+
+### Lenses that do computation
 
 So far we've seen lenses that extract data out of data-structures, but
 lenses are more powerful than that. Lenses can actually perform
@@ -220,8 +244,8 @@ shadowed by Lens' methods then you can use `Lens.getattr_(attribute)`.
 
 At their heart, lenses are really just souped-up getters and setters. If
 you have a getter and a setter for some data then you can turn those
-into a lens using the `getter_setter_` method. As an example here is a
-lens that focuses some text and interprets it as json data:
+into a lens using the `getter_setter_` method. Here is a lens that
+focuses some text and interprets it as json data:
 
 	>>> import json
 	>>> def setter(state, value):
@@ -235,8 +259,11 @@ lens that focuses some text and interprets it as json data:
 	'{"numbers": [1, 4, 3]}'
 
 This is just an example; the json lens defined above is already
-available with the `json_` method. See its docstring for details on how
-to use `Lens.getter_setter_`.
+available with the `json_` method. See the docstrings for both these
+methods for details on how to use them.
+
+
+### Traversals
 
 All the lenses so far have focused a single object inside a state, but
 it is possible for a lens to have more than one focus. A lens with
@@ -294,6 +321,15 @@ preserved.
 	[0, 1, 2, 3]
 	>>> both_twice + 10
 	[[10, 11], [12, 13]]
+
+A slightly more useful traversal method is `each_`. `each_` will focus
+all of the items in a data-structure analogous to iterating over it
+using python's `iter` and `next`. It supports most of the built-in
+iterables out of the box, but if you want to use it on your own objects
+then you will need to add a hook yourself.
+
+	>>> lens([1, 2, 3]).each_() + 10
+	[11, 12, 13]
 
 The `values_` method returns a traversal that focuses all of the values
 in a dictionary. If we return to our `GameState` example from earlier,
