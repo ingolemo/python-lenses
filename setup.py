@@ -25,6 +25,6 @@ setuptools.setup(
     keywords='lens lenses immutable functional',
     packages=setuptools.find_packages(exclude=['tests']),
     extras_require={
-        'test': ['coverage'],
+        'test': ['coverage', 'hypothesis'],
     },
 )
