@@ -18,6 +18,7 @@ lens_methods = [
     ('items_', baselens.ItemsLens),
     ('json_', baselens.JsonLens),
     ('keys_', baselens.KeysLens),
+    ('listwrap_', baselens.ListWrapLens),
     ('norm_', baselens.NormalisingLens),
     ('setter_', baselens.SetterLens),
     ('traverse_', baselens.TraverseLens),

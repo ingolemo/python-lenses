@@ -665,6 +665,36 @@ class KeysLens(ComposedLens):
         return 'KeysLens()'
 
 
+class ListWrapLens(IsomorphismLens):
+    '''An isomorphism that wraps its state up in a list. This is useful when
+    you need to a traversal using a TupleLens. Analogous to
+    `lambda state: [state]`.
+
+        >>> from lenses import lens
+        >>> lens().listwrap_()
+        Lens(None, ListWrapLens())
+        >>> lens(0).listwrap_().get()
+        [0]
+        >>> lens(0).listwrap_().set([1])
+        1
+        >>> l = lens().tuple_(lens()[0], lens()[1].listwrap_())
+        >>> l.bind([[1, 3], 4]).each_().each_().get_all()
+        [1, 3, 4]
+    '''
+
+    def __init__(self):
+        pass
+
+    def forwards(self, state):
+        return [state]
+
+    def backwards(self, focus):
+        return focus[0]
+
+    def __repr__(self):
+        return 'ListWrapLens()'
+
+
 class NormalisingLens(IsomorphismLens):
     '''An isomorphism that applies a function as it sets a new focus
     without regard to the old state. It will get foci without
