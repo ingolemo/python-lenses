@@ -807,7 +807,8 @@ class TrivialLens(IsomorphismLens):
 
 class TupleLens(GetterSetterLens):
     '''A lens that combines the focuses of other lenses into a
-    single tuple.
+    single tuple. The sublenses must be regular lenses and not
+    traversals.
 
         >>> from lenses import lens
         >>> lens().tuple_()
