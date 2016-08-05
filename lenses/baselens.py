@@ -132,7 +132,8 @@ class ComposedLens(LensLike):
             if isinstance(lens, TrivialLens):
                 continue
             elif type(lens) is ComposedLens:
-                yield from lens.lenses
+                for lens in lens.lenses:
+                    yield lens
             else:
                 yield lens
 
