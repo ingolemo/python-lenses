@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ingolemo/python-lenses.svg?branch=master)](https://travis-ci.org/ingolemo/python-lenses)
+
 # Lenses
 
 Lenses is a python library that helps you to manipulate large
