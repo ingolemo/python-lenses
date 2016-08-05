@@ -99,7 +99,7 @@ method:
 You can call methods on the data using `call`. Note that this
 method should return new data to include in the data-structure:
 
-	>>> lens([1, {2}, 3])[1].call('union', {4, 5})
+	>>> lens([1, {2}, 3])[1].call('union', {4, 5})  # doctest: +SKIP
 	[1, {2, 4, 5}, 3]
 
 Lenses will also pass most operators through to the data they're focused
@@ -253,7 +253,7 @@ focuses some text and interprets it as json data:
 	...
 	>>> json_lens = lens().getter_setter_(json.loads, setter)
 	>>> my_data = json_lens.bind('{"numbers":[1, 2, 3]}')
-	>>> my_data.get()
+	>>> my_data.get()  # doctest: +SKIP
 	{'numbers': [1, 2, 3]}
 	>>> my_data['numbers'][1].set(4)
 	'{"numbers": [1, 4, 3]}'

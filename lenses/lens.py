@@ -216,7 +216,7 @@ class Lens(object):
 
             >>> from lenses import lens
             >>> json_encoder = lens().decode_().json_().flip()
-            >>> json_encoder.bind(['hello', 'world']).get()
+            >>> json_encoder.bind(['hello', 'world']).get()  # doctest: +SKIP
             b'["hello", "world"]'
         '''
         self._assert_unbound('Lens.flip')

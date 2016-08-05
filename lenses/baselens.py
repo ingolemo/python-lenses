@@ -210,7 +210,7 @@ class IsomorphismLens(LensLike):
     interact with it in a more convenient form.
 
         >>> from lenses import lens
-        >>> lens().iso_(int, str)
+        >>> lens().iso_(int, str)  # doctest: +SKIP
         Lens(None, IsomorphismLens(<class 'int'>, <class 'str'>))
         >>> lens('1').iso_(int, str).get()
         1
@@ -267,9 +267,9 @@ class DecodeLens(IsomorphismLens):
         >>> from lenses import lens
         >>> lens().decode_(encoding='utf8')
         Lens(None, DecodeLens('utf8', 'strict'))
-        >>> lens(b'hello').decode_().get()
+        >>> lens(b'hello').decode_().get()  # doctest: +SKIP
         'hello'
-        >>> lens(b'hello').decode_().set('world')
+        >>> lens(b'hello').decode_().set('world')  # doctest: +SKIP
         b'world'
     '''
 
@@ -342,7 +342,7 @@ class ErrorLens(LensLike):
         >>> from lenses import lens
         >>> lens().error_(Exception())
         Lens(None, ErrorLens(Exception()))
-        >>> lens().error_(Exception, '{}')
+        >>> lens().error_(Exception, '{}')  # doctest: +SKIP
         Lens(None, ErrorLens(<class 'Exception'>, '{}'))
         >>> lens(True).error_(Exception).get()
         Traceback (most recent call last):
@@ -381,7 +381,7 @@ class FilteringLens(LensLike):
     regular `filter` function does.
 
         >>> from lenses import lens
-        >>> lens().filter_(bool)
+        >>> lens().filter_(bool)  # doctest: +SKIP
         Lens(None, FilteringLens(<class 'bool'>))
         >>> lens([0, 1, '', 'hi']).each_().filter_(bool).get_all()
         [1, 'hi']
@@ -478,7 +478,7 @@ class GetterLens(IsomorphismLens):
     Note that modify does both a get and a set.
 
         >>> from lenses import lens
-        >>> lens().getter_(str)
+        >>> lens().getter_(str)  # doctest: +SKIP
         Lens(None, GetterLens(<class 'str'>))
         >>> lens([1, 2, 3])[0].getter_(str).get()
         '1'
@@ -708,7 +708,7 @@ class NormalisingLens(IsomorphismLens):
     `IsomophismLens((lambda s: s), setter)`.
 
         >>> from lenses import lens
-        >>> lens().norm_(int)
+        >>> lens().norm_(int)  # doctest: +SKIP
         Lens(None, NormalisingLens(<class 'int'>))
         >>> lens([1, 2, 3])[0].norm_(int).get()
         1
