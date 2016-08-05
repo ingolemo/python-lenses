@@ -80,7 +80,7 @@ support, but support for any python object can be added so long as you
 know how to construct a new version of that object with the appropriate
 data changed. tuples and namedtuples are supported out of the box.
 
-	>>> class MyClass:
+	>>> class MyClass(object):
 	...     def __init__(self, attribute):
 	...         self.attr = attribute
 	...     def __repr__(self):
@@ -179,7 +179,7 @@ used with particular classes as attributes of those classes. Attribute
 access is much more readable than requiring the user of a class to
 construct a lens themselves.
 
-	>>> class ClassWithLens:
+	>>> class ClassWithLens(object):
 	...     def __init__(self, items):
 	...         self._private_items = items
 	...     def __repr__(self):

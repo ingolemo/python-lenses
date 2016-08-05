@@ -2,7 +2,7 @@ from . import setter
 from . import typeclass
 
 
-class Maybe:
+class Maybe(object):
     '''A class that can contain a value or not. If it contains a value
     then it will be an instance of Just. If it doesn't then it will be
     an instance of Nothing. You can wrap an existing value By calling

@@ -6,7 +6,7 @@ import lenses
 import lenses.typeclass as tc
 
 
-class MonoidProduct:
+class MonoidProduct(object):
     def __init__(self, n):
         self.n = n
 

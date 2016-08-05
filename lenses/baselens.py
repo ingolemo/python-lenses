@@ -44,7 +44,7 @@ def collect_args(n):
     return arg_collector
 
 
-class LensLike:
+class LensLike(object):
     '''A LensLike. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function (`LensLike.func`) that
     does all the hard work. This function is an uncurried form of the
@@ -866,7 +866,7 @@ class ZoomAttrLens(LensLike):
     lens that is being looked up.
 
         >>> from lenses import lens
-        >>> class ClassWithLens:
+        >>> class ClassWithLens(object):
         ...     def __init__(self, items):
         ...         self._private_items = items
         ...     def __repr__(self):
