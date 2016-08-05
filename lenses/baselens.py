@@ -34,7 +34,6 @@ def collect_args(n):
     args = []
 
     def arg_collector(arg):
-        nonlocal args
         args.append(arg)
         if len(args) == n:
             return tuple(args)
@@ -44,7 +43,7 @@ def collect_args(n):
     return arg_collector
 
 
-class LensLike:
+class LensLike(object):
     '''A LensLike. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function (`LensLike.func`) that
     does all the hard work. This function is an uncurried form of the
@@ -132,7 +131,8 @@ class ComposedLens(LensLike):
             if isinstance(lens, TrivialLens):
                 continue
             elif type(lens) is ComposedLens:
-                yield from lens.lenses
+                for lens in lens.lenses:
+                    yield lens
             else:
                 yield lens
 
@@ -209,7 +209,7 @@ class IsomorphismLens(LensLike):
     interact with it in a more convenient form.
 
         >>> from lenses import lens
-        >>> lens().iso_(int, str)
+        >>> lens().iso_(int, str)  # doctest: +SKIP
         Lens(None, IsomorphismLens(<class 'int'>, <class 'str'>))
         >>> lens('1').iso_(int, str).get()
         1
@@ -266,9 +266,9 @@ class DecodeLens(IsomorphismLens):
         >>> from lenses import lens
         >>> lens().decode_(encoding='utf8')
         Lens(None, DecodeLens('utf8', 'strict'))
-        >>> lens(b'hello').decode_().get()
+        >>> lens(b'hello').decode_().get()  # doctest: +SKIP
         'hello'
-        >>> lens(b'hello').decode_().set('world')
+        >>> lens(b'hello').decode_().set('world')  # doctest: +SKIP
         b'world'
     '''
 
@@ -305,7 +305,7 @@ class EachLens(LensLike):
         []
     '''
 
-    def __init__(self, filter_func=None, *, filter_none=False):
+    def __init__(self, filter_func=None, filter_none=False, *_):
         if filter_none:
             self.filter_func = lambda a: a is not None
         elif filter_func is None:
@@ -341,7 +341,7 @@ class ErrorLens(LensLike):
         >>> from lenses import lens
         >>> lens().error_(Exception())
         Lens(None, ErrorLens(Exception()))
-        >>> lens().error_(Exception, '{}')
+        >>> lens().error_(Exception, '{}')  # doctest: +SKIP
         Lens(None, ErrorLens(<class 'Exception'>, '{}'))
         >>> lens(True).error_(Exception).get()
         Traceback (most recent call last):
@@ -380,7 +380,7 @@ class FilteringLens(LensLike):
     regular `filter` function does.
 
         >>> from lenses import lens
-        >>> lens().filter_(bool)
+        >>> lens().filter_(bool)  # doctest: +SKIP
         Lens(None, FilteringLens(<class 'bool'>))
         >>> lens([0, 1, '', 'hi']).each_().filter_(bool).get_all()
         [1, 'hi']
@@ -477,7 +477,7 @@ class GetterLens(IsomorphismLens):
     Note that modify does both a get and a set.
 
         >>> from lenses import lens
-        >>> lens().getter_(str)
+        >>> lens().getter_(str)  # doctest: +SKIP
         Lens(None, GetterLens(<class 'str'>))
         >>> lens([1, 2, 3])[0].getter_(str).get()
         '1'
@@ -707,7 +707,7 @@ class NormalisingLens(IsomorphismLens):
     `IsomophismLens((lambda s: s), setter)`.
 
         >>> from lenses import lens
-        >>> lens().norm_(int)
+        >>> lens().norm_(int)  # doctest: +SKIP
         Lens(None, NormalisingLens(<class 'int'>))
         >>> lens([1, 2, 3])[0].norm_(int).get()
         1
@@ -866,7 +866,7 @@ class ZoomAttrLens(LensLike):
     lens that is being looked up.
 
         >>> from lenses import lens
-        >>> class ClassWithLens:
+        >>> class ClassWithLens(object):
         ...     def __init__(self, items):
         ...         self._private_items = items
         ...     def __repr__(self):

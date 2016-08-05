@@ -2,7 +2,7 @@ from . import setter
 from . import typeclass
 
 
-class Maybe:
+class Maybe(object):
     '''A class that can contain a value or not. If it contains a value
     then it will be an instance of Just. If it doesn't then it will be
     an instance of Nothing. You can wrap an existing value By calling
@@ -70,16 +70,16 @@ class Nothing(Maybe):
 
     def __new__(cls):
         if cls.instance is None:
-            cls.instance = super().__new__(cls)
+            cls.instance = Maybe.__new__(cls)
         return cls.instance
 
     def __init__(self):
-        super().__init__(None, True)
+        super(Nothing, self).__init__(None, True)
 
 
 class Just(Maybe):
     def __init__(self, item):
-        super().__init__(item, False)
+        super(Just, self).__init__(item, False)
 
 
 @typeclass.mempty.register(Maybe)

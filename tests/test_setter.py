@@ -6,7 +6,7 @@ import lenses.setter as s
 
 
 def test_setitem_imm_custom_class():
-    class C:
+    class C(object):
         def __init__(self, item):
             self.item = item
 
@@ -36,7 +36,7 @@ def test_setitem_imm_tuple():
 
 
 def test_setattr_imm_custom_class():
-    class C:
+    class C(object):
         def __init__(self, attr):
             self.attr = attr
 
@@ -53,7 +53,7 @@ def test_setattr_imm_custom_class():
 
 
 def test_setattr_imm_custom_class_raw():
-    class C:
+    class C(object):
         def __init__(self, attr):
             self.attr = attr
 
@@ -69,7 +69,7 @@ def test_setattr_imm_namedtuple():
 
 
 def test_fromiter_custom_class():
-    class C:
+    class C(object):
         def __init__(self, attr):
             self.attr = attr
 
@@ -95,7 +95,7 @@ def test_fromiter_set():
 
 
 def test_fromiter_str():
-    assert s.fromiter('', ['1', '2', '3']) == '123'
+    assert s.fromiter(u'', ['1', '2', '3']) == u'123'
 
 
 def test_fromiter_tuple():

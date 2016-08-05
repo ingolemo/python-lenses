@@ -1,4 +1,8 @@
-from functools import singledispatch
+try:
+    from functools import singledispatch
+except ImportError:
+    from singledispatch import singledispatch
+import sys
 
 
 # monoid
@@ -15,6 +19,16 @@ def mappend(monoid, other):
 @mempty.register(int)
 def _mempty_int(self):
     return 0
+
+
+if sys.version_info[0] < 3:
+    @mempty.register(long)
+    def _mempty_long(self):
+        return long(0)
+
+    @mempty.register(unicode)
+    def _memty_unicode(self):
+        return u''
 
 
 @mempty.register(str)
@@ -39,7 +53,10 @@ def _mempty_dict(dct):
 
 @mappend.register(dict)
 def _mappend_dict(dct, other):
-    return {**dct, **other}
+    out = {}
+    out.update(dct)
+    out.update(other)
+    return out
 
 
 # functor

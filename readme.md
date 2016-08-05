@@ -80,7 +80,7 @@ support, but support for any python object can be added so long as you
 know how to construct a new version of that object with the appropriate
 data changed. tuples and namedtuples are supported out of the box.
 
-	>>> class MyClass:
+	>>> class MyClass(object):
 	...     def __init__(self, attribute):
 	...         self.attr = attribute
 	...     def __repr__(self):
@@ -99,7 +99,7 @@ method:
 You can call methods on the data using `call`. Note that this
 method should return new data to include in the data-structure:
 
-	>>> lens([1, {2}, 3])[1].call('union', {4, 5})
+	>>> lens([1, {2}, 3])[1].call('union', {4, 5})  # doctest: +SKIP
 	[1, {2, 4, 5}, 3]
 
 Lenses will also pass most operators through to the data they're focused
@@ -179,7 +179,7 @@ used with particular classes as attributes of those classes. Attribute
 access is much more readable than requiring the user of a class to
 construct a lens themselves.
 
-	>>> class ClassWithLens:
+	>>> class ClassWithLens(object):
 	...     def __init__(self, items):
 	...         self._private_items = items
 	...     def __repr__(self):
@@ -253,7 +253,7 @@ focuses some text and interprets it as json data:
 	...
 	>>> json_lens = lens().getter_setter_(json.loads, setter)
 	>>> my_data = json_lens.bind('{"numbers":[1, 2, 3]}')
-	>>> my_data.get()
+	>>> my_data.get()  # doctest: +SKIP
 	{'numbers': [1, 2, 3]}
 	>>> my_data['numbers'][1].set(4)
 	'{"numbers": [1, 4, 3]}'

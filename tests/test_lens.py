@@ -119,7 +119,7 @@ def test_lens_flip_not_isomorphism():
 
 
 def test_lens_descriptor():
-    class MyClass:
+    class MyClass(object):
         def __init__(self, items):
             self._private_items = items
 
@@ -131,7 +131,7 @@ def test_lens_descriptor():
 
 
 def test_lens_descriptor_doesnt_bind_from_class():
-    class MyClass:
+    class MyClass(object):
         def __init__(self, items):
             self._private_items = items
 
@@ -144,7 +144,7 @@ def test_lens_descriptor_doesnt_bind_from_class():
 
 
 def test_lens_descriptor_zoom():
-    class MyClass:
+    class MyClass(object):
         def __init__(self, items):
             self._private_items = items
 
