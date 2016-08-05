@@ -306,7 +306,7 @@ class EachLens(LensLike):
         []
     '''
 
-    def __init__(self, filter_func=None, *, filter_none=False):
+    def __init__(self, filter_func=None, filter_none=False, *_):
         if filter_none:
             self.filter_func = lambda a: a is not None
         elif filter_func is None:
