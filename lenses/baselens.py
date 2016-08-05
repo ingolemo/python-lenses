@@ -34,7 +34,6 @@ def collect_args(n):
     args = []
 
     def arg_collector(arg):
-        nonlocal args
         args.append(arg)
         if len(args) == n:
             return tuple(args)
