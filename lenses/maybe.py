@@ -70,16 +70,16 @@ class Nothing(Maybe):
 
     def __new__(cls):
         if cls.instance is None:
-            cls.instance = super().__new__(cls)
+            cls.instance = Maybe.__new__(cls)
         return cls.instance
 
     def __init__(self):
-        super().__init__(None, True)
+        super(Nothing, self).__init__(None, True)
 
 
 class Just(Maybe):
     def __init__(self, item):
-        super().__init__(item, False)
+        super(Just, self).__init__(item, False)
 
 
 @typeclass.mempty.register(Maybe)
