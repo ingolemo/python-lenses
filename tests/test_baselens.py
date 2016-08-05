@@ -101,7 +101,7 @@ def test_DecodeLens_get_with_args():
 
 
 def test_DecodeLens_set():
-    assert b.DecodeLens('ascii', 'replace').set(b'', '\xe9') == b'?'
+    assert b.DecodeLens('ascii', 'replace').set(b'', u'\xe9') == b'?'
 
 
 def test_EachLens_get_all():
