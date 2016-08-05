@@ -53,7 +53,10 @@ def _mempty_dict(dct):
 
 @mappend.register(dict)
 def _mappend_dict(dct, other):
-    return {**dct, **other}
+    out = {}
+    out.update(dct)
+    out.update(other)
+    return out
 
 
 # functor
