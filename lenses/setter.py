@@ -3,6 +3,7 @@ try:
 except ImportError:
     from singledispatch import singledispatch
 import copy
+import sys
 
 
 @singledispatch
@@ -43,19 +44,30 @@ def setitem_immutable(self, key, value):
     else:
         return self._lens_setitem(key, value)
 
+if sys.version_info[0] > 2:
+    @setitem_immutable.register(bytes)
+    def _bytes_setitem_immutable(self, key, value):
+        data = bytearray(self)
+        data[key] = value
+        return bytes(data)
 
-@setitem_immutable.register(bytes)
-def _bytes_setitem_immutable(self, key, value):
-    data = bytearray(self)
-    data[key] = value
-    return bytes(data)
+    @setitem_immutable.register(str)
+    def _str_setitem_immutable(self, key, value):
+        data = list(self)
+        data[key] = value
+        return ''.join(data)
+else:
+    @setitem_immutable.register(str)
+    def _bytes_setitem_immutable(self, key, value):
+        data = bytearray(self)
+        data[key] = value
+        return bytes(data)
 
-
-@setitem_immutable.register(str)
-def _str_setitem_immutable(self, key, value):
-    data = list(self)
-    data[key] = value
-    return ''.join(data)
+    @setitem_immutable.register(unicode)
+    def _str_setitem_immutable(self, key, value):
+        data = list(self)
+        data[key] = value
+        return ''.join(data)
 
 
 @setitem_immutable.register(tuple)
@@ -144,9 +156,22 @@ def fromiter(self, iterable):
         return self._lens_fromiter(iterable)
 
 
-@fromiter.register(bytes)
-def _bytes_fromiter(self, iterable):
-    return bytes(iterable)
+if sys.version_info[0] > 2:
+    @fromiter.register(bytes)
+    def _bytes_fromiter(self, iterable):
+        return bytes(iterable)
+
+    @fromiter.register(str)
+    def _str_fromiter(self, iterable):
+        return ''.join(iterable)
+else:
+    @fromiter.register(str)
+    def _bytes_fromiter(self, iterable):
+        return ''.join(map(chr, iterable))
+
+    @fromiter.register(unicode)
+    def _str_fromiter(self, iterable):
+        return ''.join(iterable)
 
 
 @fromiter.register(dict)
@@ -165,11 +190,6 @@ def _list_fromiter(self, iterable):
 @fromiter.register(set)
 def _set_fromiter(self, iterable):
     return set(iterable)
-
-
-@fromiter.register(str)
-def _str_fromiter(self, iterable):
-    return ''.join(iterable)
 
 
 @fromiter.register(tuple)

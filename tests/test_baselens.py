@@ -97,7 +97,7 @@ def test_DecodeLens_get():
 
 
 def test_DecodeLens_get_with_args():
-    assert b.DecodeLens('utf-8').get(b'caf\xc3\xa9') == 'caf\xe9'
+    assert b.DecodeLens('utf-8').get(b'caf\xc3\xa9') == u'caf\xe9'
 
 
 def test_DecodeLens_set():

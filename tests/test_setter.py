@@ -95,7 +95,7 @@ def test_fromiter_set():
 
 
 def test_fromiter_str():
-    assert s.fromiter('', ['1', '2', '3']) == '123'
+    assert s.fromiter(u'', ['1', '2', '3']) == u'123'
 
 
 def test_fromiter_tuple():
