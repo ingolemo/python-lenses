@@ -24,6 +24,9 @@ setuptools.setup(
     ],
     keywords='lens lenses immutable functional',
     packages=setuptools.find_packages(exclude=['tests']),
+    install_requires=[
+        'singledispatch',
+    ],
     extras_require={
         'test': ['coverage', 'hypothesis'],
     },

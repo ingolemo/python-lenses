@@ -1,4 +1,7 @@
-from functools import singledispatch
+try:
+    from functools import singledispatch
+except ImportError:
+    from singledispatch import singledispatch
 
 
 # monoid
