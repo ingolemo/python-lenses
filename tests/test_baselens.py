@@ -1,4 +1,5 @@
 import collections
+import sys
 
 import pytest
 # import hypothesis
@@ -100,8 +101,9 @@ def test_DecodeLens_get_with_args():
     assert b.DecodeLens('utf-8').get(b'caf\xc3\xa9') == u'caf\xe9'
 
 
-def test_DecodeLens_set():
-    assert b.DecodeLens('ascii', 'replace').set(b'', '\xe9') == b'?'
+if sys.version_info[0] > 2:
+    def test_DecodeLens_set():
+        assert b.DecodeLens('ascii', 'replace').set(b'', '\xe9') == b'?'
 
 
 def test_EachLens_get_all():
