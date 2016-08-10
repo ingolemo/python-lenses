@@ -468,8 +468,9 @@ class GetitemLens(GetterSetterLens):
 
 
 class GetitemOrElseLens(GetitemLens):
-    '''A lens that focuses an item inside a container. Analogous to
-    `dict.get`.
+    '''A lens that focuses an item inside a container by calling its `get`
+    method, allowing you to specify a default value for missing keys.
+    Analogous to `dict.get`.
 
         >>> from lenses import lens
         >>> lens().get_('foo')
