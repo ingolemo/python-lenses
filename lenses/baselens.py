@@ -380,12 +380,13 @@ class FilteringLens(LensLike):
     regular `filter` function does.
 
         >>> from lenses import lens
-        >>> lens().filter_(bool)  # doctest: +SKIP
-        Lens(None, FilteringLens(<class 'bool'>))
-        >>> lens([0, 1, '', 'hi']).each_().filter_(bool).get_all()
-        [1, 'hi']
-        >>> lens([0, 1, '', 'hi']).each_().filter_(bool).set(2)
-        [0, 2, '', 2]
+        >>> lens().filter_(all)
+        Lens(None, FilteringLens(<built-in function all>))
+        >>> data = [[1, 2], [0], ['a'], ['', 'b']]
+        >>> lens(data).each_().filter_(all).get_all()
+        [[1, 2], ['a']]
+        >>> lens(data).each_().filter_(all).set(2)
+        [2, [0], 2, ['', 'b']]
 
     The filtering is done to foci before the lens' manipulation is
     applied. This means that the resulting foci can still violate the
