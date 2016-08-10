@@ -209,12 +209,12 @@ class IsomorphismLens(LensLike):
     interact with it in a more convenient form.
 
         >>> from lenses import lens
-        >>> lens().iso_(int, str)  # doctest: +SKIP
-        Lens(None, IsomorphismLens(<class 'int'>, <class 'str'>))
-        >>> lens('1').iso_(int, str).get()
-        1
-        >>> lens('1').iso_(int, str).set(2)
-        '2'
+        >>> lens().iso_(chr, ord)
+        Lens(None, IsomorphismLens(<built-in function chr>, <built-in function ord>))
+        >>> lens(65).iso_(chr, ord).get()
+        'A'
+        >>> lens(65).iso_(chr, ord).set('B')
+        66
     '''
 
     def __init__(self, forwards, backwards):
