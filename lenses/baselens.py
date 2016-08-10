@@ -467,6 +467,32 @@ class GetitemLens(GetterSetterLens):
         return 'GetitemLens({!r})'.format(self.key)
 
 
+class GetitemOrElseLens(GetitemLens):
+    '''A lens that focuses an item inside a container. Analogous to
+    `dict.get`.
+
+        >>> from lenses import lens
+        >>> lens().get_('foo')
+        Lens(None, GetitemOrElseLens('foo'))
+        >>> lens({'foo': 'bar'}).get_('baz').get()
+        >>> lens({'foo': 'bar'}).get_('baz', []).get()
+        []
+        >>> from collections import OrderedDict
+        >>> lens(OrderedDict({'foo': 'bar'})).get_('baz').set('qux')
+        OrderedDict([('foo', 'bar'), ('baz', 'qux')])
+    '''
+
+    def __init__(self, key, default=None):
+        self.key = key
+        self.default = default
+
+    def getter(self, state):
+        return state.get(self.key, self.default)
+
+    def __repr__(self):
+        return 'GetitemOrElseLens({!r})'.format(self.key)
+
+
 class GetterLens(IsomorphismLens):
     '''An isomorphism that applies a function to its focus when the
     focus is retrieved, but will just set whatever it is asked. This

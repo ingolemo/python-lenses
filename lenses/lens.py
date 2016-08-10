@@ -8,6 +8,7 @@ lens_methods = [
     ('error_', baselens.ErrorLens),
     ('each_', baselens.EachLens),
     ('filter_', baselens.FilteringLens),
+    ('get_', baselens.GetitemOrElseLens),
     ('getattr_', baselens.GetattrLens),
     ('getitem_', baselens.GetitemLens),
     ('getter_', baselens.GetterLens),
