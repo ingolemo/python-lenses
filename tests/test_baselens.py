@@ -192,7 +192,7 @@ def test_GetattrLens_set():
     assert b.GetattrLens('attr').set(Tup(1), 2) == Tup(2)
 
 
-class C:
+class C(object):
     def __init__(self, attr):
         self.attr = attr
 
