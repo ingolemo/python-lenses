@@ -193,11 +193,10 @@ construct a lens themselves.
 	ClassWithLens([4, 2, 3])
 
 If you ever end up focusing an object with a lens as one of its
-attributes then you can use that lens by accessing the attribute with
-an extra `_l` at the end:
+attributes, lenses are smart enough to follow that lens to its focus.
 
 	>>> data = [ClassWithLens([1, 2, 3]), ClassWithLens([4, 5, 6])]
-	>>> lens(data)[1].first_l.set(7)
+	>>> lens(data)[1].first.set(7)
 	[ClassWithLens([1, 2, 3]), ClassWithLens([7, 5, 6])]
 
 

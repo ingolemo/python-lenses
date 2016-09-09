@@ -935,13 +935,11 @@ class ZoomAttrLens(LensLike):
         ...     first = lens()._private_items[0]
         ...
         >>> data = (ClassWithLens([1, 2, 3]), 4)
-        >>> lens().first_l
-        Lens(None, ZoomAttrLens('first'))
         >>> lens().zoomattr_('first')
         Lens(None, ZoomAttrLens('first'))
-        >>> lens(data)[0].first_l.get()
+        >>> lens(data)[0].zoomattr_('first').get()
         1
-        >>> lens(data)[0].first_l.set(5)
+        >>> lens(data)[0].zoomattr_('first').set(5)
         (ClassWithLens([5, 2, 3]), 4)
     '''
 

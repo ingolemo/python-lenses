@@ -157,8 +157,8 @@ def test_lens_descriptor_zoom():
         first = lens()._private_items[0]
 
     data = (MyClass([1, 2, 3]),)
-    assert lens(data)[0].first_l.get() == 1
-    assert lens(data)[0].first_l.set(4) == (MyClass([4, 2, 3]),)
+    assert lens(data)[0].first.get() == 1
+    assert lens(data)[0].first.set(4) == (MyClass([4, 2, 3]),)
 
 
 def test_lens_get_state_keyword():
