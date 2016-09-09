@@ -249,7 +249,7 @@ class Lens(object):
                 return self.call(name[:-2], *args, **kwargs)
             return caller
 
-        return self.add_lens(baselens.GetattrLens(name))
+        return self.add_lens(baselens.GetZoomAttrLens(name))
 
     def __getitem__(self, name):
         return self.add_lens(baselens.GetitemLens(name))
