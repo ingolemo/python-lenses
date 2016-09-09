@@ -412,15 +412,13 @@ class GetattrLens(GetterSetterLens):
 
         >>> from lenses import lens
         >>> from collections import namedtuple
-        >>> Either = namedtuple('Either', 'left right')
-        >>> lens().left
+        >>> Pair = namedtuple('Pair', 'left right')
+        >>> lens().getattr_('left')
         Lens(None, GetattrLens('left'))
-        >>> lens().getattr_('right')
-        Lens(None, GetattrLens('right'))
-        >>> lens(Either(1, 2)).left.get()
+        >>> lens(Pair(1, 2)).getattr_('left').get()
         1
-        >>> lens(Either(1, 2)).right.set(3)
-        Either(left=1, right=3)
+        >>> lens(Pair(1, 2)).getattr_('right').set(3)
+        Pair(left=1, right=3)
     '''
 
     def __init__(self, name):
@@ -443,16 +441,16 @@ class GetZoomAttrLens(LensLike):
         >>> from lenses import lens
         >>> from collections import namedtuple
         >>> Triple = namedtuple('Triple', 'left middle right')
-        >>> state = Triple(1, 10, lens().getzoomattr_('middle'))
-        >>> lens().getzoomattr_('left')
+        >>> state = Triple(1, 10, lens().middle)
+        >>> lens().left
         Lens(None, GetZoomAttrLens('left'))
-        >>> lens(state).getzoomattr_('left').get()
+        >>> lens(state).left.get()
         1
-        >>> lens(state).getzoomattr_('left').set(3)
+        >>> lens(state).left.set(3)
         Triple(left=3, middle=10, right=Lens(None, GetZoomAttrLens('middle')))
-        >>> lens(state).getzoomattr_('right').get()
+        >>> lens(state).right.get()
         10
-        >>> lens(state).getzoomattr_('right').set(13)
+        >>> lens(state).right.set(13)
         Triple(left=1, middle=13, right=Lens(None, GetZoomAttrLens('middle')))
     '''
     def __init__(self, name):
