@@ -10,6 +10,7 @@ lens_methods = [
     ('filter_', baselens.FilteringLens),
     ('get_', baselens.GetitemOrElseLens),
     ('getattr_', baselens.GetattrLens),
+    ('getzoomattr_', baselens.GetZoomAttrLens),
     ('getitem_', baselens.GetitemLens),
     ('getter_', baselens.GetterLens),
     ('getter_setter_', baselens.GetterSetterLens),

@@ -192,6 +192,36 @@ def test_GetattrLens_set():
     assert b.GetattrLens('attr').set(Tup(1), 2) == Tup(2)
 
 
+class C:
+    def __init__(self, attr):
+        self.attr = attr
+
+    def __eq__(self, other):
+        return self.attr == other.attr
+
+    sublens = lens().attr
+
+
+def test_GetZoomAttrLens_get_attr():
+    state = C('c')
+    b.GetZoomAttrLens('attr').get(state) == 'c'
+
+
+def test_GetZoomAttrLens_set_attr():
+    state = C('c')
+    b.GetZoomAttrLens('attr').set(state, 'b') == C('b')
+
+
+def test_GetZoomAttrLens_get_zoom():
+    state = C('c')
+    b.GetZoomAttrLens('sublens').get(state) == 'c'
+
+
+def test_GetZoomAttrLens_set_zoom():
+    state = C('c')
+    b.GetZoomAttrLens('sublens').set(state, 'b') == C('b')
+
+
 def test_GetitemLens_get():
     assert b.GetitemLens(0).get([1, 2, 3]) == 1
 
