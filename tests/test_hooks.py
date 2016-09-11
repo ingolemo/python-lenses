@@ -2,7 +2,7 @@ import collections
 
 import pytest
 
-import lenses.setter as s
+import lenses.hooks as s
 
 
 def test_setitem_imm_custom_class():

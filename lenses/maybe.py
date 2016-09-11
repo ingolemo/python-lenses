@@ -1,4 +1,4 @@
-from . import setter
+from . import hooks
 from . import typeclass
 
 
@@ -104,7 +104,7 @@ def _maybe_apply(self, fn):
     return Just(fn.item(self.item))
 
 
-@setter.fromiter.register(Maybe)
+@hooks.fromiter.register(Maybe)
 def _maybe_fromiter(self, iter):
     i = list(iter)
     if i == []:

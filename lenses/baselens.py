@@ -1,4 +1,4 @@
-from . import setter
+from . import hooks
 from .identity import Identity
 from .const import Const
 from .functorisor import Functorisor
@@ -246,8 +246,8 @@ class BothLens(LensLike):
 
     def func(self, f, state):
         def multisetter(items):
-            s = setter.setitem_immutable(state, 0, items[0])
-            s = setter.setitem_immutable(s, 1, items[1])
+            s = hooks.setitem_immutable(state, 0, items[0])
+            s = hooks.setitem_immutable(s, 1, items[1])
             return s
 
         f0 = f(state[0])
@@ -317,7 +317,7 @@ class EachLens(LensLike):
         items = list(filter(self.filter_func, state))
 
         def build_new_state_from_iter(a):
-            return setter.fromiter(state, filter(self.filter_func, a))
+            return hooks.fromiter(state, filter(self.filter_func, a))
 
         if items == []:
             return f.get_pure(build_new_state_from_iter(items))
@@ -428,7 +428,7 @@ class GetattrLens(GetterSetterLens):
         return getattr(state, self.name)
 
     def setter(self, state, focus):
-        return setter.setattr_immutable(state, self.name, focus)
+        return hooks.setattr_immutable(state, self.name, focus)
 
     def __repr__(self):
         return 'GetattrLens({!r})'.format(self.name)
@@ -495,7 +495,7 @@ class GetitemLens(GetterSetterLens):
         return state[self.key]
 
     def setter(self, state, focus):
-        return setter.setitem_immutable(state, self.key, focus)
+        return hooks.setitem_immutable(state, self.key, focus)
 
     def __repr__(self):
         return 'GetitemLens({!r})'.format(self.key)

@@ -27,7 +27,7 @@ repl, or by reading the source yourself.
 
 Most users will only need the docs from `lenses.Lens`. If you want to
 add hooks to allow parts of the library to work with custom objects then
-you should check out the `lenses.setters` module. Most of the fancy lens
+you should check out the `lenses.hooks` module. Most of the fancy lens
 code is in the `lenses.baselens` module for those who are curious how
 everything works.
 
