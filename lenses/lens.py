@@ -21,7 +21,6 @@ lens_methods = [
     ('keys_', baselens.KeysLens),
     ('listwrap_', baselens.ListWrapLens),
     ('norm_', baselens.NormalisingLens),
-    ('setter_', baselens.SetterLens),
     ('traverse_', baselens.TraverseLens),
     ('tuple_', baselens.TupleLens),
     ('values_', baselens.ValuesLens),
