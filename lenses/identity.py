@@ -2,6 +2,13 @@ from .typeclass import apply, pure
 
 
 class Identity(object):
+    '''The identiy functor applies functions to its contents
+    with no additional funtionality. It is the trivial or null
+    functor.
+
+    It is needed for lenses to be able to set values.
+    '''
+
     def __init__(self, item):
         self.item = item
 

@@ -1,7 +1,12 @@
+'''This module contains functions that you can hook into to allow
+various lenses to operate on your own custom data structures.
+'''
+
 try:
     from functools import singledispatch
 except ImportError:
     from singledispatch import singledispatch
+
 import copy
 import sys
 

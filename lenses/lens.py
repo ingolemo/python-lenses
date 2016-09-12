@@ -53,7 +53,7 @@ def _carry_op(name):
     def operation(self, *args, **kwargs):
         return self.modify(lambda a: getattr(a, name)(*args, **kwargs))
 
-    doc = 'Equivalent to `self.modify(lambda a: a.{}(*args, **kwargs))`'
+    doc = 'Equivalent to `self.call({!r}, *args, **kwargs))`'
     operation.__name__ = name
     operation.__doc__ = doc.format(name)
     return operation
@@ -192,8 +192,8 @@ class Lens(object):
 
     def add_lens(self, other):
         '''Refine the current focus of this lens by composing it with
-        another lens object. Can be a `lenses.LensLike` or an unbound
-        `lenses.Lens`.
+        another lens object. Can be a `lenses.baselens.LensLike` or
+        an unbound `lenses.Lens`.
 
             >>> from lenses import lens
             >>> second_first = lens()[1][0]

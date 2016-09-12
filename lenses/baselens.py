@@ -61,9 +61,11 @@ class LensLike(object):
 
     def get(self, state):
         '''Returns the focus within `state`. If multiple items are
-        focused then it will attempt to join them together with
-        `lenses.typeclass.mappend`. The lens must have at least one
-        focus.'''
+        focused then it will attempt to join them together as a monoid.
+        See `lenses.typeclass.mappend`.
+
+        Will raise ValueError if the lens doesn't have at least one focus.
+        '''
 
         guard = object()
         const = Functorisor(lambda a: Const(Nothing()),
@@ -99,9 +101,11 @@ class LensLike(object):
 
     def flip(self):
         '''Flips an isomorphism so that it works in the opposite
-        direction. only works if the lens is actually an isomorphism.
-        Intended to be overridden by such subclasses. Raises
-        TypeError for non-isomorphic lenses.'''
+        direction. Only works if the lens is actually an isomorphism.
+        Intended to be overridden by such subclasses.
+
+        Raises TypeError for non-isomorphic lenses.
+        '''
         message = 'Cannot flip: {} is not an isomorphism.'
         raise TypeError(message.format(type(self)))
 
@@ -120,6 +124,8 @@ class ComposedLens(LensLike):
         >>> from lenses import lens
         >>> lens()[0][1]
         Lens(None, GetitemLens(0) & GetitemLens(1))
+
+    (The ComposedLens is represented above by the `&` symbol)
     '''
 
     def __init__(self, lenses=()):
@@ -168,11 +174,34 @@ class GetterSetterLens(LensLike):
     '''Turns a pair of getter and setter functions into a van
     Laarhoven lens. A getter function is one that takes a state and
     returns a value derived from that state. A setter function takes
-    an old state and a new value and injects the new value into the
-    old state, returning a new state.
+    an old state and a new value and uses them to construct a new state.
 
-    def getter(state) -> value
-    def setter(old_state, new_value) -> new_state
+        >>> from lenses import lens
+        >>> def getter(state):
+        ...     'Get the average of a list'
+        ...     return sum(state) // len(state)
+        ...
+        >>> def setter(old_state, value):
+        ...     'Set the average of a list by changing the final value'
+        ...     target_sum = value * len(old_state)
+        ...     prefix = old_state[:-1]
+        ...     return prefix + [target_sum - sum(prefix)]
+        ...
+        >>> average_lens = lens().getter_setter_(getter, setter)
+        >>> average_lens
+        Lens(None, GetterSetterLens(<function getter...>, <function setter...>))
+        >>> average_lens.bind([1, 2, 4, 5]).get()
+        3
+        >>> average_lens.bind([1, 2, 3]).set(4)
+        [1, 2, 9]
+        >>> average_lens.bind([1, 2, 3]) - 1
+        [1, 2, 0]
+
+    Though GetterSetterLens is more powerful because it can inspect the
+    old state to produce a new one, IsomorphismLens is more suited to
+    building custom lenses due to the greater availability of functions
+    that already fit its API. Only use a GetterSetterLens if you need the
+    extra power it affords.
     '''
 
     def __init__(self, getter, setter):
@@ -215,6 +244,15 @@ class IsomorphismLens(LensLike):
         'A'
         >>> lens(65).iso_(chr, ord).set('B')
         66
+
+    Due to their symmetry, isomorphisms can be flipped, thereby swapping
+    thier forwards and backwards functions:
+
+        >>> flipped = lens().iso_(chr, ord).flip()
+        >>> flipped
+        Lens(None, IsomorphismLens(<built-in function ord>, <built-in function chr>))
+        >>> flipped.bind('A').get()
+        65
     '''
 
     def __init__(self, forwards, backwards):
@@ -289,7 +327,7 @@ class DecodeLens(IsomorphismLens):
 
 class EachLens(LensLike):
     '''A traversal that iterates over its state, focusing everything it
-    iterates over. It uses `setter.fromiter` to reform the state
+    iterates over. It uses `lenses.hooks.fromiter` to reform the state
     afterwards so it should work with any iterable that function
     supports. Analogous to `iter`.
 
@@ -727,9 +765,9 @@ class KeysLens(ComposedLens):
 
 
 class ListWrapLens(IsomorphismLens):
-    '''An isomorphism that wraps its state up in a list. This is useful when
-    you need to a traversal using a TupleLens. Analogous to
-    `lambda state: [state]`.
+    '''An isomorphism that wraps its state up in a list. This is
+    occasionally useful when you need to make hetrogenous data more
+    uniform. Analogous to `lambda state: [state]`.
 
         >>> from lenses import lens
         >>> lens().listwrap_()
@@ -741,6 +779,9 @@ class ListWrapLens(IsomorphismLens):
         >>> l = lens().tuple_(lens()[0], lens()[1].listwrap_())
         >>> l.bind([[1, 3], 4]).each_().each_().get_all()
         [1, 3, 4]
+
+    Also serves as an example that lenses do not always have to
+    'zoom in' on a focus; they can also 'zoom out'.
     '''
 
     def __init__(self):
@@ -761,21 +802,25 @@ class NormalisingLens(IsomorphismLens):
     without regard to the old state. It will get foci without
     transformation. This lens allows you to post-process values before
     you set them them, but still get value as they exist in the state.
-    Useful for type conversions or normalising data. This lens is
-    similar to the SetterLens, but this setter function has a more
-    convenient signature, applicable to most built-in
+    Useful for type conversions or normalising data.
+
+    For best results, your normalisation function should be idempotent.
+
+    This lens is similar to the SetterLens, but this setter function
+    has a more convenient signature, applicable to most built-in
     functions/constructors. Equivalent to
     `IsomophismLens((lambda s: s), setter)`.
 
         >>> from lenses import lens
-        >>> lens().norm_(int)  # doctest: +SKIP
-        Lens(None, NormalisingLens(<class 'int'>))
-        >>> lens([1, 2, 3])[0].norm_(int).get()
-        1
-        >>> lens([1, 2, 3])[0].norm_(int).set('4')
-        [4, 2, 3]
-        >>> lens([1, 2, 3])[0].norm_(int).modify(lambda a: a - 4.5)
-        [-3, 2, 3]
+        >>> def real_only(num):
+        ...     return num.real
+        ...
+        >>> lens().norm_(real_only)
+        Lens(None, NormalisingLens(<function real_only at ...>))
+        >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).get()
+        1.0
+        >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).set(4+7j)
+        [4.0, 2.0, 3.0]
     '''
 
     def __init__(self, setter):
@@ -821,7 +866,11 @@ class SetterLens(GetterSetterLens):
 class TraverseLens(LensLike):
     '''A traversal that focuses everything in a data structure depending
     on how that data structure defines `lenses.typeclass.traverse`.
-    Usually somewhat similar to iterating over it.
+    This lens is nothing more than a wrapper around that function.
+
+    This is a particularly useful lens for traversing recursive
+    data-structures, but unfortunately it does require you to implement
+    the traversal yourself. By default, it is only defined for lists.
 
         >>> from lenses import lens
         >>> lens().traverse_()
@@ -841,8 +890,8 @@ class TraverseLens(LensLike):
 
 class TrivialLens(IsomorphismLens):
     '''A trivial isomorphism that focuses the whole state. It doesn't
-    manipulate the state. Mostly used as a "null" lens. Analogous to
-    `lambda a: a`.
+    manipulate the state in any way. Mostly used as a "null" lens.
+    Analogous to `lambda a: a`.
 
         >>> from lenses import lens
         >>> lens()
@@ -874,13 +923,23 @@ class TupleLens(GetterSetterLens):
         >>> from lenses import lens
         >>> lens().tuple_()
         Lens(None, TupleLens())
-        >>> tl = lens().tuple_(lens()[0].lens, lens()[2].lens)
+        >>> tl = lens().tuple_(lens()[0], lens()[2])
         >>> tl
         Lens(None, TupleLens(GetitemLens(0), GetitemLens(2)))
         >>> tl.bind([1, 2, 3, 4]).get()
         (1, 3)
         >>> tl.bind([1, 2, 3, 4]).set((5, 6))
         [5, 2, 6, 4]
+
+    This lens is particularly useful when immediately followed by
+    an EachLens, allowing you to traverse data even when it comes
+    from disparate locations within the state.
+
+        >>> state = ([1, 2, 3], 4, [5, 6])
+        >>> tl.bind(state).each_().each_().get_all()
+        [1, 2, 3, 5, 6]
+        >>> tl.bind(state).each_().each_() + 10
+        ([11, 12, 13], 4, [15, 16])
     '''
 
     def __init__(self, *lenses):
