@@ -12,7 +12,6 @@ lens_methods = [
     ('getattr_', baselens.GetattrLens),
     ('getzoomattr_', baselens.GetZoomAttrLens),
     ('getitem_', baselens.GetitemLens),
-    ('getter_', baselens.GetterLens),
     ('getter_setter_', baselens.GetterSetterLens),
     ('iso_', baselens.IsomorphismLens),
     ('item_', baselens.ItemLens),
