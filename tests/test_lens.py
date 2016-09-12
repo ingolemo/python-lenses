@@ -216,7 +216,7 @@ def test_lens_divide():
 
 # Testing that you can use sublenses through Lens properly
 def test_lens_trivial():
-    assert lens(3).trivial_().get() == 3
+    assert lens(3).get() == 3
 
 
 def test_lens_getitem():

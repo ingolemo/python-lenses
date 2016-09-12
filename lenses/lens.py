@@ -24,7 +24,6 @@ lens_methods = [
     ('norm_', baselens.NormalisingLens),
     ('setter_', baselens.SetterLens),
     ('traverse_', baselens.TraverseLens),
-    ('trivial_', baselens.TrivialLens),
     ('tuple_', baselens.TupleLens),
     ('values_', baselens.ValuesLens),
     ('zoomattr_', baselens.ZoomAttrLens),
