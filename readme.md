@@ -231,10 +231,10 @@ A simple example is that of the `item_` method which returns a lens that
 focuses on a single key of a dictionary but returns both the key and the
 value:
 
-	>>> l = lens({'one': 1})
-	>>> l.item_('one').get()
+	>>> item_one = lens({'one': 1}).item_('one')
+	>>> item_one.get()
 	('one', 1)
-	>>> l.item_('one').set(('three', 3))
+	>>> item_one.set(('three', 3))
 	{'three': 3}
 
 There are a number of such more complicated lenses defined on `Lens`. To
@@ -243,25 +243,41 @@ all end with a single underscore. See `help(lenses.Lens)` in the repl
 for more. If you need to access an attribute on the state that has been
 shadowed by Lens' methods then you can use `Lens.getattr_(attribute)`.
 
-At their heart, lenses are really just souped-up getters and setters. If
-you have a getter and a setter for some data then you can turn those
-into a lens using the `getter_setter_` method. Here is a lens that
-focuses some text and interprets it as json data:
+For a good example of a more complex lens, check out the `json_` method
+which gives you a lens that can focus a string as though it were a parsed
+json object.
 
-	>>> import json
-	>>> def setter(state, value):
-	...     return json.dumps(value)
-	...
-	>>> json_lens = lens().getter_setter_(json.loads, setter)
-	>>> my_data = json_lens.bind('{"numbers":[1, 2, 3]}')
-	>>> my_data.get()  # doctest: +SKIP
+	>>> json_lens = lens('{"numbers":[1, 2, 3]}').json_()
+	>>> json_lens.get()  # doctest: +SKIP
 	{'numbers': [1, 2, 3]}
-	>>> my_data['numbers'][1].set(4)
+	>>> json_lens['numbers'][1].set(4)
 	'{"numbers": [1, 4, 3]}'
 
-This is just an example; the json lens defined above is already
-available with the `json_` method. See the docstrings for both these
-methods for details on how to use them.
+At their heart, lenses are really just souped-up getters and setters. If
+you have a getter and a setter for some data then you can turn those
+into a lens using the `getter_setter_` method. Here is how you could
+recreate the `item_('one')` lens defined above in terms of
+`getter_setter_`:
+
+	>>> def getter(current_state):
+	...     return 'one', current_state['one']
+	...
+	>>> def setter(old_state, new_focus):
+	...     key, value = new_focus
+	...     new_state = old_state.copy()
+	...     del new_state['one']
+	...     new_state[key] = value
+	...     return new_state
+	...
+	>>> item_one = lens({'one': 1}).getter_setter_(getter, setter)
+	>>> item_one.get()
+	('one', 1)
+	>>> item_one.set(('three', 3))
+	{'three': 3}
+
+Recreating existing behaviour isn't very useful, but hopefully you can
+see how useful it is to be able to make your own lenses for any pair of
+getter and setter functions.
 
 
 ### Traversals
