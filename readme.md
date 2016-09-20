@@ -278,6 +278,8 @@ returns a single focus. It will return the _first_ item focused by the
 traversal. If you want to get all the items focused by a lens then you
 can use the `get_all` method which will return those objects in a list:
 
+	>>> lens([0, 1, 2, 3]).both_().get()
+	0
 	>>> lens([0, 1, 2, 3]).both_().get_all()
 	[0, 1]
 
