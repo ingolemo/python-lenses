@@ -770,16 +770,16 @@ class ListWrapLens(IsomorphismLens):
 class NormalisingLens(IsomorphismLens):
     '''An isomorphism that applies a function as it sets a new focus
     without regard to the old state. It will get foci without
-    transformation. This lens allows you to post-process values before
-    you set them them, but still get value as they exist in the state.
+    transformation. This lens allows you to pre-process values before
+    you set them, but still get values as they exist in the state.
     Useful for type conversions or normalising data.
 
     For best results, your normalisation function should be idempotent.
+    That is, applying the function twice should have no effect:
 
-    This lens is similar to the SetterLens, but this setter function
-    has a more convenient signature, applicable to most built-in
-    functions/constructors. Equivalent to
-    `IsomophismLens((lambda s: s), setter)`.
+        setter(setter(value)) == setter(value)
+
+    Equivalent to `IsomophismLens((lambda s: s), setter)`.
 
         >>> from lenses import lens
         >>> def real_only(num):
@@ -791,6 +791,14 @@ class NormalisingLens(IsomorphismLens):
         1.0
         >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).set(4+7j)
         [4.0, 2.0, 3.0]
+
+    Types with constructors that do conversion are often good targets
+    for this lens:
+
+        >>> lens([1, 2, 3])[0].norm_(int).set(4.0)
+        [4, 2, 3]
+        >>> lens([1, 2, 3])[1].norm_(int).set('5')
+        [1, 5, 3]
     '''
 
     def __init__(self, setter):
