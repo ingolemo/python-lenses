@@ -51,6 +51,7 @@ it (anything that would call `__getattr__` or `__getitem__`):
 	>>> data = [1, 2, 3]
 	>>> my_lens = lens(data)[1]
 
+The data that the lens is "zooming in on" is called the _focus_ of the lens.
 Once you arrive at the data you want, you can get hold of it with the
 `get` method:
 
@@ -71,10 +72,10 @@ never mutates the original data structure:
 Lenses allow you to manipulate arbitrarily nested objects:
 
 	>>> data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-	>>> lens(data)[1][0].set(20)
-	[[1, 2, 3], [20, 5, 6], [7, 8, 9]]
-	>>> lens(data)[2].set(20)
-	[[1, 2, 3], [4, 5, 6], 20]
+	>>> lens(data)[1][0].set(10)
+	[[1, 2, 3], [10, 5, 6], [7, 8, 9]]
+	>>> lens(data)[2].set(10)
+	[[1, 2, 3], [4, 5, 6], 10]
 
 And they support more than just lists. Any mutable python object that
 can by copied with `copy.copy` will work. Immutable objects need special
@@ -82,30 +83,53 @@ support, but support for any python object can be added so long as you
 know how to construct a new version of that object with the appropriate
 data changed. tuples and namedtuples are supported out of the box.
 
-	>>> class MyClass(object):
+Here's an example where we change the value of an attribute of a custom class:
+
+	>>> class Container(object):
 	...     def __init__(self, attribute):
 	...         self.attr = attribute
 	...     def __repr__(self):
-	...         return 'MyClass(' + repr(self.attr) + ')'
+	...         return 'Container({!r})'.format(self.attr)
 	...
-	>>> data = (0, MyClass({'hello': 'world'}))
-	>>> lens(data)[1].attr['hello'].set('everyone')
-	(0, MyClass({'hello': 'everyone'}))
+	>>> data = Container(1)
+	>>> lens(data).attr.set(2)
+	Container(2)
 
-If you wish to apply a function using a lens you can use the `modify`
-method:
+Nesting these things also works. In this example we change a value in
+a dictionary, which is an attribute of a custom class, which is one of
+the elements in a tuple:
+
+	>>> data = (0, Container({'hello': 'world'}))
+	>>> lens(data)[1].attr['hello'].set('everyone')
+	(0, Container({'hello': 'everyone'}))
+
+If you wish to apply a function to the focus of the lens you can use the
+`modify` method:
 
 	>>> lens([1, 2, 3])[0].modify(lambda a: a + 10)
 	[11, 2, 3]
 
-You can call methods on the data using `call`. Note that this
-method should return new data to include in the data-structure:
+You can call methods on a lens' focus using `call`.
 
-	>>> lens([1, {2}, 3])[1].call('union', {4, 5})  # doctest: +SKIP
-	[1, {2, 4, 5}, 3]
+	>>> lens(['one', 'two', 'three'])[0].call('upper')
+	['ONE', 'two', 'three']
 
-Lenses will also pass most operators through to the data they're focused
-on. This makes using lenses in your code much more readable:
+Note that the method you are calling must return new data to include
+in the data-structure; methods that mutate the existing structure are
+dangerous and probably won't work at all unless they return self.
+
+	>>> # doesn't work as intended because list.sort returns None
+	>>> lens([[2, 1, 3], [5, 4]])[0].call('sort') == [[1, 2, 3], [5, 4]]
+	False
+
+You can pass extra arguments to `call` and they will be forwarded on:
+
+	>>> lens([1, 2, 3])[0].call('__add__', 10)
+	[11, 2, 3]
+
+Since wanting to call an object's dunder methods is so common, lenses
+will also pass most operators through to the data they're focused on. This
+makes using lenses in your code much more readable:
 
 	>>> lens([1, 2, 3])[0] + 10
 	[11, 2, 3]
@@ -116,21 +140,22 @@ games:
 
 	>>> from collections import namedtuple
 	>>> 
-	>>> GameState = namedtuple('GameState', 'worlds current_world current_level')
-	>>> World = namedtuple('World', 'levels theme')
+	>>> GameState = namedtuple('GameState',
+	...     'current_world current_level worlds')
+	>>> World = namedtuple('World', 'theme levels')
 	>>> Level = namedtuple('Level', 'map enemies')
 	>>> Enemy = namedtuple('Enemy', 'x y')
 	>>> 
-	>>> old_state = GameState({
-	...     1: World({}, 'grassland'),
-	...     2: World({
+	>>> old_state = GameState(1, 2, {
+	...     1: World('grassland', {}),
+	...     2: World('desert', {
 	...         1: Level({}, {
 	...             'goomba1': Enemy(100, 45),
 	...             'goomba2': Enemy(130, 45),
 	...             'goomba3': Enemy(160, 45),
 	...         }),
-	...     }, 'desert'),
-	... }, 1, 1)
+	...     }),
+	... })
 	>>> 
 	>>> new_state = lens(old_state).worlds[2].levels[1].enemies['goomba3'].x + 1
 
@@ -159,61 +184,78 @@ ways that a bound lens can except that you can't call any of the methods
 that manipulate the state (such as `get` and `set`).
 
 	>>> unbound_lens = lens()
-	>>> key_one = unbound_lens['one']
+	>>> index_one = unbound_lens[1]
 
-You can then attach a state to the lens using the `bind` method and call
-state manipulating methods as normal:
+You can then attach a state to the lens using the `bind` method which
+returns a bound lens just as if you'd passed the state to `lens`. You
+can then call state manipulating methods as normal:
 
-	>>> key_one.bind({'one': 1, 'two': 2}).get()
-	1
+	>>> index_one.bind({1: 'one', 2: 'two'}).get()
+	'one'
 
-Alternatively, you can call the state manipulating method as normal and
-pass in a keyword-only `state` argument for the method to act on:
+In other words, `lens(state)` and `lens().bind(state)` are equivalent.
+Lenses don't actually care about their state in any way until they need
+to manipulate it. The same lens will work on states of any type so long
+as that type supports the necessary operations. We used the `index_one`
+lens above on a dictionary, but it works just fine on a list too:
 
-	>>> key_one.get(state={'one': 1, 'two': 2})
-	1
+	>>> index_one.bind(['eine', 'zwei', 'drei']).get()
+	'zwei'
+
+You can also call a state manipulating method on an unbound lens and pass
+the state in as a keyword-only argument:
+
+	>>> index_one.get(state={1: 'one', 2: 'two'})
+	'one'
 
 You can use unbound Lens objects as descriptors. That is, if you set a
-lens as a class attribute and you access that attribute from an
-instance, you will get a lens that has been bound to that instance. This
-allows you to conveniently store and access lenses that are likely to be
-used with particular classes as attributes of those classes. Attribute
-access is much more readable than requiring the user of a class to
-construct a lens themselves.
+lens as a class attribute and you access that attribute from an instance,
+you will get a lens that has been bound to that instance. This allows
+you to conveniently store and access lenses that are likely to be used
+with particular classes as attributes of those classes. Attribute access
+is much more readable than requiring the user of a class to construct
+a lens themselves.
 
-	>>> class ClassWithLens(object):
-	...     def __init__(self, items):
-	...         self._private_items = items
+Here we have a vector class that stores its data in a private `_coords`
+attribute, but allows access to parts of that data through `x` and `y`
+attributes. The end result is like an immutable version of python's
+property decorator.
+
+	>>> class Vector(object):
+	...     def __init__(self, x, y):
+	...         self._coords = [x, y]
 	...     def __repr__(self):
-	...         return 'ClassWithLens({!r})'.format(self._private_items)
-	...     first = lens()._private_items[0]
+	...         args = ', '.join(repr(coord) for coord in self._coords)
+	...         return 'Vector({})'.format(args)
+	...     x = lens()._coords[0]
+	...     y = lens()._coords[1]
 	...
-	>>> my_instance = ClassWithLens([1, 2, 3])
-	>>> my_instance.first.set(4)
-	ClassWithLens([4, 2, 3])
+	>>> my_position = Vector(1, 2)
+	>>> my_position.x.set(3)
+	Vector(3, 2)
 
-If you ever end up focusing an object with a lens as one of its
-attributes, lenses are smart enough to follow that lens to its focus.
+If you ever end up focusing an object with a sublens as one of its
+attributes, lenses are smart enough to follow that sublens to its focus.
 
-	>>> data = [ClassWithLens([1, 2, 3]), ClassWithLens([4, 5, 6])]
-	>>> lens(data)[1].first.set(7)
-	[ClassWithLens([1, 2, 3]), ClassWithLens([7, 5, 6])]
+	>>> data = [Vector(1, 2), Vector(3, 4)]
+	>>> lens(data)[1].y.set(5)
+	[Vector(1, 2), Vector(3, 5)]
 
 
 ### Composing Lenses
 
 If you have two lenses, you can join them together using the `add_lens`
-method. Joining lenses means that one of the lenses is placed "inside"
-of the other so that the focus of one lens is fed into the other one as
-its state:
+method. Joining lenses means that the second lens is placed "inside"
+of the first so that the focus of the first lens is fed into the second
+one as its state:
 
-	>>> first = lens()[0]
-	>>> second = lens()[1]
-	>>> first_then_second = first.add_lens(second)
-	>>> first_then_second.bind([[2, 3], [4, 5]]).get()
+	>>> index_zero = lens()[0]
+	>>> index_one = lens()[1]
+	>>> zero_then_one = index_zero.add_lens(index_one)
+	>>> zero_then_one.bind([[2, 3], [4, 5]]).get()
 	3
-	>>> second_then_first = second.add_lens(first)
-	>>> second_then_first.bind([[2, 3], [4, 5]]).get()
+	>>> one_then_zero = index_one.add_lens(index_zero)
+	>>> one_then_zero.bind([[2, 3], [4, 5]]).get()
 	4
 
 When you call `a.add_lens(b)`, `b` must be an unbound lens and the
@@ -276,8 +318,12 @@ recreate the `item_('one')` lens defined above in terms of
 	{'three': 3}
 
 Recreating existing behaviour isn't very useful, but hopefully you can
-see how useful it is to be able to make your own lenses for any pair of
-getter and setter functions.
+see how useful it is to be able to make your own lenses just by writing
+a pair of functions.
+
+If you use custom lenses frequently then you may want to look into the
+`iso_` method which is a less powerful but often more convenient version
+of `getter_setter_`.
 
 
 ### Traversals
@@ -324,10 +370,10 @@ lenses allow:
 Traversals can be composed with normal lenses. The result is a traversal
 with the lens applied to each of its original foci:
 
-	>>> both_first = lens([[0, 1], [2, 3]]).both_()[0]
-	>>> both_first.get_all()
+	>>> both_then_zero = lens([[0, 1], [2, 3]]).both_()[0]
+	>>> both_then_zero.get_all()
 	[0, 2]
-	>>> both_first + 10
+	>>> both_then_zero + 10
 	[[10, 1], [12, 3]]
 
 Traversals can also be composed with other traversals just fine. They
