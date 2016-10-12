@@ -7,6 +7,7 @@ import lenses.hooks as s
 
 def test_setitem_imm_custom_class():
     class C(object):
+
         def __init__(self, item):
             self.item = item
 
@@ -37,6 +38,7 @@ def test_setitem_imm_tuple():
 
 def test_setattr_imm_custom_class():
     class C(object):
+
         def __init__(self, attr):
             self.attr = attr
 
@@ -54,6 +56,7 @@ def test_setattr_imm_custom_class():
 
 def test_setattr_imm_custom_class_raw():
     class C(object):
+
         def __init__(self, attr):
             self.attr = attr
 
@@ -68,46 +71,47 @@ def test_setattr_imm_namedtuple():
     assert s.setattr_immutable(Tup(1), 'attr', 2) == Tup(2)
 
 
-def test_fromiter_custom_class():
+def test_from_iter_custom_class():
     class C(object):
+
         def __init__(self, attr):
             self.attr = attr
 
         def __eq__(self, other):
             return self.attr == other.attr
 
-        def _lens_fromiter(self, iterable):
+        def _lens_from_iter(self, iterable):
             return C(next(iter(iterable)))
 
-    assert s.fromiter(C(1), [2]) == C(2)
+    assert s.from_iter(C(1), [2]) == C(2)
 
 
-def test_fromiter_bytes():
-    assert s.fromiter(b'', [49, 50, 51]) == b'123'
+def test_from_iter_bytes():
+    assert s.from_iter(b'', [49, 50, 51]) == b'123'
 
 
-def test_fromiter_list():
-    assert s.fromiter([], (1, 2, 3)) == [1, 2, 3]
+def test_from_iter_list():
+    assert s.from_iter([], (1, 2, 3)) == [1, 2, 3]
 
 
-def test_fromiter_set():
-    assert s.fromiter(set(), [1, 2, 3]) == {1, 2, 3}
+def test_from_iter_set():
+    assert s.from_iter(set(), [1, 2, 3]) == {1, 2, 3}
 
 
-def test_fromiter_str():
-    assert s.fromiter(u'', ['1', '2', '3']) == u'123'
+def test_from_iter_str():
+    assert s.from_iter(u'', ['1', '2', '3']) == u'123'
 
 
-def test_fromiter_tuple():
-    assert s.fromiter((), [1, 2, 3]) == (1, 2, 3)
+def test_from_iter_tuple():
+    assert s.from_iter((), [1, 2, 3]) == (1, 2, 3)
 
 
-def test_fromiter_dict():
+def test_from_iter_dict():
     data = {'jane': 5, 'jim': 6, 'joanne': 8}
-    new_keys = [k.capitalize() for k in data]
-    assert s.fromiter(data, new_keys) == {'Jane': 5, 'Jim': 6, 'Joanne': 8}
+    new_keys = [(k.capitalize(), v) for k, v in s.to_iter(data)]
+    assert s.from_iter(data, new_keys) == {'Jane': 5, 'Jim': 6, 'Joanne': 8}
 
 
-def test_fromiter_unknown():
+def test_from_iter_unknown():
     with pytest.raises(NotImplementedError):
-        s.fromiter(object(), [1, 2, 3])
+        s.from_iter(object(), [1, 2, 3])

@@ -341,6 +341,15 @@ class EachLens(LensLike):
         [2, 3, 4]
         >>> lens(data).each_(filter_none=True).set(None)
         []
+
+    For technical reasons, this lens iterates over dictionaries by their
+    items and not just their keys.
+
+        >>> data = {'one': 1}
+        >>> lens(data).each_().get_all()
+        [('one', 1)]
+        >>> lens(data).each_()[1] + 1
+        {'one': 2}
     '''
 
     def __init__(self, filter_func=None, filter_none=False, *_):
@@ -352,10 +361,10 @@ class EachLens(LensLike):
             self.filter_func = filter_func
 
     def func(self, f, state):
-        items = list(filter(self.filter_func, state))
+        items = list(filter(self.filter_func, hooks.to_iter(state)))
 
         def build_new_state_from_iter(a):
-            return hooks.fromiter(state, filter(self.filter_func, a))
+            return hooks.from_iter(state, filter(self.filter_func, a))
 
         if items == []:
             return f.get_pure(build_new_state_from_iter(items))

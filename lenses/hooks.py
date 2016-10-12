@@ -131,74 +131,107 @@ def _tuple_setattr_immutable(self, name, value):
 
 
 @singledispatch
-def fromiter(self, iterable):
+def to_iter(self):
+    '''Takes an object and produces an iterable. It is
+    intended as the inverse of the `from_iter` function.
+
+    For most types this hook is a thin wrapper around python's built-in
+    `iter` function. Its default behaviour is to call `iter` and this
+    is usually sufficient.
+
+    The reason this hook exists is to customise how dictionaries are
+    iterated. In order to properly reconstruct a dictionary from an
+    iterable you need access to both the keys and the values. So this
+    function iterates over dictionaries by thier items instead.
+
+    This function will try to call a `_lens_to_iter()` method on its
+    argument before it calls `iter`, allowing you to have different
+    behaviours for lens iteration and regular iteration if you wish. This
+    function is also wrapped with `functools.singledispatch`, allowing
+    it to have different implementations for each type.
+    '''
+    try:
+        self._lens_to_iter
+    except AttributeError:
+        return iter(self)
+    else:
+        return self._lens_to_iter()
+
+
+@to_iter.register(dict)
+def _dict_to_iter(self):
+    return iter(self.items())
+
+
+@singledispatch
+def from_iter(self, iterable):
     '''Takes an object and an iterable and produces a new object that is
     a copy of the original with data from `iterable` reincorporated. It
-    is intended as the inverse of the `iter` function. Any state in
+    is intended as the inverse of the `to_iter` function. Any state in
     `self` that is not modelled by the iterable should remain unchanged.
 
-        fromiter(self, iter(self)) == self
+        from_iter(self, to_iter(self)) == self
 
     This function is used by EachLens to synthesise states from
-    iterables, allowing the lenses library to focus every element of an
-    iterable state.
+    iterables, allowing it to focus every element of an iterable state.
 
     The default behaviour of this function is to call
-    `obj._lens_fromiter(iterable)` in the hope that the object knows how
+    `obj._lens_from_iter(iterable)` in the hope that the object knows how
     to create new versions of itself from an iterable. Many types can be
     created from iterables but do not use a `_lens_fromiter` method to
     do this. For that reason, this function is also wrapped with
     `functools.singledispatch`, allowing it to have different
     implementations for each type. Unlike some other functions in this
-    module, there is no widely applicable fallback behaviour.
+    module, there is no widely applicable fallback behaviour. If all
+    else fails, it will raise a `NotImplementedError`.
     '''
     try:
-        self._lens_fromiter
+        self._lens_from_iter
     except AttributeError:
         message = 'Don\'t know how to create instance of {} from iterable'
         raise NotImplementedError(message.format(type(self)))
     else:
-        return self._lens_fromiter(iterable)
+        return self._lens_from_iter(iterable)
 
 
 if sys.version_info[0] > 2:
-    @fromiter.register(bytes)
-    def _bytes_fromiter(self, iterable):
+    @from_iter.register(bytes)
+    def _bytes_from_iter(self, iterable):
         return bytes(iterable)
 
-    @fromiter.register(str)
-    def _str_fromiter(self, iterable):
+    @from_iter.register(str)
+    def _str_from_iter(self, iterable):
         return ''.join(iterable)
 else:
-    @fromiter.register(str)
-    def _bytes_fromiter(self, iterable):
+    @from_iter.register(str)
+    def _bytes_from_iter(self, iterable):
         return ''.join(map(chr, iterable))
 
-    @fromiter.register(unicode)
-    def _str_fromiter(self, iterable):
+    @from_iter.register(unicode)
+    def _str_from_iter(self, iterable):
         return ''.join(iterable)
 
 
-@fromiter.register(dict)
-def _dict_fromiter(self, iterable):
+@from_iter.register(dict)
+def _dict_from_iter(self, iterable):
     new = self.copy()
     new.clear()
-    new.update(zip(iterable, self.values()))
+    new.update(iterable)
     return new
 
 
-@fromiter.register(list)
-def _list_fromiter(self, iterable):
+@from_iter.register(list)
+def _list_from_iter(self, iterable):
     return list(iterable)
 
 
-@fromiter.register(set)
-def _set_fromiter(self, iterable):
+@from_iter.register(set)
+def _set_from_iter(self, iterable):
     return set(iterable)
 
 
-@fromiter.register(tuple)
-def _tuple_fromiter(self, iterable):
+@from_iter.register(tuple)
+def _tuple_from_iter(self, iterable):
     # we need to use `type(self)` to handle namedtuples and perhaps
     # other subclasses
     return type(self)(iterable)

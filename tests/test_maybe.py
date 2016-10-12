@@ -27,8 +27,8 @@ def test_Nothing_iter():
     assert list(Nothing()) == []
 
 
-def test_Nothing_fromiter():
-    assert lenses.hooks.fromiter(Just(1), []) == Nothing()
+def test_Nothing_from_iter():
+    assert lenses.hooks.from_iter(Just(1), []) == Nothing()
 
 
 def test_Nothing_not_equals_Just():
@@ -69,6 +69,6 @@ def test_Just_iter():
     assert list(Just(obj)) == [obj]
 
 
-def test_Just_fromiter():
+def test_Just_from_iter():
     obj = object()
-    assert lenses.hooks.fromiter(Nothing(), [obj]) == Just(obj)
+    assert lenses.hooks.from_iter(Nothing(), [obj]) == Just(obj)

@@ -104,8 +104,8 @@ def _maybe_apply(self, fn):
     return Just(fn.item(self.item))
 
 
-@hooks.fromiter.register(Maybe)
-def _maybe_fromiter(self, iter):
+@hooks.from_iter.register(Maybe)
+def _maybe_from_iter(self, iter):
     i = list(iter)
     if i == []:
         return Nothing()
