@@ -27,7 +27,6 @@ def collect_args(n):
     in a tuple. Useful as a substitute for functions that can't easily be
     curried.
 
-        >>> from lenses.baselens import collect_args
         >>> collect_args(3)(1)(2)(3)
         (1, 2, 3)
     '''
