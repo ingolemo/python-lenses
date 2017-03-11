@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 python -m doctest readme.md
 test "$?" = '0' || exit
 
