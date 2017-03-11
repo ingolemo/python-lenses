@@ -108,24 +108,3 @@ def _pure_tuple(tup, item):
 @apply.register(tuple)
 def _apply_tuple(tup, funcs):
     return tuple(f(i) for i in tup for f in funcs)
-
-
-# traversable
-@singledispatch
-def traverse(traversable, func):
-    return traversable.traverse(func)
-
-
-@traverse.register(list)
-def _traverse_list(lst, func):
-    if lst == []:
-        return func.get_pure([])
-    head, rest = lst[0], lst[1:]
-
-    def cons(a):
-        return lambda b: [a] + b
-
-    if rest:
-        return apply(traverse(rest, func), fmap(func(head), cons))
-    else:
-        return fmap(func(head), lambda a: [a])

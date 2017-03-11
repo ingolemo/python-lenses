@@ -21,7 +21,6 @@ lens_methods = [
     ('keys_', baselens.KeysLens),
     ('listwrap_', baselens.ListWrapLens),
     ('norm_', baselens.NormalisingLens),
-    ('traverse_', baselens.TraverseLens),
     ('tuple_', baselens.TupleLens),
     ('values_', baselens.ValuesLens),
     ('zoomattr_', baselens.ZoomAttrLens),
@@ -133,7 +132,7 @@ class Lens(object):
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
             >>> from lenses import lens
-            >>> lens([[], [1], [2, 3]]).traverse_().get_monoid()
+            >>> lens([[], [1], [2, 3]]).each_().get_monoid()
             [1, 2, 3]
         '''
         if 'state' in kwargs:

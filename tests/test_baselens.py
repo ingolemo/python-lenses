@@ -173,12 +173,12 @@ def test_ErrorLens_set():
 
 
 def test_FilteringLens_get():
-    l = b.TraverseLens() & b.FilteringLens(lambda a: a > 0)
+    l = b.EachLens() & b.FilteringLens(lambda a: a > 0)
     assert l.set([1, -1, 1], 3) == [3, -1, 3]
 
 
 def test_FilteringLens_set():
-    l = b.TraverseLens() & b.FilteringLens(lambda a: a > 0)
+    l = b.EachLens() & b.FilteringLens(lambda a: a > 0)
     assert l.get_all([1, -1, 1]) == [1, 1]
 
 
@@ -380,51 +380,6 @@ def test_TupleLens_set_with_Lens():
     data = {'hello': 0, 'world': 1}
     my_lens = b.TupleLens(lens()['hello'], lens()['world'])
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
-
-
-def test_TraverseLens_get():
-    assert b.TraverseLens().get(['a', 'b', 'c']) == 'abc'
-
-
-def test_TraverseLens_get_empty():
-    with pytest.raises(ValueError):
-        b.TraverseLens().get([])
-
-
-def test_TraverseLens_get_all():
-    assert b.TraverseLens().get_all([0, 1, 2, 3]) == [0, 1, 2, 3]
-
-
-def test_TraverseLens_get_all_empty():
-    assert b.TraverseLens().get_all([]) == []
-
-
-def test_TraverseLens_set():
-    assert b.TraverseLens().set([0, 1, 2, 3], 4) == [4, 4, 4, 4]
-
-
-def test_TraverseLens_set_empty():
-    assert b.TraverseLens().set([], 4) == []
-
-
-def test_TraverseLens_get_all_double():
-    l = b.TraverseLens() & b.TraverseLens()
-    assert l.get_all([[0, 1], [2, 3]]) == [0, 1, 2, 3]
-
-
-def test_TraverseLens_get_all_double_empty():
-    l = b.TraverseLens() & b.TraverseLens()
-    assert l.get_all([[0, 1], []]) == [0, 1]
-
-
-def test_TraverseLens_set_double():
-    l = b.TraverseLens() & b.TraverseLens()
-    assert l.set([[0, 1], [2, 3]], 4) == [[4, 4], [4, 4]]
-
-
-def test_TraverseLens_set_double_empty():
-    l = b.TraverseLens() & b.TraverseLens()
-    assert l.set([[0, 1], []], 4) == [[4, 4], []]
 
 
 def test_ZoomLens_get():

@@ -3,7 +3,7 @@ from .identity import Identity
 from .const import Const
 from .functorisor import Functorisor
 from .maybe import Just, Nothing
-from .typeclass import fmap, pure, apply, traverse
+from .typeclass import fmap, pure, apply
 
 
 def multiap(func, *args):
@@ -817,31 +817,6 @@ class NormalisingLens(IsomorphismLens):
 
     def __repr__(self):
         return 'NormalisingLens({!r})'.format(self.backwards)
-
-
-class TraverseLens(LensLike):
-    '''A traversal that focuses everything in a data structure depending
-    on how that data structure defines `lenses.typeclass.traverse`.
-    This lens is nothing more than a wrapper around that function.
-
-    This is a particularly useful lens for traversing recursive
-    data-structures, but unfortunately it does require you to implement
-    the traversal yourself. By default, it is only defined for lists.
-
-        >>> from lenses import lens
-        >>> lens().traverse_()
-        Lens(None, TraverseLens())
-        >>> lens([1, 2, 3]).traverse_().get_all()
-        [1, 2, 3]
-        >>> lens([1, 2, 3]).traverse_().modify(lambda n: n + 1)
-        [2, 3, 4]
-    '''
-
-    def func(self, f, state):
-        return traverse(state, f)
-
-    def __repr__(self):
-        return 'TraverseLens()'
 
 
 class TrivialLens(IsomorphismLens):
