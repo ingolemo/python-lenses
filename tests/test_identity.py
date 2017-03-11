@@ -15,12 +15,6 @@ def test_identity_pure():
     assert Identity(1).pure(obj) == Identity(obj)
 
 
-def test_identity_traverse():
-    def func(data):
-        return [data[0]]
-    assert Identity('abc').traverse(func) == [Identity('a')]
-
-
 def test_identity_descriptive_repr():
     obj = object()
     assert repr(obj) in repr(Identity(obj))

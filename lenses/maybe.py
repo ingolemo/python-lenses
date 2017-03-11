@@ -59,12 +59,6 @@ class Maybe(object):
             return guard
         return self.item
 
-    def traverse(self, func):
-        if self.is_nothing:
-            return func.get_pure(self)
-        return typeclass.fmap(func(self.item), Just)
-
-
 class Nothing(Maybe):
     instance = None
 
