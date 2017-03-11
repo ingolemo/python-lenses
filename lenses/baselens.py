@@ -147,10 +147,7 @@ class ComposedLens(LensLike):
 
         res = f
         for lens in reversed(self.lenses):
-
-            @res.replace_func
-            def res(st, res=res, lens=lens):
-                return lens.func(res, st)
+            res = res.update(lens.func)
 
         return res(state)
 
@@ -366,7 +363,7 @@ class EachLens(LensLike):
             return hooks.from_iter(state, filter(self.filter_func, a))
 
         if items == []:
-            return f.get_pure(build_new_state_from_iter(items))
+            return f.pure(build_new_state_from_iter(items))
 
         collector = collect_args(len(items))
         applied = multiap(collector, *map(f, items))
@@ -678,7 +675,7 @@ class ItemsLens(LensLike):
     def func(self, f, state):
         items = list(state.items())
         if items == []:
-            return f.get_pure(state)
+            return f.pure(state)
 
         def dict_builder(args):
             data = state.copy()
