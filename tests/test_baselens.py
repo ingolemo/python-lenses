@@ -60,6 +60,11 @@ def test_LensLike():
         b.LensLike().get(None)
 
 
+def test_LensLike_no_focus():
+    with pytest.raises(ValueError):
+        b.EachLens().get([])
+
+
 def test_lens_and():
     my_lens = b.BothLens() & b.GetitemLens(1)
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
