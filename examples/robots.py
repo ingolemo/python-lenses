@@ -33,6 +33,14 @@ def get_single_char():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
+def duplicates(items):
+    seen_items = set()
+    for item in items:
+        if item in seen_items:
+            yield item
+        seen_items.add(item)
+
+
 class Vector(tuple):
 
     @classmethod
@@ -62,14 +70,14 @@ class Vector(tuple):
 class GameState:
 
     def __init__(self):
-        self.robots = set()
+        self.robots = list()
         self.crashes = set()
         self.player = Vector((MAXX // 2, MAXY // 2))
         self.running = True
         self.message = None
 
         for _ in range(ROBOTS):
-            self.robots.add(Vector.random())
+            self.robots.append(Vector.random())
 
     def handle_input(self, input):
         '''Takes a single character string as input and alters the game
@@ -102,22 +110,14 @@ class GameState:
         towards the player by one step. Handles the robots crashing into
         one another too.'''
 
-        new_robots = set()
-        crashes = set(self.crashes)
-        for old_pos in self.robots:
-            new_pos = old_pos.step_towards(self.player)
-            if new_pos in new_robots:
-                crashes.add(new_pos)
-                new_robots.remove(new_pos)
-            elif new_pos in crashes:
-                pass
-            else:
-                new_robots.add(new_pos)
+        # move the robots towards the player
+        self = lens(self).robots.each_().call_step_towards(self.player)
+        # robots in the same place are crashes
+        self = lens(self).crashes.call_union(duplicates(self.robots))
+        # remove crashed robots
+        self = lens(self).robots.modify(lambda r: list(set(r) - self.crashes))
 
-        return lens(self).tuple_(
-            lens().robots,
-            lens().crashes,
-        ).set((new_robots, crashes))
+        return self
 
     def check_game_end(self):
         '''Checks for the game's win/lose conditions and 'alters' the
@@ -125,7 +125,7 @@ class GameState:
         been won or lost then it just returns the game state
         unaltered.'''
 
-        if self.player in self.robots | self.crashes:
+        if self.player in self.crashes.union(self.robots):
             return self.end_game('You Died!')
         elif not self.robots:
             return self.end_game('You Win!')
