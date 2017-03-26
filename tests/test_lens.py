@@ -54,7 +54,7 @@ def test_lens_call():
 
 
 def test_lens_call_implicitly():
-    assert lens('hello').upper_m() == 'HELLO'
+    assert lens('hello').call_upper() == 'HELLO'
 
 
 def test_lens_call_args():
@@ -62,7 +62,7 @@ def test_lens_call_args():
 
 
 def test_lens_call_args_implicitly():
-    assert lens('h').center_m(5) == '  h  '
+    assert lens('h').call_center(5) == '  h  '
 
 
 def test_lens_call_kwargs():
@@ -70,7 +70,7 @@ def test_lens_call_kwargs():
 
 
 def test_lens_call_kwargs_implicitly():
-    assert lens('h').encode_m(encoding='utf-8') == b'h'
+    assert lens('h').call_encode(encoding='utf-8') == b'h'
 
 
 def test_lens_call_state_keyword():
@@ -81,8 +81,26 @@ def test_lens_call_mut():
     assert lens([3, 1, 2]).call_mut('sort') == [1, 2, 3]
 
 
+def test_lens_call_mut_implicitly():
+    assert lens([3, 1, 2]).call_mut_sort() == [1, 2, 3]
+
+
 def test_lens_call_mut_args():
     assert lens([1, 2]).call_mut('append', 3) == [1, 2, 3]
+
+
+def test_lens_call_mut_args_implicitly():
+    assert lens([1, 2]).call_mut_append(3) == [1, 2, 3]
+
+
+def test_lens_call_mut_kwargs():
+    result = lens(['eine', 'un', 'one']).call_mut('sort', key=len)
+    assert result == ['un', 'one', 'eine']
+
+
+def test_lens_call_mut_kwargs_implicitly():
+    result = lens(['eine', 'un', 'one']).call_mut_sort(key=len)
+    assert result == ['un', 'one', 'eine']
 
 
 def test_lens_call_mut_deep():

@@ -264,9 +264,14 @@ class Lens(object):
         if name.endswith('_'):
             raise AttributeError('Not a valid lens constructor')
 
-        if name.endswith('_m'):
+        if name.startswith('call_mut_'):
             def caller(*args, **kwargs):
-                return self.call(name[:-2], *args, **kwargs)
+                return self.call_mut(name[9:], *args, **kwargs)
+            return caller
+
+        if name.startswith('call_'):
+            def caller(*args, **kwargs):
+                return self.call(name[5:], *args, **kwargs)
             return caller
 
         return self.add_lens(baselens.GetZoomAttrLens(name))
