@@ -11,12 +11,24 @@ def test_lens_get():
     assert lens([1, 2, 3])[1].get() == 2
 
 
+def test_lens_get_state_keyword():
+    assert lens()[1].get(state=[1, 2, 3]) == 2
+
+
 def test_lens_get_all():
     assert lens([[1, 2], [3, 4]]).both_()[1].get_all() == [2, 4]
 
 
+def test_lens_get_all_state_keyword():
+    assert lens().each_().get_all(state=[1, 2, 3]) == [1, 2, 3]
+
+
 def test_lens_get_monoid():
     assert lens([[1, 2], [3, 4]]).both_().get_monoid() == [1, 2, 3, 4]
+
+
+def test_lens_get_monoid_state_keyword():
+    assert lens().each_().get_monoid(state=[1, 2, 3]) == 6
 
 
 def test_lens_set():
@@ -24,9 +36,17 @@ def test_lens_set():
     assert lens([1, 2, 3])[1].set(5) == [1, 5, 3]
 
 
+def test_lens_set_state_keyword():
+    assert lens()[1].set(4, state=[1, 2, 3]) == [1, 4, 3]
+
+
 def test_lens_modify():
     assert lens(10).modify(lambda a: a + 1) == 11
     assert lens([1, 2, 3])[0].modify(lambda a: a + 5) == [6, 2, 3]
+
+
+def test_lens_modify_state_keyword():
+    assert lens()[1].modify(str, state=[1, 2, 3]) == [1, '2', 3]
 
 
 def test_lens_call():
@@ -51,6 +71,10 @@ def test_lens_call_kwargs():
 
 def test_lens_call_kwargs_implicitly():
     assert lens('h').encode_m(encoding='utf-8') == b'h'
+
+
+def test_lens_call_state_keyword():
+    assert lens()[1].call('union', {4}, state=[1, {2}, 3]) == [1, {2, 4}, 3]
 
 
 def test_lens_call_mut():
@@ -144,6 +168,7 @@ def test_lens_flip_not_isomorphism():
 
 def test_lens_descriptor():
     class MyClass(object):
+
         def __init__(self, items):
             self._private_items = items
 
@@ -156,6 +181,7 @@ def test_lens_descriptor():
 
 def test_lens_descriptor_doesnt_bind_from_class():
     class MyClass(object):
+
         def __init__(self, items):
             self._private_items = items
 
@@ -169,6 +195,7 @@ def test_lens_descriptor_doesnt_bind_from_class():
 
 def test_lens_descriptor_zoom():
     class MyClass(object):
+
         def __init__(self, items):
             self._private_items = items
 
@@ -183,30 +210,6 @@ def test_lens_descriptor_zoom():
     data = (MyClass([1, 2, 3]),)
     assert lens(data)[0].first.get() == 1
     assert lens(data)[0].first.set(4) == (MyClass([4, 2, 3]),)
-
-
-def test_lens_get_state_keyword():
-    assert lens()[1].get(state=[1, 2, 3]) == 2
-
-
-def test_lens_get_all_state_keyword():
-    assert lens().each_().get_all(state=[1, 2, 3]) == [1, 2, 3]
-
-
-def test_lens_get_monoid_state_keyword():
-    assert lens().each_().get_monoid(state=[1, 2, 3]) == 6
-
-
-def test_lens_set_state_keyword():
-    assert lens()[1].set(4, state=[1, 2, 3]) == [1, 4, 3]
-
-
-def test_lens_modify_state_keyword():
-    assert lens()[1].modify(str, state=[1, 2, 3]) == [1, '2', 3]
-
-
-def test_lens_call_state_keyword():
-    assert lens()[1].call('union', {4}, state=[1, {2}, 3]) == [1, {2, 4}, 3]
 
 
 def test_lens_error_on_bound_and_state():
