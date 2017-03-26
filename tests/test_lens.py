@@ -53,6 +53,30 @@ def test_lens_call_kwargs_implicitly():
     assert lens('h').encode_m(encoding='utf-8') == b'h'
 
 
+def test_lens_call_mut():
+    assert lens([3, 1, 2]).call_mut('sort') == [1, 2, 3]
+
+
+def test_lens_call_mut_args():
+    assert lens([1, 2]).call_mut('append', 3) == [1, 2, 3]
+
+
+def test_lens_call_mut_deep():
+    state = [object(), object()]
+    result = lens(state).call_mut('append', object())
+    assert result[0] is not state[0]
+
+
+def test_lens_call_mut_shallow():
+    state = [object(), object()]
+    result = lens(state).call_mut('append', object(), shallow=True)
+    assert result[0] is state[0]
+
+
+def test_lens_call_mut_state_keyword():
+    assert lens().call_mut('append', 3, state=[1, 2]) == [1, 2, 3]
+
+
 def test_lens_add_lens_trivial_LensLike():
     assert lens([1, 2]).add_lens(baselens.TrivialLens()) + [3] == [1, 2, 3]
 

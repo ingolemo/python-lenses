@@ -1,3 +1,4 @@
+import copy
 import functools
 
 from . import baselens
@@ -183,6 +184,32 @@ class Lens(object):
 
         def func(a):
             return getattr(a, method_name)(*args, **kwargs)
+
+        return self.modify(func)
+
+    def call_mut(self, method_name, *args, **kwargs):
+        '''Call a method on the focus that will mutate it in place.
+        Works by making a deep copy of the focus before calling the
+        mutating method on it. The return value of that method is ignored.
+        You can pass a keyword argument deep=False to only make a shallow copy.
+
+            >>> from lenses import lens
+            >>> lens([[3, 1, 2], [5, 4]])[0].call_mut('sort')
+            [[1, 2, 3], [5, 4]]
+        '''
+        if 'state' in kwargs:
+            self = self.bind(kwargs['state'])
+            del kwargs['state']
+
+        shallow = False
+        if 'shallow' in kwargs:
+            shallow = kwargs['shallow']
+            del kwargs['shallow']
+
+        def func(a):
+            a = copy.copy(a) if shallow else copy.deepcopy(a)
+            getattr(a, method_name)(*args, **kwargs)
+            return a
 
         return self.modify(func)
 

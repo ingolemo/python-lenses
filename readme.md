@@ -122,7 +122,18 @@ dangerous and probably won't work at all unless they return self.
 	>>> lens([[2, 1, 3], [5, 4]])[0].call('sort') == [[1, 2, 3], [5, 4]]
 	False
 
-You can pass extra arguments to `call` and they will be forwarded on:
+If you want to call a mutating method on a focus you can use the
+`call_mut` method. This method will make a deep copy of the focus before
+mutating it so that the original state is preserved:
+
+	>>> lens([[2, 1, 3], [5, 4]])[0].call_mut('sort')
+	[[1, 2, 3], [5, 4]]
+
+You can pass a keyword-only argument `shallow=True` to make a shallow copy
+instead if you know that the method will only perform shallow mutation.
+
+You can pass extra arguments to `call` and `call_mut` and they will be
+forwarded on:
 
 	>>> lens([1, 2, 3])[0].call('__add__', 10)
 	[11, 2, 3]
