@@ -35,6 +35,11 @@ def test_Nothing_not_equals_Just():
     assert Nothing() != Just(object())
 
 
+def test_Nothing_maybe():
+    obj = object()
+    assert Nothing().maybe() == None
+
+
 def test_Just_equals_Just_when_subobjects_equal():
     # maybe hypothesis can make this more rigourous
     obj1 = object()
@@ -72,3 +77,8 @@ def test_Just_iter():
 def test_Just_from_iter():
     obj = object()
     assert lenses.hooks.from_iter(Nothing(), [obj]) == Just(obj)
+
+
+def test_Just_maybe():
+    obj = object()
+    assert Just(obj).maybe() == obj
