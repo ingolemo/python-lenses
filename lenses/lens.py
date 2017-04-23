@@ -177,6 +177,12 @@ class Lens(object):
             >>> from lenses import lens
             >>> lens(['alpha', 'beta', 'gamma'])[2].call('upper')
             ['alpha', 'beta', 'GAMMA']
+
+        As a shortcut, you can include the name of the method you want
+        to call immediately after `call_`:
+
+            >>> lens(['alpha', 'beta', 'gamma'])[2].call_upper()
+            ['alpha', 'beta', 'GAMMA']
         '''
         if 'state' in kwargs:
             self = self.bind(kwargs['state'])
@@ -196,6 +202,12 @@ class Lens(object):
 
             >>> from lenses import lens
             >>> lens([[3, 1, 2], [5, 4]])[0].call_mut('sort')
+            [[1, 2, 3], [5, 4]]
+
+        As a shortcut, you can include the name of the method you want
+        to call immediately after `call_mut_`:
+
+            >>> lens([[3, 1, 2], [5, 4]])[0].call_mut_sort()
             [[1, 2, 3], [5, 4]]
         '''
         if 'state' in kwargs:
