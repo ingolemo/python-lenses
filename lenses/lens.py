@@ -191,7 +191,8 @@ class Lens(object):
         '''Call a method on the focus that will mutate it in place.
         Works by making a deep copy of the focus before calling the
         mutating method on it. The return value of that method is ignored.
-        You can pass a keyword argument deep=False to only make a shallow copy.
+        You can pass a keyword argument shallow=True to only make a
+        shallow copy.
 
             >>> from lenses import lens
             >>> lens([[3, 1, 2], [5, 4]])[0].call_mut('sort')
