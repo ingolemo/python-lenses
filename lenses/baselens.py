@@ -133,9 +133,10 @@ class ComposedLens(LensLike):
     @staticmethod
     def _filter_lenses(lenses):
         for lens in lenses:
-            if isinstance(lens, TrivialLens):
+            lenstype = type(lens)
+            if lenstype is TrivialLens:
                 continue
-            elif type(lens) is ComposedLens:
+            elif lenstype is ComposedLens:
                 for lens in lens.lenses:
                     yield lens
             else:
