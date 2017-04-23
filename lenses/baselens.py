@@ -3,7 +3,7 @@ from .identity import Identity
 from .const import Const
 from .functorisor import Functorisor
 from .maybe import Just, Nothing
-from .typeclass import fmap, pure, apply
+from . import typeclass
 
 
 def multiap(func, *args):
@@ -15,9 +15,9 @@ def multiap(func, *args):
         >>> multiap(func, [1, 10], [100])
         [101, 110]
     '''
-    functor = fmap(args[0], func)
+    functor = typeclass.fmap(args[0], func)
     for arg in args[1:]:
-        functor = apply(arg, functor)
+        functor = typeclass.apply(arg, functor)
     return functor
 
 
@@ -208,7 +208,7 @@ class GetterSetterLens(LensLike):
     def func(self, f, state):
         old_value = self.getter(state)
         fa = f(old_value)
-        return fmap(fa, lambda a: self.setter(state, a))
+        return typeclass.fmap(fa, lambda a: self.setter(state, a))
 
     def __repr__(self):
         return 'GetterSetterLens({!r}, {!r})'.format(self.getter, self.setter)
@@ -260,7 +260,7 @@ class IsomorphismLens(LensLike):
         return IsomorphismLens(self.backwards, self.forwards)
 
     def func(self, f, state):
-        return fmap(f(self.forwards(state)), self.backwards)
+        return typeclass.fmap(f(self.forwards(state)), self.backwards)
 
     def __repr__(self):
         return 'IsomorphismLens({!r}, {!r})'.format(self.forwards,
@@ -287,7 +287,7 @@ class BothLens(LensLike):
 
         f0 = f(state[0])
         f1 = f(state[1])
-        return fmap(multiap(collect_args(2), f0, f1), multisetter)
+        return typeclass.fmap(multiap(collect_args(2), f0, f1), multisetter)
 
     def __repr__(self):
         return 'BothLens()'
@@ -368,7 +368,7 @@ class EachLens(LensLike):
 
         collector = collect_args(len(items))
         applied = multiap(collector, *map(f, items))
-        return fmap(applied, build_new_state_from_iter)
+        return typeclass.fmap(applied, build_new_state_from_iter)
 
     def __repr__(self):
         return 'EachLens()'
@@ -444,7 +444,8 @@ class FilteringLens(LensLike):
         self.predicate = predicate
 
     def func(self, f, state):
-        return f(state) if self.predicate(state) else pure(f(state), state)
+        return f(state) if self.predicate(
+            state) else typeclass.pure(f(state), state)
 
     def __repr__(self):
         return 'FilteringLens({!r})'.format(self.predicate)
@@ -497,6 +498,7 @@ class GetZoomAttrLens(LensLike):
         >>> lens(state).right.set(13)
         Triple(left=1, middle=13, right=Lens(None, GetZoomAttrLens('middle')))
     '''
+
     def __init__(self, name):
         self.name = name
         self._getattr_cache = GetattrLens(name)
@@ -685,7 +687,7 @@ class ItemsLens(LensLike):
             return data
 
         collector = collect_args(len(items))
-        return fmap(multiap(collector, *map(f, items)), dict_builder)
+        return typeclass.fmap(multiap(collector, *map(f, items)), dict_builder)
 
     def __repr__(self):
         return 'ItemsLens()'
