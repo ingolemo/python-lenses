@@ -14,7 +14,7 @@ The entry point to this library is the `lens` function, which returns a
     Lens(None, TrivialLens())
 '''
 
-from .lens import Lens
+from .ui import Lens
 
 
 def lens(obj=None):
