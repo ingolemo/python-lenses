@@ -1,31 +1,31 @@
 import copy
 import functools
 
-from . import baselens
+from . import optics
 
 lens_methods = [
-    ('both_', baselens.BothLens),
-    ('decode_', baselens.DecodeLens),
-    ('error_', baselens.ErrorLens),
-    ('each_', baselens.EachLens),
-    ('filter_', baselens.FilteringLens),
-    ('get_', baselens.GetitemOrElseLens),
-    ('getattr_', baselens.GetattrLens),
-    ('getzoomattr_', baselens.GetZoomAttrLens),
-    ('getitem_', baselens.GetitemLens),
-    ('getter_setter_', baselens.GetterSetterLens),
-    ('iso_', baselens.IsomorphismLens),
-    ('item_', baselens.ItemLens),
-    ('item_by_value_', baselens.ItemByValueLens),
-    ('items_', baselens.ItemsLens),
-    ('json_', baselens.JsonLens),
-    ('keys_', baselens.KeysLens),
-    ('listwrap_', baselens.ListWrapLens),
-    ('norm_', baselens.NormalisingLens),
-    ('tuple_', baselens.TupleLens),
-    ('values_', baselens.ValuesLens),
-    ('zoomattr_', baselens.ZoomAttrLens),
-    ('zoom_', baselens.ZoomLens),
+    ('both_', optics.BothLens),
+    ('decode_', optics.DecodeLens),
+    ('error_', optics.ErrorLens),
+    ('each_', optics.EachLens),
+    ('filter_', optics.FilteringLens),
+    ('get_', optics.GetitemOrElseLens),
+    ('getattr_', optics.GetattrLens),
+    ('getzoomattr_', optics.GetZoomAttrLens),
+    ('getitem_', optics.GetitemLens),
+    ('getter_setter_', optics.GetterSetterLens),
+    ('iso_', optics.IsomorphismLens),
+    ('item_', optics.ItemLens),
+    ('item_by_value_', optics.ItemByValueLens),
+    ('items_', optics.ItemsLens),
+    ('json_', optics.JsonLens),
+    ('keys_', optics.KeysLens),
+    ('listwrap_', optics.ListWrapLens),
+    ('norm_', optics.NormalisingLens),
+    ('tuple_', optics.TupleLens),
+    ('values_', optics.ValuesLens),
+    ('zoomattr_', optics.ZoomAttrLens),
+    ('zoom_', optics.ZoomLens),
 ]
 
 
@@ -81,7 +81,7 @@ class Lens(object):
 
     def __init__(self, state=None, lens=None):
         if lens is None:
-            lens = baselens.TrivialLens()
+            lens = optics.TrivialLens()
         self.state = state
         self.lens = lens
 
@@ -223,7 +223,7 @@ class Lens(object):
 
     def add_lens(self, other):
         '''Refine the current focus of this lens by composing it with
-        another lens object. Can be a `lenses.baselens.LensLike` or
+        another lens object. Can be a `lenses.optics.LensLike` or
         an unbound `lenses.Lens`.
 
             >>> from lenses import lens
@@ -231,7 +231,7 @@ class Lens(object):
             >>> lens([[0, 1], [2, 3]]).add_lens(second_first).get()
             2
         '''
-        if isinstance(other, baselens.LensLike):
+        if isinstance(other, optics.LensLike):
             return Lens(self.state, self.lens.compose(other))
         elif isinstance(other, Lens):
             other._assert_unbound('Lens.add_lens')
@@ -282,10 +282,10 @@ class Lens(object):
                 return self.call(name[5:], *args, **kwargs)
             return caller
 
-        return self.add_lens(baselens.GetZoomAttrLens(name))
+        return self.add_lens(optics.GetZoomAttrLens(name))
 
     def __getitem__(self, name):
-        return self.add_lens(baselens.GetitemLens(name))
+        return self.add_lens(optics.GetitemLens(name))
 
     def _underlying_lens(self):
         return self.lens

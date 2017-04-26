@@ -5,7 +5,7 @@ import pytest
 # import hypothesis.strategies as strat
 
 from lenses import lens
-from lenses import baselens as b
+from lenses import optics as b
 
 
 # def build_lens_strat():
