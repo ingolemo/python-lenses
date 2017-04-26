@@ -14,7 +14,7 @@ lens_methods = [
     ('getzoomattr_', optics.GetZoomAttrLens),
     ('getitem_', optics.GetitemLens),
     ('getter_setter_', optics.GetterSetterLens),
-    ('iso_', optics.IsomorphismLens),
+    ('iso_', optics.Isomorphism),
     ('item_', optics.ItemLens),
     ('item_by_value_', optics.ItemByValueLens),
     ('items_', optics.ItemsLens),

@@ -262,20 +262,20 @@ def test_GetterSetterLens_meaningful_repr():
     assert repr(setter) in repr(l)
 
 
-def test_IsomorphismLens_get():
-    assert b.IsomorphismLens(int, str).get('1') == 1
+def test_Isomorphism_get():
+    assert b.Isomorphism(int, str).get('1') == 1
 
 
 def test_IsomorphismLens_set():
-    assert b.IsomorphismLens(int, str).set('1', 2) == '2'
+    assert b.Isomorphism(int, str).set('1', 2) == '2'
 
 
 def test_IsomorphismLens_get_flip():
-    assert b.IsomorphismLens(int, str).flip().get(1) == '1'
+    assert b.Isomorphism(int, str).flip().get(1) == '1'
 
 
 def test_IsomorphismLens_set_flip():
-    assert b.IsomorphismLens(int, str).flip().set(1, '2') == 2
+    assert b.Isomorphism(int, str).flip().set(1, '2') == 2
 
 
 def test_ItemLens_get():
