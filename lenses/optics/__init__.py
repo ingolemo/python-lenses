@@ -1,9 +1,9 @@
-from . import hooks
-from .identity import Identity
-from .const import Const
-from .functorisor import Functorisor
-from .maybe import Just, Nothing
-from . import typeclass
+from .. import hooks
+from ..identity import Identity
+from ..const import Const
+from ..functorisor import Functorisor
+from ..maybe import Just, Nothing
+from .. import typeclass
 
 
 def multiap(func, *args):
