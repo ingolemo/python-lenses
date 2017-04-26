@@ -287,7 +287,7 @@ class ComposedLens(LensLike):
         return res(state)
 
     def flip(self):
-        super().flip()
+        super(ComposedLens, self).flip()
         return ComposedLens([l.flip() for l in reversed(self.lenses)])
 
     def compose(self, other):
