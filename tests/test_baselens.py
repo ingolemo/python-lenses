@@ -56,7 +56,7 @@ from lenses import baselens as b
 
 
 def test_LensLike():
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(TypeError):
         b.LensLike().get(None)
 
 

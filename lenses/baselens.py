@@ -50,6 +50,63 @@ class LensLike(object):
     notation):
 
     func :: (value -> functor value), state -> functor state
+
+    A LensLike has a kind that determines what operations are valid on
+    that LensLike. Valid kinds are Equality, Isomorphism, Prism, Review,
+    Lens, Traversal, Getter, Setter, Fold, and None.
+
+    Fold
+
+    : A Fold is an optic capable of getting, but not necessarily setting,
+    multiple foci at once. You can think of a fold as kind of like an
+    iterator; it allows you to view many subparts of a larger structure.
+
+    Setter
+
+    : A Setter is an optic that is capable of setting foci in a state
+    but not necessarily getting them.
+
+    Getter
+
+    : A Getter is a Fold that is restricted to getting a single foci at
+    a time. It can not necessarily set any foci.
+
+    Traversal
+
+    : A Traversal is both a Fold and a Setter. It is capable of both
+    setting and getting multiple foci at once.
+
+    Lens
+
+    : A Lens is both a Getter and a Traversal. It is capable of getting
+    and setting is single foci at a time.
+
+    Review
+
+    : Currently Unused.
+
+    Prism
+
+    : A Prism is both a Traversal and a Review. Currently unused.
+
+    Isomorphism
+
+    : An Isomorphism is both a Lens and a Prism. Isomorphisms have the
+    property that they are reversable; You can take an isomorphism and
+    flip it around so that getting the foci becomes setting the foci
+    and setting becomes getting.
+
+    Equality
+
+    : An Equality is an Isomorphism. Currently unused.
+
+    None
+
+    : Here "None" is referring to the built-in python `None` object and
+    not a custom class like the other kinds. An optic of kind None is
+    an invalid optic. Optics of this kind may exist internally, but if
+    you manage to create a None optic through normal means then this
+    represents a bug in the library.
     '''
 
     def func(self, f, state):
@@ -63,8 +120,15 @@ class LensLike(object):
         focused then it will attempt to join them together as a monoid.
         See `lenses.typeclass.mappend`.
 
-        Will raise ValueError if the lens doesn't have at least one focus.
+        Requires kind Fold. This method will raise TypeError if the
+        optic has no way to get any foci.
+
+        For technical reasons, this method requires there to be at least
+        one foci at the end of the get. It will raise ValueError when
+        there is none.
         '''
+        if not self._is_kind(Fold):
+            raise TypeError('Must be an instance of Fold to .get()')
 
         guard = object()
         const = Functorisor(lambda a: Const(Nothing()),
@@ -75,19 +139,40 @@ class LensLike(object):
         return result
 
     def get_all(self, state):
-        'Returns a list of all the foci within `state`.'
+        '''Returns a list of all the foci within `state`.
+
+        Requires kind Fold. This method will raise TypeError if the
+        optic has no way to get any foci.
+        '''
+        if not self._is_kind(Fold):
+            raise TypeError('Must be an instance of Fold to .get_all()')
+
         consttup = Functorisor(lambda a: Const([]),
                                lambda a: Const([a]))
         return self.func(consttup, state).unwrap()
 
     def modify(self, state, fn):
-        'Applies a function `fn` to all the foci within `state`.'
+        '''Applies a function `fn` to all the foci within `state`.
+
+        Requires kind Setter. This method will raise TypeError when the
+        optic has no way to set foci.
+        '''
+        if not self._is_kind(Setter):
+            raise TypeError('Must be an instance of Setter to .modify()')
+
         identfn = Functorisor(lambda a: Identity(a),
                               lambda a: Identity(fn(a)))
         return self.func(identfn, state).unwrap()
 
     def set(self, state, value):
-        'Sets all the foci within `state` to `value`.'
+        '''Sets all the foci within `state` to `value`.
+
+        Requires kind Setter. This method will raise TypeError when the
+        optic has no way to set foci.
+        '''
+        if not self._is_kind(Setter):
+            raise TypeError('Must be an instance of Setter to .set()')
+
         ident = Functorisor(lambda a: Identity(a),
                             lambda a: Identity(value))
         return self.func(ident, state).unwrap()
@@ -103,15 +188,64 @@ class LensLike(object):
         direction. Only works if the lens is actually an isomorphism.
         Intended to be overridden by such subclasses.
 
-        Raises TypeError for non-isomorphic lenses.
+        Requires type Isomorphism. Raises TypeError for non-isomorphic
+        lenses.
         '''
-        message = 'Cannot flip: {} is not an isomorphism.'
-        raise TypeError(message.format(type(self)))
+        if not self._is_kind(Isomorphism):
+            raise TypeError('Must be an instance of Isomorphism to .flip()')
+
+    def kind(self):
+        '''Returns a class representing the 'kind' of optic.'''
+        optics = [Equality, Isomorphism, Prism, Review,
+                  Lens, Traversal,
+                  Getter, Setter, Fold]
+        for optic in optics:
+            if self._is_kind(optic):
+                return optic
 
     def _underlying_lens(self):
         return self
 
+    def _is_kind(self, cls):
+        return isinstance(self, cls)
+
     __and__ = compose
+
+
+class Fold(LensLike):
+    pass
+
+
+class Setter(LensLike):
+    pass
+
+
+class Getter(Fold):
+    pass
+
+
+class Traversal(Fold, Setter):
+    pass
+
+
+class Lens(Getter, Traversal):
+    pass
+
+
+class Review(LensLike):
+    pass
+
+
+class Prism(Traversal, Review):
+    pass
+
+
+class Isomorphism(Lens, Prism):
+    pass
+
+
+class Equality(Isomorphism):
+    pass
 
 
 class ComposedLens(LensLike):
@@ -153,6 +287,7 @@ class ComposedLens(LensLike):
         return res(state)
 
     def flip(self):
+        super().flip()
         return ComposedLens([l.flip() for l in reversed(self.lenses)])
 
     def compose(self, other):
@@ -161,13 +296,18 @@ class ComposedLens(LensLike):
             return TrivialLens()
         elif len(result.lenses) == 1:
             return result.lenses[0]
+        if result.kind() is None:
+            raise RuntimeError('Optic has no valid type')
         return result
 
     def __repr__(self):
         return ' & '.join(str(l) for l in self.lenses)
 
+    def _is_kind(self, cls):
+        return all(lens._is_kind(cls) for lens in self.lenses)
 
-class GetterSetterLens(LensLike):
+
+class GetterSetterLens(Lens):
     '''Turns a pair of getter and setter functions into a van
     Laarhoven lens. A getter function is one that takes a state and
     returns a value derived from that state. A setter function takes
@@ -214,7 +354,7 @@ class GetterSetterLens(LensLike):
         return 'GetterSetterLens({!r}, {!r})'.format(self.getter, self.setter)
 
 
-class IsomorphismLens(LensLike):
+class IsomorphismLens(Isomorphism):
     '''A lens based on an isomorphism. An isomorphism can be formed by
     two functions that mirror each other; they can convert forwards
     and backwards between a state and a focus without losing
@@ -267,7 +407,7 @@ class IsomorphismLens(LensLike):
                                                     self.backwards)
 
 
-class BothLens(LensLike):
+class BothLens(Traversal):
     '''A traversal that focuses both items [0] and [1].
 
         >>> from lenses import lens
@@ -322,7 +462,7 @@ class DecodeLens(IsomorphismLens):
         return repr.format(self.encoding, self.errors)
 
 
-class EachLens(LensLike):
+class EachLens(Traversal):
     '''A traversal that iterates over its state, focusing everything it
     iterates over. It uses `lenses.hooks.fromiter` to reform the state
     afterwards so it should work with any iterable that function
@@ -374,7 +514,7 @@ class EachLens(LensLike):
         return 'EachLens()'
 
 
-class ErrorLens(LensLike):
+class ErrorLens(Traversal):
     '''A lens that raises an exception whenever it tries to focus
     something. If `message is None` then the exception will be raised
     unmodified. If `message is not None` then when the lens is asked to
@@ -416,7 +556,7 @@ class ErrorLens(LensLike):
         return 'ErrorLens({!r}, {!r})'.format(self.exception, self.message)
 
 
-class FilteringLens(LensLike):
+class FilteringLens(Traversal):
     '''A traversal that only traverses a focus if the predicate returns
     `True` when called with that focus as an argument. Best used when
     composed after a traversal. It only prevents the traversal from
@@ -479,7 +619,7 @@ class GetattrLens(GetterSetterLens):
         return 'GetattrLens({!r})'.format(self.name)
 
 
-class GetZoomAttrLens(LensLike):
+class GetZoomAttrLens(Lens):
     '''A lens that focuses an attribute of an object, though if that attribute
     happens to be a lens it will zoom the lens.
 
@@ -660,7 +800,7 @@ class ItemByValueLens(GetterSetterLens):
         return 'ItemByValueLens({!r})'.format(self.value)
 
 
-class ItemsLens(LensLike):
+class ItemsLens(Traversal):
     '''A traversal focusing key-value tuples that are the items of a
     dictionary. Analogous to `dict.items`.
 
@@ -847,9 +987,9 @@ class TrivialLens(IsomorphismLens):
 
 
 class TupleLens(GetterSetterLens):
-    '''A lens that combines the focuses of other lenses into a
-    single tuple. The sublenses must be regular lenses and not
-    traversals.
+    '''A lens that combines the focuses of other lenses into a single
+    tuple. The sublenses must be optics of kind Lens; this means no
+    Traversals.
 
         >>> from lenses import lens
         >>> lens().tuple_()
@@ -875,6 +1015,9 @@ class TupleLens(GetterSetterLens):
 
     def __init__(self, *lenses):
         self.lenses = [l._underlying_lens() for l in lenses]
+        for lens in self.lenses:
+            if not lens._is_kind(Lens):
+                raise TypeError('TupleLens only works with lenses')
 
     def getter(self, state):
         return tuple(lens.get(state) for lens in self.lenses)
@@ -911,7 +1054,7 @@ class ValuesLens(ComposedLens):
         return 'ValuesLens()'
 
 
-class ZoomAttrLens(LensLike):
+class ZoomAttrLens(Traversal):
     '''A lens that looks up an attribute on its target and follows it as
     if were a bound `Lens` object. Ignores the state, if any, of the
     lens that is being looked up.
@@ -944,7 +1087,7 @@ class ZoomAttrLens(LensLike):
         return 'ZoomAttrLens({!r})'.format(self.name)
 
 
-class ZoomLens(LensLike):
+class ZoomLens(Traversal):
     '''Follows its state as if it were a bound `Lens` object.
 
         >>> from lenses import lens
