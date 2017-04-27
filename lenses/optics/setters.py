@@ -7,17 +7,17 @@ class ForkedSetter(Setter):
 
         >>> from lenses import lens
         >>> lens().fork_(lens()[0], lens()[2])
-        Lens(None, (Lens(None, GetitemLens(0))) | (Lens(None, GetitemLens(2))))
+        Lens(None, (GetitemLens(0)) | (GetitemLens(2)))
         >>> lens([[0, 0], 0, 0]).fork_(lens()[0][1], lens()[2]).set(1)
         [[0, 1], 0, 1]
     '''
 
     def __init__(self, *lenses):
-        self.lenses = lenses
+        self.lenses = [lens._underlying_lens() for lens in lenses]
 
     def func(self, f, state):
         for lens in self.lenses:
-            state = lens._underlying_lens().func(f, state).unwrap()
+            state = lens.func(f, state).unwrap()
 
         return Identity(state)
 
