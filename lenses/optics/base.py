@@ -193,7 +193,44 @@ class Traversal(Fold, Setter):
 
 
 class Lens(Getter, Traversal):
-    pass
+    '''An optic that wraps a pair of getter and setter functions. A getter
+    function is one that takes a state and returns a value derived from
+    that state. A setter function takes an old state and a new value
+    and uses them to construct a new state.
+
+        >>> from lenses import lens
+        >>> def getter(state):
+        ...     'Get the average of a list'
+        ...     return sum(state) // len(state)
+        ...
+        >>> def setter(old_state, value):
+        ...     'Set the average of a list by changing the final value'
+        ...     target_sum = value * len(old_state)
+        ...     prefix = old_state[:-1]
+        ...     return prefix + [target_sum - sum(prefix)]
+        ...
+        >>> average_lens = lens().getter_setter_(getter, setter)
+        >>> average_lens
+        Lens(None, Lens(<function getter...>, <function setter...>))
+        >>> average_lens.bind([1, 2, 4, 5]).get()
+        3
+        >>> average_lens.bind([1, 2, 3]).set(4)
+        [1, 2, 9]
+        >>> average_lens.bind([1, 2, 3]) - 1
+        [1, 2, 0]
+    '''
+
+    def __init__(self, getter, setter):
+        self.getter = getter
+        self.setter = setter
+
+    def func(self, f, state):
+        old_value = self.getter(state)
+        fa = f(old_value)
+        return typeclass.fmap(fa, lambda a: self.setter(state, a))
+
+    def __repr__(self):
+        return 'Lens({!r}, {!r})'.format(self.getter, self.setter)
 
 
 class Review(LensLike):
@@ -250,7 +287,7 @@ class Isomorphism(Lens, Prism):
     '''A lens based on an isomorphism. An isomorphism can be formed by
     two functions that mirror each other; they can convert forwards
     and backwards between a state and a focus without losing
-    information. The difference between this and a GetterSetterLens is
+    information. The difference between this and a regular Lens is
     that here the backwards functions don't need to know anything about
     the original state in order to produce a new state.
 
@@ -287,6 +324,12 @@ class Isomorphism(Lens, Prism):
     def __init__(self, forwards, backwards):
         self.forwards = forwards
         self.backwards = backwards
+
+    def getter(self, state):
+        return self.forwards(state)
+
+    def setter(self, old_state, focus):
+        return self.backwards(focus)
 
     def unpack(self, state):
         return Just(self.forwards(state))

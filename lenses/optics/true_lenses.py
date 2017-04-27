@@ -4,54 +4,7 @@ from .. import typeclass
 from .base import Lens
 
 
-class GetterSetterLens(Lens):
-    '''Turns a pair of getter and setter functions into a van
-    Laarhoven lens. A getter function is one that takes a state and
-    returns a value derived from that state. A setter function takes
-    an old state and a new value and uses them to construct a new state.
-
-        >>> from lenses import lens
-        >>> def getter(state):
-        ...     'Get the average of a list'
-        ...     return sum(state) // len(state)
-        ...
-        >>> def setter(old_state, value):
-        ...     'Set the average of a list by changing the final value'
-        ...     target_sum = value * len(old_state)
-        ...     prefix = old_state[:-1]
-        ...     return prefix + [target_sum - sum(prefix)]
-        ...
-        >>> average_lens = lens().getter_setter_(getter, setter)
-        >>> average_lens
-        Lens(None, GetterSetterLens(<function getter...>, <function setter...>))
-        >>> average_lens.bind([1, 2, 4, 5]).get()
-        3
-        >>> average_lens.bind([1, 2, 3]).set(4)
-        [1, 2, 9]
-        >>> average_lens.bind([1, 2, 3]) - 1
-        [1, 2, 0]
-
-    Though GetterSetterLens is more powerful because it can inspect the
-    old state to produce a new one, Isomorphism is more suited to
-    building custom lenses due to the greater availability of functions
-    that already fit its API. Only use a GetterSetterLens if you need the
-    extra power it affords.
-    '''
-
-    def __init__(self, getter, setter):
-        self.getter = getter
-        self.setter = setter
-
-    def func(self, f, state):
-        old_value = self.getter(state)
-        fa = f(old_value)
-        return typeclass.fmap(fa, lambda a: self.setter(state, a))
-
-    def __repr__(self):
-        return 'GetterSetterLens({!r}, {!r})'.format(self.getter, self.setter)
-
-
-class GetattrLens(GetterSetterLens):
+class GetattrLens(Lens):
     '''A lens that focuses an attribute of an object. Analogous to
     `getattr`.
 
@@ -79,7 +32,7 @@ class GetattrLens(GetterSetterLens):
         return 'GetattrLens({!r})'.format(self.name)
 
 
-class GetitemLens(GetterSetterLens):
+class GetitemLens(Lens):
     '''A lens that focuses an item inside a container. Analogous to
     `operator.itemgetter`.
 
@@ -138,7 +91,7 @@ class GetitemOrElseLens(GetitemLens):
         return 'GetitemOrElseLens({!r})'.format(self.key)
 
 
-class ItemLens(GetterSetterLens):
+class ItemLens(Lens):
     '''A lens that focuses a single item (key-value pair) in a
     dictionary by its key. Set an item to `None` to remove it from the
     dictionary.
@@ -181,7 +134,7 @@ class ItemLens(GetterSetterLens):
         return 'ItemLens({!r})'.format(self.key)
 
 
-class ItemByValueLens(GetterSetterLens):
+class ItemByValueLens(Lens):
     '''A lens that focuses a single item (key-value pair) in a
     dictionary by its value. Set an item to `None` to remove it from the
     dictionary. This lens assumes that there will only be a single key
@@ -224,7 +177,7 @@ class ItemByValueLens(GetterSetterLens):
         return 'ItemByValueLens({!r})'.format(self.value)
 
 
-class TupleLens(GetterSetterLens):
+class TupleLens(Lens):
     '''A lens that combines the focuses of other lenses into a single
     tuple. The sublenses must be optics of kind Lens; this means no
     Traversals.

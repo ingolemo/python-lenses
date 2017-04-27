@@ -235,29 +235,29 @@ def test_GetitemLens_set():
     assert b.GetitemLens(0).set([1, 2, 3], 4) == [4, 2, 3]
 
 
-def test_GetterSetterLens_get():
-    my_lens = b.GetterSetterLens(lambda a: a[:-1], lambda s, a: a + '!')
+def test_Lens_get():
+    my_lens = b.Lens(lambda a: a[:-1], lambda s, a: a + '!')
     state = 'hello!'
     assert my_lens.get(state) == 'hello'
 
 
-def test_GetterSetterLens_set():
-    my_lens = b.GetterSetterLens(lambda a: a[:-1], lambda s, a: a + '!')
+def test_Lens_set():
+    my_lens = b.Lens(lambda a: a[:-1], lambda s, a: a + '!')
     state = 'hello!'
     assert my_lens.set(state, 'bye') == 'bye!'
 
 
-def test_GetterSetterLens_modify():
-    my_lens = b.GetterSetterLens(lambda a: a[:-1], lambda s, a: a + '!')
+def test_Lens_modify():
+    my_lens = b.Lens(lambda a: a[:-1], lambda s, a: a + '!')
     state = 'hello!'
     assert my_lens.modify(
         state, lambda a: a.replace('lo', 'p')) == 'help!'
 
 
-def test_GetterSetterLens_meaningful_repr():
+def test_Lens_meaningful_repr():
     getter = lambda s: s
     setter = lambda s, f: f
-    l = b.GetterSetterLens(getter, setter)
+    l = b.Lens(getter, setter)
     assert repr(getter) in repr(l)
     assert repr(setter) in repr(l)
 
