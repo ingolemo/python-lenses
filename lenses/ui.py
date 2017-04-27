@@ -21,6 +21,7 @@ lens_methods = [
     ('item_', optics.ItemLens),
     ('item_by_value_', optics.ItemByValueLens),
     ('items_', optics.ItemsTraversal),
+    ('iter_', optics.IterableFold),
     ('json_', optics.JsonIso),
     ('just_', optics.JustPrism),
     ('keys_', optics.KeysTraversal),
