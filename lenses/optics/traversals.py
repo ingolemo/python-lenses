@@ -118,41 +118,6 @@ class EachLens(Traversal):
         return 'EachLens()'
 
 
-class FilteringLens(Traversal):
-    '''A traversal that only traverses a focus if the predicate returns
-    `True` when called with that focus as an argument. Best used when
-    composed after a traversal. It only prevents the traversal from
-    visiting foci, it does not filter out values the way that python's
-    regular `filter` function does.
-
-        >>> from lenses import lens
-        >>> lens().filter_(all)
-        Lens(None, FilteringLens(<built-in function all>))
-        >>> data = [[1, 2], [0], ['a'], ['', 'b']]
-        >>> lens(data).each_().filter_(all).get_all()
-        [[1, 2], ['a']]
-        >>> lens(data).each_().filter_(all).set(2)
-        [2, [0], 2, ['', 'b']]
-
-    The filtering is done to foci before the lens' manipulation is
-    applied. This means that the resulting foci can still violate the
-    predicate if the manipulating function doesn't respect it:
-
-        >>> lens(['', 2, '']).each_().filter_(bool).set(None)
-        ['', None, '']
-    '''
-
-    def __init__(self, predicate):
-        self.predicate = predicate
-
-    def func(self, f, state):
-        return f(state) if self.predicate(
-            state) else typeclass.pure(f(state), state)
-
-    def __repr__(self):
-        return 'FilteringLens({!r})'.format(self.predicate)
-
-
 class ItemsLens(Traversal):
     '''A traversal focusing key-value tuples that are the items of a
     dictionary. Analogous to `dict.items`.

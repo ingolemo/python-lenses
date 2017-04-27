@@ -1,6 +1,7 @@
 from .base import *
 from .getters import *
 from .isomorphisms import *
+from .prisms import *
 from .true_lenses import *
 from .traversals import *
 

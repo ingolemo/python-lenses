@@ -177,13 +177,13 @@ def test_ErrorLens_set():
         b.ErrorLens(Exception('a message')).set(object(), object())
 
 
-def test_FilteringLens_get():
-    l = b.EachLens() & b.FilteringLens(lambda a: a > 0)
+def test_FilteringPrism_get():
+    l = b.EachLens() & b.FilteringPrism(lambda a: a > 0)
     assert l.set([1, -1, 1], 3) == [3, -1, 3]
 
 
-def test_FilteringLens_set():
-    l = b.EachLens() & b.FilteringLens(lambda a: a > 0)
+def test_FilteringPrism_set():
+    l = b.EachLens() & b.FilteringPrism(lambda a: a > 0)
     assert l.get_all([1, -1, 1]) == [1, 1]
 
 

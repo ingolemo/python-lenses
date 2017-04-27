@@ -50,7 +50,8 @@ class LensLike(object):
 
     Prism
 
-    : A Prism is both a Traversal and a Review. Currently unused.
+    : A Prism is both a Traversal and a Review. It is capable of getting
+    and setting a single focus that may or may not exist.
 
     Isomorphism
 
@@ -200,7 +201,49 @@ class Review(LensLike):
 
 
 class Prism(Traversal, Review):
-    pass
+    '''A prism is an optic made from a pair of functions that pack and
+    unpack a state where the unpacking process can potentially fail.
+
+    `pack` is a function that takes a focus and returns that focus
+    wrapped up in a new state. `unpack` is a function that takes a state
+    and unpacks it to get a focus. The unpack function must return an
+    instance of `lenses.maybe.Maybe`; `Just` if the unpacking succeeded
+    and `Nothing` if the unpacking failed.
+
+    Parsing strings is a common situation when prisms are useful:
+
+        >>> from lenses import lens
+        >>> from lenses.maybe import Nothing, Just
+        >>> def pack(focus):
+        ...     return str(focus)
+        >>> def unpack(state):
+        ...     try:
+        ...         return Just(int(state))
+        ...     except ValueError:
+        ...         return Nothing()
+        >>> lens().prism_(pack, unpack)
+        Lens(None, Prism(<function pack ...>, <function unpack ...>))
+        >>> lens('42').prism_(pack, unpack).get_all()
+        [42]
+        >>> lens('fourty two').prism_(pack, unpack).get_all()
+        []
+
+    All prisms are also traversals that have exactly zero or one foci.
+    '''
+
+    def __init__(self, pack, unpack):
+        self.pack = pack
+        self.unpack = unpack
+
+    def func(self, f, state):
+        result = self.unpack(state)
+        if result.is_nothing:
+            return f.pure(state)
+        return typeclass.fmap(f(result.unwrap()), self.pack)
+
+    def __repr__(self):
+        return 'Prism({!r}, {!r})'.format(self.pack,
+                                          self.unpack)
 
 
 class Isomorphism(Lens, Prism):
@@ -245,6 +288,12 @@ class Isomorphism(Lens, Prism):
         self.forwards = forwards
         self.backwards = backwards
 
+    def unpack(self, state):
+        return Just(self.forwards(a))
+
+    def pack(self, focus):
+        return focus
+
     def flip(self):
         return Isomorphism(self.backwards, self.forwards)
 
@@ -253,7 +302,7 @@ class Isomorphism(Lens, Prism):
 
     def __repr__(self):
         return 'Isomorphism({!r}, {!r})'.format(self.forwards,
-                                                    self.backwards)
+                                                self.backwards)
 
 
 class Equality(Isomorphism):
