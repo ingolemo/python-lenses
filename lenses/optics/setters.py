@@ -7,7 +7,7 @@ class ForkedSetter(Setter):
 
         >>> from lenses import lens
         >>> lens().fork_(lens()[0], lens()[2])
-        Lens(None, (GetitemLens(0)) | (GetitemLens(2)))
+        Lens(None, ForkedSetter(GetitemLens(0), GetitemLens(2)))
         >>> lens([[0, 0], 0, 0]).fork_(lens()[0][1], lens()[2]).set(1)
         [[0, 1], 0, 1]
     '''
@@ -22,4 +22,5 @@ class ForkedSetter(Setter):
         return Identity(state)
 
     def __repr__(self):
-        return ' | '.join('({})'.format(l) for l in self.lenses)
+        args = ', '.join(repr(l) for l in self.lenses)
+        return 'ForkedSetter({})'.format(args)
