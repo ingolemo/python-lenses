@@ -2,6 +2,7 @@ from .base import *
 from .getters import *
 from .isomorphisms import *
 from .prisms import *
+from .setters import *
 from .true_lenses import *
 from .traversals import *
 

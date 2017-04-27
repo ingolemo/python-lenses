@@ -10,6 +10,7 @@ lens_methods = [
     ('each_', optics.EachLens),
     ('filter_', optics.FilteringPrism),
     ('f_', optics.FunctionGetter),
+    ('fork_', optics.ForkedSetter),
     ('get_', optics.GetitemOrElseLens),
     ('getattr_', optics.GetattrLens),
     ('getzoomattr_', optics.GetZoomAttrLens),
