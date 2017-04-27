@@ -289,10 +289,10 @@ class Isomorphism(Lens, Prism):
         self.backwards = backwards
 
     def unpack(self, state):
-        return Just(self.forwards(a))
+        return Just(self.forwards(state))
 
     def pack(self, focus):
-        return focus
+        return self.backwards(focus)
 
     def flip(self):
         return Isomorphism(self.backwards, self.forwards)
