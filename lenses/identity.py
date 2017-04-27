@@ -13,7 +13,7 @@ class Identity(object):
         self.item = item
 
     def __repr__(self):
-        return '{}({!r})'.format(self.__class__, self.item)
+        return '{}({!r})'.format(self.__class__.__name__, self.item)
 
     def __eq__(self, other):
         if not isinstance(other, Identity):
