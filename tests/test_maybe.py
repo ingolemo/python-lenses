@@ -1,3 +1,5 @@
+import pytest
+
 from lenses.maybe import Nothing, Just
 import lenses
 
@@ -38,6 +40,11 @@ def test_Nothing_not_equals_Just():
 def test_Nothing_maybe():
     obj = object()
     assert Nothing().maybe() == None
+
+
+def test_Nothing_unwrap():
+    with pytest.raises(ValueError):
+        Nothing().unwrap()
 
 
 def test_Just_equals_Just_when_subobjects_equal():
@@ -81,4 +88,8 @@ def test_Just_from_iter():
 
 def test_Just_maybe():
     obj = object()
-    assert Just(obj).maybe() == obj
+    assert Just(obj).maybe() is obj
+
+def test_Just_unwrap():
+    obj = object()
+    assert Just(obj).unwrap() is obj

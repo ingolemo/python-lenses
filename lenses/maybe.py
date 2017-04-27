@@ -59,6 +59,11 @@ class Maybe(object):
             return guard
         return self.item
 
+    def unwrap(self):
+        if self.is_nothing:
+            raise ValueError('Cannot unwrap Nothing')
+        return self.item
+
 class Nothing(Maybe):
     instance = None
 
