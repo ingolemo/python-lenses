@@ -31,7 +31,7 @@ class LensLike(object):
 
     Getter
 
-    : A Getter is a Fold that is restricted to getting a single foci at
+    : A Getter is a Fold that is restricted to getting a single focus at
     a time. It can not necessarily set any foci.
 
     Traversal
@@ -42,7 +42,7 @@ class LensLike(object):
     Lens
 
     : A Lens is both a Getter and a Traversal. It is capable of getting
-    and setting is single foci at a time.
+    and setting a single focus at a time.
 
     Review
 
@@ -56,7 +56,7 @@ class LensLike(object):
 
     : An Isomorphism is both a Lens and a Prism. Isomorphisms have the
     property that they are reversable; You can take an isomorphism and
-    flip it around so that getting the foci becomes setting the foci
+    flip it around so that getting the focus becomes setting the focus
     and setting becomes getting.
 
     Equality
