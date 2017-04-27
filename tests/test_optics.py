@@ -207,24 +207,24 @@ class C(object):
     sublens = lens().attr
 
 
-def test_GetZoomAttrLens_get_attr():
+def test_GetZoomAttrTraversal_get_attr():
     state = C('c')
-    b.GetZoomAttrLens('attr').get(state) == 'c'
+    b.GetZoomAttrTraversal('attr').get(state) == 'c'
 
 
-def test_GetZoomAttrLens_set_attr():
+def test_GetZoomAttrTraversal_set_attr():
     state = C('c')
-    b.GetZoomAttrLens('attr').set(state, 'b') == C('b')
+    b.GetZoomAttrTraversal('attr').set(state, 'b') == C('b')
 
 
-def test_GetZoomAttrLens_get_zoom():
+def test_GetZoomAttrTraversal_get_zoom():
     state = C('c')
-    b.GetZoomAttrLens('sublens').get(state) == 'c'
+    b.GetZoomAttrTraversal('sublens').get(state) == 'c'
 
 
-def test_GetZoomAttrLens_set_zoom():
+def test_GetZoomAttrTraversal_set_zoom():
     state = C('c')
-    b.GetZoomAttrLens('sublens').set(state, 'b') == C('b')
+    b.GetZoomAttrTraversal('sublens').set(state, 'b') == C('b')
 
 
 def test_GetitemLens_get():

@@ -13,7 +13,7 @@ lens_methods = [
     ('fork_', optics.ForkedSetter),
     ('get_', optics.GetitemOrElseLens),
     ('getattr_', optics.GetattrLens),
-    ('getzoomattr_', optics.GetZoomAttrLens),
+    ('getzoomattr_', optics.GetZoomAttrTraversal),
     ('getitem_', optics.GetitemLens),
     ('getter_setter_', optics.GetterSetterLens),
     ('instance_', optics.InstancePrism),
@@ -287,7 +287,7 @@ class Lens(object):
                 return self.call(name[5:], *args, **kwargs)
             return caller
 
-        return self.add_lens(optics.GetZoomAttrLens(name))
+        return self.add_lens(optics.GetZoomAttrTraversal(name))
 
     def __getitem__(self, name):
         return self.add_lens(optics.GetitemLens(name))

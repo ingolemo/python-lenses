@@ -118,6 +118,48 @@ class EachLens(Traversal):
         return 'EachLens()'
 
 
+class GetZoomAttrTraversal(Traversal):
+    '''A traversal that focuses an attribute of an object, though if
+    that attribute happens to be a lens it will zoom the lens. This
+    is used internally to make lenses that are attributes of objects
+    transparent. If you already know whether you are focusing a lens or
+    a non-lens you should be explicit and use a ZoomAttrTraversal or a
+    GetAttrLens respectively.
+
+        >>> from lenses import lens
+        >>> from collections import namedtuple
+        >>> Triple = namedtuple('Triple', 'left middle right')
+        >>> state = Triple(1, 10, lens().middle)
+        >>> lens().left
+        Lens(None, GetZoomAttrTraversal('left'))
+        >>> lens(state).left.get()
+        1
+        >>> lens(state).left.set(3)
+        Triple(left=3, middle=10, right=Lens(None, GetZoomAttrTraversal('middle')))
+        >>> lens(state).right.get()
+        10
+        >>> lens(state).right.set(13)
+        Triple(left=1, middle=13, right=Lens(None, GetZoomAttrTraversal('middle')))
+    '''
+
+    def __init__(self, name):
+        from lenses.optics import GetattrLens
+        self.name = name
+        self._getattr_cache = GetattrLens(name)
+
+    def func(self, f, state):
+        attr = getattr(state, self.name)
+        try:
+            sublens = attr._underlying_lens()
+        except AttributeError:
+            sublens = self._getattr_cache
+        return sublens.func(f, state)
+
+    def __repr__(self):
+        return 'GetZoomAttrTraversal({!r})'.format(self.name)
+
+
+
 class ItemsLens(Traversal):
     '''A traversal focusing key-value tuples that are the items of a
     dictionary. Analogous to `dict.items`.

@@ -79,42 +79,6 @@ class GetattrLens(GetterSetterLens):
         return 'GetattrLens({!r})'.format(self.name)
 
 
-class GetZoomAttrLens(Lens):
-    '''A lens that focuses an attribute of an object, though if that attribute
-    happens to be a lens it will zoom the lens.
-
-        >>> from lenses import lens
-        >>> from collections import namedtuple
-        >>> Triple = namedtuple('Triple', 'left middle right')
-        >>> state = Triple(1, 10, lens().middle)
-        >>> lens().left
-        Lens(None, GetZoomAttrLens('left'))
-        >>> lens(state).left.get()
-        1
-        >>> lens(state).left.set(3)
-        Triple(left=3, middle=10, right=Lens(None, GetZoomAttrLens('middle')))
-        >>> lens(state).right.get()
-        10
-        >>> lens(state).right.set(13)
-        Triple(left=1, middle=13, right=Lens(None, GetZoomAttrLens('middle')))
-    '''
-
-    def __init__(self, name):
-        self.name = name
-        self._getattr_cache = GetattrLens(name)
-
-    def func(self, f, state):
-        attr = getattr(state, self.name)
-        try:
-            sublens = attr._underlying_lens()
-        except AttributeError:
-            sublens = self._getattr_cache
-        return sublens.func(f, state)
-
-    def __repr__(self):
-        return 'GetZoomAttrLens({!r})'.format(self.name)
-
-
 class GetitemLens(GetterSetterLens):
     '''A lens that focuses an item inside a container. Analogous to
     `operator.itemgetter`.
