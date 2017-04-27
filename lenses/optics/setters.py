@@ -3,7 +3,7 @@ from ..identity import Identity
 from .base import Setter
 
 class ForkedSetter(Setter):
-    '''A lenses representing the parallel composition of several sub-lenses.
+    '''A setter representing the parallel composition of several sub-lenses.
 
         >>> from lenses import lens
         >>> lens().fork_(lens()[0], lens()[2])
