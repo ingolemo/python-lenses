@@ -4,10 +4,10 @@ import functools
 from . import optics
 
 lens_methods = [
-    ('both_', optics.BothLens),
-    ('decode_', optics.DecodeLens),
-    ('error_', optics.ErrorLens),
-    ('each_', optics.EachLens),
+    ('both_', optics.BothTraversal),
+    ('decode_', optics.DecodeIso),
+    ('error_', optics.ErrorIso),
+    ('each_', optics.EachTraversal),
     ('filter_', optics.FilteringPrism),
     ('f_', optics.FunctionGetter),
     ('fork_', optics.ForkedSetter),
@@ -20,17 +20,17 @@ lens_methods = [
     ('iso_', optics.Isomorphism),
     ('item_', optics.ItemLens),
     ('item_by_value_', optics.ItemByValueLens),
-    ('items_', optics.ItemsLens),
-    ('json_', optics.JsonLens),
+    ('items_', optics.ItemsTraversal),
+    ('json_', optics.JsonIso),
     ('just_', optics.JustPrism),
-    ('keys_', optics.KeysLens),
-    ('listwrap_', optics.ListWrapLens),
-    ('norm_', optics.NormalisingLens),
+    ('keys_', optics.KeysTraversal),
+    ('listwrap_', optics.ListWrapIso),
+    ('norm_', optics.NormalisingIso),
     ('prism_', optics.Prism),
     ('tuple_', optics.TupleLens),
-    ('values_', optics.ValuesLens),
-    ('zoomattr_', optics.ZoomAttrLens),
-    ('zoom_', optics.ZoomLens),
+    ('values_', optics.ValuesTraversal),
+    ('zoomattr_', optics.ZoomAttrTraversal),
+    ('zoom_', optics.ZoomTraversal),
 ]
 
 
@@ -86,7 +86,7 @@ class Lens(object):
 
     def __init__(self, state=None, lens=None):
         if lens is None:
-            lens = optics.TrivialLens()
+            lens = optics.TrivialIso()
         self.state = state
         self.lens = lens
 

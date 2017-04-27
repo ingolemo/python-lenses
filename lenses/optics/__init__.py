@@ -7,7 +7,7 @@ from .true_lenses import *
 from .traversals import *
 
 
-class KeysLens(ComposedLens):
+class KeysTraversal(ComposedLens):
     '''A traversal focusing the keys of a dictionary. Analogous to
     `dict.keys`.
 
@@ -15,7 +15,7 @@ class KeysLens(ComposedLens):
         >>> from collections import OrderedDict
         >>> data = OrderedDict([(1, 10), (2, 20)])
         >>> lens().keys_()
-        Lens(None, KeysLens())
+        Lens(None, KeysTraversal())
         >>> lens(data).keys_().get_all()
         [1, 2]
         >>> lens(data).keys_().modify(lambda n: n + 1)
@@ -23,13 +23,13 @@ class KeysLens(ComposedLens):
     '''
 
     def __init__(self):
-        self.lenses = [ItemsLens(), GetitemLens(0)]
+        self.lenses = [ItemsTraversal(), GetitemLens(0)]
 
     def __repr__(self):
-        return 'KeysLens()'
+        return 'KeysTraversal()'
 
 
-class ValuesLens(ComposedLens):
+class ValuesTraversal(ComposedLens):
     '''A traversal focusing the values of a dictionary. Analogous to
     `dict.values`.
 
@@ -37,7 +37,7 @@ class ValuesLens(ComposedLens):
         >>> from collections import OrderedDict
         >>> data = OrderedDict([(1, 10), (2, 20)])
         >>> lens().values_()
-        Lens(None, ValuesLens())
+        Lens(None, ValuesTraversal())
         >>> lens(data).values_().get_all()
         [10, 20]
         >>> lens(data).values_().modify(lambda n: n + 1)
@@ -45,7 +45,7 @@ class ValuesLens(ComposedLens):
     '''
 
     def __init__(self):
-        self.lenses = [ItemsLens(), GetitemLens(1)]
+        self.lenses = [ItemsTraversal(), GetitemLens(1)]
 
     def __repr__(self):
-        return 'ValuesLens()'
+        return 'ValuesTraversal()'

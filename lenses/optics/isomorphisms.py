@@ -1,14 +1,14 @@
 from .base import Isomorphism
 
 
-class DecodeLens(Isomorphism):
+class DecodeIso(Isomorphism):
     '''An isomorphism that decodes and encodes its focus on the fly.
     Lets you focus a byte string as a unicode string. The arguments have
     the same meanings as `bytes.decode`. Analogous to `bytes.decode`.
 
         >>> from lenses import lens
         >>> lens().decode_(encoding='utf8')
-        Lens(None, DecodeLens('utf8', 'strict'))
+        Lens(None, DecodeIso('utf8', 'strict'))
         >>> lens(b'hello').decode_().get()  # doctest: +SKIP
         'hello'
         >>> lens(b'hello').decode_().set('world')  # doctest: +SKIP
@@ -26,18 +26,18 @@ class DecodeLens(Isomorphism):
         return focus.encode(self.encoding, self.errors)
 
     def __repr__(self):
-        repr = 'DecodeLens({!r}, {!r})'
+        repr = 'DecodeIso({!r}, {!r})'
         return repr.format(self.encoding, self.errors)
 
 
-class JsonLens(Isomorphism):
+class JsonIso(Isomorphism):
     '''An isomorphism that focuses a string containing json data as its
     parsed equivalent. Analogous to `json.loads`.
 
         >>> from lenses import lens
         >>> data = '[{"points": [4, 7]}]'
         >>> lens().json_()
-        Lens(None, JsonLens())
+        Lens(None, JsonIso())
         >>> lens(data).json_()[0]['points'][1].get()
         7
         >>> lens(data).json_()[0]['points'][0].set(8)
@@ -54,17 +54,17 @@ class JsonLens(Isomorphism):
         return self.json_mod.dumps(focus)
 
     def __repr__(self):
-        return 'JsonLens()'
+        return 'JsonIso()'
 
 
-class ListWrapLens(Isomorphism):
+class ListWrapIso(Isomorphism):
     '''An isomorphism that wraps its state up in a list. This is
     occasionally useful when you need to make hetrogenous data more
     uniform. Analogous to `lambda state: [state]`.
 
         >>> from lenses import lens
         >>> lens().listwrap_()
-        Lens(None, ListWrapLens())
+        Lens(None, ListWrapIso())
         >>> lens(0).listwrap_().get()
         [0]
         >>> lens(0).listwrap_().set([1])
@@ -87,10 +87,10 @@ class ListWrapLens(Isomorphism):
         return focus[0]
 
     def __repr__(self):
-        return 'ListWrapLens()'
+        return 'ListWrapIso()'
 
 
-class NormalisingLens(Isomorphism):
+class NormalisingIso(Isomorphism):
     '''An isomorphism that applies a function as it sets a new focus
     without regard to the old state. It will get foci without
     transformation. This lens allows you to pre-process values before
@@ -102,14 +102,14 @@ class NormalisingLens(Isomorphism):
 
         setter(setter(value)) == setter(value)
 
-    Equivalent to `IsomophismLens((lambda s: s), setter)`.
+    Equivalent to `Isomorphism((lambda s: s), setter)`.
 
         >>> from lenses import lens
         >>> def real_only(num):
         ...     return num.real
         ...
         >>> lens().norm_(real_only)
-        Lens(None, NormalisingLens(<function real_only at ...>))
+        Lens(None, NormalisingIso(<function real_only at ...>))
         >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).get()
         1.0
         >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).set(4+7j)
@@ -131,4 +131,4 @@ class NormalisingLens(Isomorphism):
         return state
 
     def __repr__(self):
-        return 'NormalisingLens({!r})'.format(self.backwards)
+        return 'NormalisingIso({!r})'.format(self.backwards)

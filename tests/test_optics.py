@@ -16,7 +16,7 @@ from lenses import optics as b
 #     recursive_lenses = strat.lists(recursive_lens, max_size=5)
 
 #     def nonrecursive_lens(lcons):
-#         lst = strat.just(b.TrivialLens())
+#         lst = strat.just(b.TrivialIso())
 #         dst = strat.just(1)
 #         for a_lens, data in lcons:
 #             if a_lens is b.GetitemLens:
@@ -62,20 +62,20 @@ def test_LensLike():
 
 def test_LensLike_no_focus():
     with pytest.raises(ValueError):
-        b.EachLens().get([])
+        b.EachTraversal().get([])
 
 
 def test_lens_and():
-    my_lens = b.BothLens() & b.GetitemLens(1)
+    my_lens = b.BothTraversal() & b.GetitemLens(1)
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
-def test_BothLens_get():
-    assert b.BothLens().get(['1', '2']) == '12'
+def test_BothTraversal_get():
+    assert b.BothTraversal().get(['1', '2']) == '12'
 
 
-def test_BothLens_set():
-    assert b.BothLens().set(['1', '2'], 4) == [4, 4]
+def test_BothTraversal_set():
+    assert b.BothTraversal().set(['1', '2'], 4) == [4, 4]
 
 
 def test_ComposedLens_nolenses_get():
@@ -94,77 +94,77 @@ def test_ComposedLens_nesting_simplifies():
 
 def test_ComposedLens_compose_simplifies():
     l = b.ComposedLens([])
-    assert type(l & l) == b.TrivialLens
+    assert type(l & l) == b.TrivialIso
 
 
-def test_DecodeLens_get():
-    assert b.DecodeLens().get(b'hello') == 'hello'
+def test_DecodeIso_get():
+    assert b.DecodeIso().get(b'hello') == 'hello'
 
 
-def test_DecodeLens_get_with_args():
-    assert b.DecodeLens('utf-8').get(b'caf\xc3\xa9') == u'caf\xe9'
+def test_DecodeIso_get_with_args():
+    assert b.DecodeIso('utf-8').get(b'caf\xc3\xa9') == u'caf\xe9'
 
 
-def test_DecodeLens_set():
-    assert b.DecodeLens('ascii', 'replace').set(b'', u'\xe9') == b'?'
+def test_DecodeIso_set():
+    assert b.DecodeIso('ascii', 'replace').set(b'', u'\xe9') == b'?'
 
 
-def test_EachLens_get_all():
-    assert b.EachLens().get_all([1, 2, 3]) == [1, 2, 3]
+def test_EachTraversal_get_all():
+    assert b.EachTraversal().get_all([1, 2, 3]) == [1, 2, 3]
 
 
-def test_EachLens_set():
-    assert b.EachLens().set([1, 2, 3], 4) == [4, 4, 4]
+def test_EachTraversal_set():
+    assert b.EachTraversal().set([1, 2, 3], 4) == [4, 4, 4]
 
 
-def test_EachLens_get_all_on_set():
-    assert sorted(b.EachLens().get_all({1, 2, 3})) == [1, 2, 3]
+def test_EachTraversal_get_all_on_set():
+    assert sorted(b.EachTraversal().get_all({1, 2, 3})) == [1, 2, 3]
 
 
-def test_EachLens_set_on_set():
-    assert b.EachLens().set({1, 2, 3}, 4) == {4}
+def test_EachTraversal_set_on_set():
+    assert b.EachTraversal().set({1, 2, 3}, 4) == {4}
 
 
-def test_EachLens_modify_on_set():
-    assert b.EachLens().modify({1, 2, 3}, lambda a: a+1) == {2, 3, 4}
+def test_EachTraversal_modify_on_set():
+    assert b.EachTraversal().modify({1, 2, 3}, lambda a: a+1) == {2, 3, 4}
 
 
-def test_EachLens_get_all_empty():
-    assert b.EachLens().get_all([]) == []
+def test_EachTraversal_get_all_empty():
+    assert b.EachTraversal().get_all([]) == []
 
 
-def test_EachLens_set_empty():
-    assert b.EachLens().set([], 4) == []
+def test_EachTraversal_set_empty():
+    assert b.EachTraversal().set([], 4) == []
 
 
-def test_EachLens_get_all_with_starting_None():
-    assert b.EachLens(filter_none=True).get_all([None, None]) == []
+def test_EachTraversal_get_all_with_starting_None():
+    assert b.EachTraversal(filter_none=True).get_all([None, None]) == []
 
 
-def test_EachLens_set_with_starting_None():
-    assert b.EachLens(filter_none=True).set([None, None], 4) == []
+def test_EachTraversal_set_with_starting_None():
+    assert b.EachTraversal(filter_none=True).set([None, None], 4) == []
 
 
-def test_EachLens_set_None():
-    assert b.EachLens(filter_none=True).set([1, 2, 3], None) == []
+def test_EachTraversal_set_None():
+    assert b.EachTraversal(filter_none=True).set([1, 2, 3], None) == []
 
 
-def test_EachLens_get_all_with_starting_filtered():
+def test_EachTraversal_get_all_with_starting_filtered():
     def f(a):
         return a != 2
-    assert b.EachLens(f).get_all([1, 2, 3]) == [1, 3]
+    assert b.EachTraversal(f).get_all([1, 2, 3]) == [1, 3]
 
 
-def test_EachLens_set_with_starting_filtered():
+def test_EachTraversal_set_with_starting_filtered():
     def f(a):
         return a != 2
-    assert b.EachLens(f).set([1, 2, 3], 4) == [4, 4]
+    assert b.EachTraversal(f).set([1, 2, 3], 4) == [4, 4]
 
 
-def test_EachLens_set_filtered():
+def test_EachTraversal_set_filtered():
     def f(a):
         return a != 4
-    assert b.EachLens(f).set([1, 2, 3], 4) == []
+    assert b.EachTraversal(f).set([1, 2, 3], 4) == []
 
 
 def test_ErrorLens_get():
@@ -178,12 +178,12 @@ def test_ErrorLens_set():
 
 
 def test_FilteringPrism_get():
-    l = b.EachLens() & b.FilteringPrism(lambda a: a > 0)
+    l = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
     assert l.set([1, -1, 1], 3) == [3, -1, 3]
 
 
 def test_FilteringPrism_set():
-    l = b.EachLens() & b.FilteringPrism(lambda a: a > 0)
+    l = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
     assert l.get_all([1, -1, 1]) == [1, 1]
 
 
@@ -316,49 +316,49 @@ def test_ItemByValueLens_set_nonexistent():
         'hello': 0, 'world': 1, 'test': 2}
 
 
-def test_ItemsLens_get_all():
+def test_ItemsTraversal_get_all():
     data = {0: 'zero', 1: 'one'}
-    my_lens = b.ItemsLens()
+    my_lens = b.ItemsTraversal()
     assert sorted(my_lens.get_all(data)) == [(0, 'zero'), (1, 'one')]
 
 
-def test_ItemsLens_get_all_empty():
-    my_lens = b.ItemsLens()
+def test_ItemsTraversal_get_all_empty():
+    my_lens = b.ItemsTraversal()
     assert sorted(my_lens.get_all({})) == []
 
 
-def test_ItemsLens_modify():
+def test_ItemsTraversal_modify():
     data = {0: 'zero', 1: 'one'}
-    my_lens = b.ItemsLens() & b.GetitemLens(0)
+    my_lens = b.ItemsTraversal() & b.GetitemLens(0)
     assert my_lens.modify(data, lambda a: a + 1) == {
         1: 'zero', 2: 'one'}
 
 
-def test_ItemsLens_modify_empty():
-    my_lens = b.ItemsLens() & b.GetitemLens(0)
+def test_ItemsTraversal_modify_empty():
+    my_lens = b.ItemsTraversal() & b.GetitemLens(0)
     assert my_lens.modify({}, lambda a: a + 1) == {}
 
 
-def test_JsonLens_get():
-    l = b.JsonLens()
+def test_JsonIso_get():
+    l = b.JsonIso()
     data = '{"numbers":[1, 2, 3]}'
     assert l.get(data) == {'numbers': [1, 2, 3]}
 
 
-def test_JsonLens_set():
-    l = b.JsonLens()
+def test_JsonIso_set():
+    l = b.JsonIso()
     data = '{"numbers":[1, 2, 3]}'
     assert l.set(data, {'numbers': []}) == '{"numbers": []}'
 
 
-def test_TrivialLens_get():
+def test_TrivialIso_get():
     obj = object()
-    assert b.TrivialLens().get(obj) is obj
+    assert b.TrivialIso().get(obj) is obj
 
 
-def test_TrivialLens_set():
+def test_TrivialIso_set():
     obj1, obj2 = object(), object()
-    assert b.TrivialLens().set(obj1, obj2) is obj2
+    assert b.TrivialIso().set(obj1, obj2) is obj2
 
 
 def test_TupleLens_get_with_LensLike():
@@ -387,13 +387,13 @@ def test_TupleLens_set_with_Lens():
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
 
 
-def test_ZoomLens_get():
-    l = b.GetitemLens(0) & b.ZoomLens()
+def test_ZoomTraversal_get():
+    l = b.GetitemLens(0) & b.ZoomTraversal()
     data = [lens([1, 2, 3])[1]]
     assert l.get(data) == 2
 
 
-def test_ZoomLens_set():
-    l = b.GetitemLens(0) & b.ZoomLens()
+def test_ZoomTraversal_set():
+    l = b.GetitemLens(0) & b.ZoomTraversal()
     data = [lens([1, 2, 3])[1]]
     assert l.set(data, 7) == [[1, 7, 3]]

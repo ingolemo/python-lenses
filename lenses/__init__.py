@@ -11,7 +11,7 @@ The entry point to this library is the `lens` function, which returns a
 
     >>> from lenses import lens
     >>> lens()
-    Lens(None, TrivialLens())
+    Lens(None, TrivialIso())
 '''
 
 from .ui import Lens

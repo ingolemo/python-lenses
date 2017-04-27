@@ -40,12 +40,12 @@ def collect_args(n):
     return arg_collector
 
 
-class BothLens(Traversal):
+class BothTraversal(Traversal):
     '''A traversal that focuses both items [0] and [1].
 
         >>> from lenses import lens
         >>> lens().both_()
-        Lens(None, BothLens())
+        Lens(None, BothTraversal())
         >>> lens([1, 2, 3]).both_().get_all()
         [1, 2]
         >>> lens([1, 2, 3]).both_().set(4)
@@ -63,10 +63,10 @@ class BothLens(Traversal):
         return typeclass.fmap(multiap(collect_args(2), f0, f1), multisetter)
 
     def __repr__(self):
-        return 'BothLens()'
+        return 'BothTraversal()'
 
 
-class EachLens(Traversal):
+class EachTraversal(Traversal):
     '''A traversal that iterates over its state, focusing everything it
     iterates over. It uses `lenses.hooks.fromiter` to reform the state
     afterwards so it should work with any iterable that function
@@ -75,7 +75,7 @@ class EachLens(Traversal):
         >>> from lenses import lens
         >>> data = [1, 2, 3]
         >>> lens().each_()
-        Lens(None, EachLens())
+        Lens(None, EachTraversal())
         >>> lens(data).each_().get_all()
         [1, 2, 3]
         >>> lens(data).each_().modify(lambda n: n + 1)
@@ -115,7 +115,7 @@ class EachLens(Traversal):
         return typeclass.fmap(applied, build_new_state_from_iter)
 
     def __repr__(self):
-        return 'EachLens()'
+        return 'EachTraversal()'
 
 
 class GetZoomAttrTraversal(Traversal):
@@ -160,7 +160,7 @@ class GetZoomAttrTraversal(Traversal):
 
 
 
-class ItemsLens(Traversal):
+class ItemsTraversal(Traversal):
     '''A traversal focusing key-value tuples that are the items of a
     dictionary. Analogous to `dict.items`.
 
@@ -168,7 +168,7 @@ class ItemsLens(Traversal):
         >>> from collections import OrderedDict
         >>> data = OrderedDict([(1, 10), (2, 20)])
         >>> lens().items_()
-        Lens(None, ItemsLens())
+        Lens(None, ItemsTraversal())
         >>> lens(data).items_().get_all()
         [(1, 10), (2, 20)]
         >>> lens(data).items_()[1].modify(lambda n: n + 1)
@@ -190,10 +190,10 @@ class ItemsLens(Traversal):
         return typeclass.fmap(multiap(collector, *map(f, items)), dict_builder)
 
     def __repr__(self):
-        return 'ItemsLens()'
+        return 'ItemsTraversal()'
 
 
-class ZoomAttrLens(Traversal):
+class ZoomAttrTraversal(Traversal):
     '''A lens that looks up an attribute on its target and follows it as
     if were a bound `Lens` object. Ignores the state, if any, of the
     lens that is being looked up.
@@ -208,7 +208,7 @@ class ZoomAttrLens(Traversal):
         ...
         >>> data = (ClassWithLens([1, 2, 3]), 4)
         >>> lens().zoomattr_('first')
-        Lens(None, ZoomAttrLens('first'))
+        Lens(None, ZoomAttrTraversal('first'))
         >>> lens(data)[0].zoomattr_('first').get()
         1
         >>> lens(data)[0].zoomattr_('first').set(5)
@@ -223,16 +223,16 @@ class ZoomAttrLens(Traversal):
         return l._underlying_lens().func(f, state)
 
     def __repr__(self):
-        return 'ZoomAttrLens({!r})'.format(self.name)
+        return 'ZoomAttrTraversal({!r})'.format(self.name)
 
 
-class ZoomLens(Traversal):
+class ZoomTraversal(Traversal):
     '''Follows its state as if it were a bound `Lens` object.
 
         >>> from lenses import lens
         >>> data = [lens([1, 2])[1], 4]
         >>> lens().zoom_()
-        Lens(None, ZoomLens())
+        Lens(None, ZoomTraversal())
         >>> lens(data)[0].zoom_().get()
         2
         >>> lens(data)[0].zoom_().set(3)
@@ -243,4 +243,4 @@ class ZoomLens(Traversal):
         return state._underlying_lens().func(f, state.state)
 
     def __repr__(self):
-        return 'ZoomLens()'
+        return 'ZoomTraversal()'

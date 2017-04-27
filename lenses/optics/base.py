@@ -372,7 +372,7 @@ class ComposedLens(LensLike):
     def _filter_lenses(lenses):
         for lens in lenses:
             lenstype = type(lens)
-            if lenstype is TrivialLens:
+            if lenstype is TrivialIso:
                 continue
             elif lenstype is ComposedLens:
                 for lens in lens.lenses:
@@ -382,7 +382,7 @@ class ComposedLens(LensLike):
 
     def func(self, f, state):
         if not self.lenses:
-            return TrivialLens().func(f, state)
+            return TrivialIso().func(f, state)
 
         res = f
         for lens in reversed(self.lenses):
@@ -397,7 +397,7 @@ class ComposedLens(LensLike):
     def compose(self, other):
         result = ComposedLens(self.lenses + [other])
         if len(result.lenses) == 0:
-            return TrivialLens()
+            return TrivialIso()
         elif len(result.lenses) == 1:
             return result.lenses[0]
         if result.kind() is None:
@@ -411,17 +411,17 @@ class ComposedLens(LensLike):
         return all(lens._is_kind(cls) for lens in self.lenses)
 
 
-class ErrorLens(Traversal):
-    '''A lens that raises an exception whenever it tries to focus
+class ErrorIso(Isomorphism):
+    '''An optic that raises an exception whenever it tries to focus
     something. If `message is None` then the exception will be raised
-    unmodified. If `message is not None` then when the lens is asked to
-    focus something it will run `message.format(state)` and the
+    unmodified. If `message is not None` then when the lens is asked
+    to focus something it will run `message.format(state)` and the
     exception will be called with the resulting formatted message as
     it's only argument. Useful for debugging.
 
         >>> from lenses import lens
         >>> lens().error_(Exception())
-        Lens(None, ErrorLens(Exception()))
+        Lens(None, ErrorIso(Exception()))
         >>> lens().error_(Exception, '{}')  # doctest: +SKIP
         Lens(None, ErrorLens(<class 'Exception'>, '{}'))
         >>> lens(True).error_(Exception).get()
@@ -449,18 +449,18 @@ class ErrorLens(Traversal):
 
     def __repr__(self):
         if self.message is None:
-            return 'ErrorLens({!r})'.format(self.exception)
-        return 'ErrorLens({!r}, {!r})'.format(self.exception, self.message)
+            return 'ErrorIso({!r})'.format(self.exception)
+        return 'ErrorIso({!r}, {!r})'.format(self.exception, self.message)
 
 
-class TrivialLens(Isomorphism):
+class TrivialIso(Isomorphism):
     '''A trivial isomorphism that focuses the whole state. It doesn't
     manipulate the state in any way. Mostly used as a "null" lens.
     Analogous to `lambda a: a`.
 
         >>> from lenses import lens
         >>> lens()
-        Lens(None, TrivialLens())
+        Lens(None, TrivialIso())
         >>> lens(True).get()
         True
         >>> lens(True).set(False)
@@ -477,4 +477,4 @@ class TrivialLens(Isomorphism):
         return focus
 
     def __repr__(self):
-        return 'TrivialLens()'
+        return 'TrivialIso()'

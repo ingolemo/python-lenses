@@ -120,7 +120,7 @@ def test_lens_call_mut_state_keyword():
 
 
 def test_lens_add_lens_trivial_LensLike():
-    assert lens([1, 2]).add_lens(optics.TrivialLens()) + [3] == [1, 2, 3]
+    assert lens([1, 2]).add_lens(optics.TrivialIso()) + [3] == [1, 2, 3]
 
 
 def test_lens_add_lens_nontrivial_LensLike():
