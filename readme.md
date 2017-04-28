@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/ingolemo/python-lenses.svg?branch=master)](https://travis-ci.org/ingolemo/python-lenses)
+[![codecov](https://codecov.io/gh/ingolemo/python-lenses/branch/master/graph/badge.svg)](https://codecov.io/gh/ingolemo/python-lenses)
 
 # Lenses
 
