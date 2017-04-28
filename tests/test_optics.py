@@ -5,6 +5,7 @@ import pytest
 # import hypothesis.strategies as strat
 
 from lenses import lens
+from lenses.maybe import Just
 from lenses import optics as b
 
 
@@ -60,9 +61,34 @@ def test_LensLike():
         b.LensLike().get(None)
 
 
-def test_LensLike_no_focus():
+def test_LensLike_func_not_implemented():
+    with pytest.raises(NotImplementedError):
+        b.LensLike().func(None, None)
+
+
+def test_LensLike_no_focus_raises():
     with pytest.raises(ValueError):
         b.EachTraversal().get([])
+
+
+def test_cannot_get_all_with_setter():
+    with pytest.raises(TypeError):
+        b.ForkedSetter(b.GetitemLens(0), b.GetitemLens(1)).get_all([1, 2])
+
+
+def test_cannot_modify_with_fold():
+    with pytest.raises(TypeError):
+        b.IterableFold().modify([1, 2, 3], lambda a: a + 1)
+
+
+def test_cannot_set_with_fold():
+    with pytest.raises(TypeError):
+        b.IterableFold().set([1, 2, 3], 4)
+
+
+def test_composition_of_fold_and_setter_is_invalid():
+    with pytest.raises(RuntimeError):
+        b.IterableFold() & b.ForkedSetter()
 
 
 def test_lens_and():
@@ -94,7 +120,7 @@ def test_ComposedLens_nesting_simplifies():
 
 def test_ComposedLens_compose_simplifies():
     l = b.ComposedLens([])
-    assert type(l & l) == b.TrivialIso
+    assert isinstance(l & l, b.TrivialIso)
 
 
 def test_DecodeIso_get():
@@ -126,7 +152,7 @@ def test_EachTraversal_set_on_set():
 
 
 def test_EachTraversal_modify_on_set():
-    assert b.EachTraversal().modify({1, 2, 3}, lambda a: a+1) == {2, 3, 4}
+    assert b.EachTraversal().modify({1, 2, 3}, lambda a: a + 1) == {2, 3, 4}
 
 
 def test_EachTraversal_get_all_empty():
@@ -168,13 +194,20 @@ def test_EachTraversal_set_filtered():
 
 
 def test_ErrorLens_get():
-    with pytest.raises(Exception):
-        b.ErrorLens(Exception('a message')).get(object())
+    class CustomException(Exception): pass
+    with pytest.raises(CustomException):
+        b.ErrorIso(CustomException('a message')).get(object())
 
 
 def test_ErrorLens_set():
-    with pytest.raises(Exception):
-        b.ErrorLens(Exception('a message')).set(object(), object())
+    class CustomException(Exception): pass
+    with pytest.raises(CustomException):
+        b.ErrorIso(CustomException('a message')).set(object(), object())
+
+
+def test_ErrorLens_repr_with_seperate_message():
+    lens = b.ErrorIso('test', 'a message')
+    assert repr(lens) == "ErrorIso('test', 'a message')"
 
 
 def test_FilteringPrism_get():
@@ -198,6 +231,7 @@ def test_GetattrLens_set():
 
 
 class C(object):
+
     def __init__(self, attr):
         self.attr = attr
 
@@ -268,6 +302,22 @@ def test_Isomorphism_get():
 
 def test_IsomorphismLens_set():
     assert b.Isomorphism(int, str).set('1', 2) == '2'
+
+
+def test_IsomorphismLens_getter():
+    assert b.Isomorphism(int, str).getter('1') == 1
+
+
+def test_IsomorphismLens_setter():
+    assert b.Isomorphism(int, str).setter(None, 1) == '1'
+
+
+def test_IsomorphismLens_unpack():
+    assert b.Isomorphism(int, str).unpack('1') == Just(1)
+
+
+def test_IsomorphismLens_pack():
+    assert b.Isomorphism(int, str).pack(1) == '1'
 
 
 def test_IsomorphismLens_get_flip():
@@ -385,6 +435,11 @@ def test_TupleLens_set_with_Lens():
     data = {'hello': 0, 'world': 1}
     my_lens = b.TupleLens(lens()['hello'], lens()['world'])
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
+
+
+def test_TupleLens_only_works_with_lenses():
+    with pytest.raises(TypeError):
+        b.TupleLens(b.EachTraversal())
 
 
 def test_ZoomTraversal_get():
