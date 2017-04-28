@@ -7,5 +7,7 @@ python:
   - "3.6"
 before_install:
   - python setup.py develop
-  - pip install pytest coverage hypothesis
+  - pip install pytest coverage hypothesis codecov
+after_success:
+  - codecov
 script: ./runtests.sh
