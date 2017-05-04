@@ -258,19 +258,19 @@ class Prism(Traversal, Review):
         ...         return Just(int(state))
         ...     except ValueError:
         ...         return Nothing()
-        >>> lens().prism_(pack, unpack)
-        Lens(None, Prism(<function pack ...>, <function unpack ...>))
-        >>> lens('42').prism_(pack, unpack).get_all()
+        >>> lens().prism_(unpack, pack)
+        Lens(None, Prism(<function unpack ...>, <function pack ...>))
+        >>> lens('42').prism_(unpack, pack).get_all()
         [42]
-        >>> lens('fourty two').prism_(pack, unpack).get_all()
+        >>> lens('fourty two').prism_(unpack, pack).get_all()
         []
 
     All prisms are also traversals that have exactly zero or one foci.
     '''
 
-    def __init__(self, pack, unpack):
-        self.pack = pack
+    def __init__(self, unpack, pack):
         self.unpack = unpack
+        self.pack = pack
 
     def func(self, f, state):
         result = self.unpack(state)
@@ -279,8 +279,8 @@ class Prism(Traversal, Review):
         return typeclass.fmap(f(result.unwrap()), self.pack)
 
     def __repr__(self):
-        return 'Prism({!r}, {!r})'.format(self.pack,
-                                          self.unpack)
+        return 'Prism({!r}, {!r})'.format(self.unpack,
+                                          self.pack)
 
 
 class Isomorphism(Lens, Prism):
