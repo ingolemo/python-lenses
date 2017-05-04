@@ -2,7 +2,7 @@ import collections
 
 import pytest
 
-from lenses import lens, optics
+from lenses import lens, optics, maybe
 
 
 # Tests for using Lens' standard methods
@@ -117,6 +117,21 @@ def test_lens_call_mut_shallow():
 
 def test_lens_call_mut_state_keyword():
     assert lens().call_mut('append', 3, state=[1, 2]) == [1, 2, 3]
+
+
+def test_lens_construct():
+    obj = object()
+    assert lens(obj).just_().construct() == maybe.Just(obj)
+
+
+def test_lens_construct_focus_keyword():
+    obj = object()
+    assert lens().just_().construct(focus=obj) == maybe.Just(obj)
+
+
+def test_lens_construct_composed():
+    obj = object()
+    assert lens(obj).just_().iso_(int, str).construct() == maybe.Just(str(obj))
 
 
 def test_lens_add_lens_trivial_LensLike():

@@ -268,6 +268,11 @@ class Lens(Getter, Traversal):
 class Review(LensLike):
     '''A review is an optic that is capable of constructing states from
     a focus.
+
+        >>> Review(abs)
+        Review(<built-in function abs>)
+        >>> Review(abs).re().get(-1)
+        1
     '''
 
     def __init__(self, pack):
