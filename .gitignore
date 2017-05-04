@@ -1,4 +1,6 @@
-.cache
+.cache/
 .coverage
-.hypothesis
-lenses.egg-info
+.eggs/
+.hypothesis/
+lenses.egg-info/
+venv/

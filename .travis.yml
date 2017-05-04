@@ -5,9 +5,9 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-before_install:
-  - python setup.py develop
+install:
   - pip install pytest coverage hypothesis codecov
+  - python setup.py install
+script: ./runtests.sh
 after_success:
   - codecov
-script: ./runtests.sh
