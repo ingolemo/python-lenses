@@ -9,7 +9,7 @@ lens_methods = [
     ('error_', optics.ErrorIso),
     ('each_', optics.EachTraversal),
     ('filter_', optics.FilteringPrism),
-    ('f_', optics.FunctionGetter),
+    ('f_', optics.Getter),
     ('fork_', optics.ForkedSetter),
     ('get_', optics.GetitemOrElseLens),
     ('getattr_', optics.GetattrLens),

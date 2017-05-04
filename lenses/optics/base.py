@@ -185,7 +185,27 @@ class Setter(LensLike):
 
 
 class Getter(Fold):
-    pass
+    '''An optic that wraps a getter function. A getter function is one
+    that takes a state and returns a value derived from that state. The
+    function is called on the focus before it is returned.
+
+        >>> from lenses import lens
+        >>> lens().f_(abs)
+        Lens(None, Getter(<built-in function abs>))
+        >>> lens(-1).f_(abs).get()
+        1
+        >>> lens([-1, 2, -3]).each_().f_(abs).get_all()
+        [1, 2, 3]
+    '''
+
+    def __init__(self, getter):
+        self.getter = getter
+
+    def func(self, f, state):
+        return Const(typeclass.fmap(f(state).unwrap(), self.getter))
+
+    def __repr__(self):
+        return 'Getter({!r})'.format(self.getter)
 
 
 class Traversal(Fold, Setter):
