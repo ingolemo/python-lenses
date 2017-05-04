@@ -76,9 +76,9 @@ def test_cannot_to_list_of_with_setter():
         b.ForkedSetter(b.GetitemLens(0), b.GetitemLens(1)).to_list_of([1, 2])
 
 
-def test_cannot_modify_with_fold():
+def test_cannot_over_with_fold():
     with pytest.raises(TypeError):
-        b.IterableFold().modify([1, 2, 3], lambda a: a + 1)
+        b.IterableFold().over([1, 2, 3], lambda a: a + 1)
 
 
 def test_cannot_set_with_fold():
@@ -151,8 +151,8 @@ def test_EachTraversal_set_on_set():
     assert b.EachTraversal().set({1, 2, 3}, 4) == {4}
 
 
-def test_EachTraversal_modify_on_set():
-    assert b.EachTraversal().modify({1, 2, 3}, lambda a: a + 1) == {2, 3, 4}
+def test_EachTraversal_over_on_set():
+    assert b.EachTraversal().over({1, 2, 3}, lambda a: a + 1) == {2, 3, 4}
 
 
 def test_EachTraversal_to_list_of_empty():
@@ -281,10 +281,10 @@ def test_Lens_set():
     assert my_lens.set(state, 'bye') == 'bye!'
 
 
-def test_Lens_modify():
+def test_Lens_over():
     my_lens = b.Lens(lambda a: a[:-1], lambda s, a: a + '!')
     state = 'hello!'
-    assert my_lens.modify(
+    assert my_lens.over(
         state, lambda a: a.replace('lo', 'p')) == 'help!'
 
 
@@ -377,16 +377,16 @@ def test_ItemsTraversal_to_list_of_empty():
     assert sorted(my_lens.to_list_of({})) == []
 
 
-def test_ItemsTraversal_modify():
+def test_ItemsTraversal_over():
     data = {0: 'zero', 1: 'one'}
     my_lens = b.ItemsTraversal() & b.GetitemLens(0)
-    assert my_lens.modify(data, lambda a: a + 1) == {
+    assert my_lens.over(data, lambda a: a + 1) == {
         1: 'zero', 2: 'one'}
 
 
-def test_ItemsTraversal_modify_empty():
+def test_ItemsTraversal_over_empty():
     my_lens = b.ItemsTraversal() & b.GetitemLens(0)
-    assert my_lens.modify({}, lambda a: a + 1) == {}
+    assert my_lens.over({}, lambda a: a + 1) == {}
 
 
 def test_JsonIso_view():

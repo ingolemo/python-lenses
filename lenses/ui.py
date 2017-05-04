@@ -169,7 +169,7 @@ class Lens(object):
         if state is not None:
             self = self.bind(state)
         self._assert_bound('Lens.modify')
-        return self.lens.modify(self.state, func)
+        return self.lens.over(self.state, func)
 
     def call(self, method_name, *args, **kwargs):
         '''Call a method on the focus. The method must return a new

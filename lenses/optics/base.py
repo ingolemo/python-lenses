@@ -120,14 +120,14 @@ class LensLike(object):
                                lambda a: Const([a]))
         return self.func(consttup, state).unwrap()
 
-    def modify(self, state, fn):
+    def over(self, state, fn):
         '''Applies a function `fn` to all the foci within `state`.
 
         Requires kind Setter. This method will raise TypeError when the
         optic has no way to set foci.
         '''
         if not self._is_kind(Setter):
-            raise TypeError('Must be an instance of Setter to .modify()')
+            raise TypeError('Must be an instance of Setter to .over()')
 
         identfn = Functorisor(lambda a: Identity(a),
                               lambda a: Identity(fn(a)))
