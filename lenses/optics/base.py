@@ -46,19 +46,24 @@ class LensLike(object):
 
     Review
 
-    : Currently Unused.
+    : A Review is an optic that is capable of being constructed
+    from. Constructing allows you to supply a focus and get back a
+    complete state. You cannot neccessarily use reviews to get or set
+    any values.
 
     Prism
 
     : A Prism is both a Traversal and a Review. It is capable of getting
-    and setting a single focus that may or may not exist.
+    and setting a single focus that may or may not exist. You can also
+    use it to construct.
 
     Isomorphism
 
-    : An Isomorphism is both a Lens and a Prism. Isomorphisms have the
-    property that they are reversable; You can take an isomorphism and
-    flip it around so that getting the focus becomes setting the focus
-    and setting becomes getting.
+    : An Isomorphism is both a Lens and a Prism. They can be used to
+    get, set, and construct. Isomorphisms have the property that they
+    are reversable; You can take an isomorphism and flip it around
+    so that getting the focus becomes setting the focus and setting
+    becomes getting.
 
     Equality
 
@@ -150,13 +155,20 @@ class LensLike(object):
     def flip(self):
         '''Flips an isomorphism so that it works in the opposite
         direction. Only works if the lens is actually an isomorphism.
-        Intended to be overridden by such subclasses.
 
-        Requires type Isomorphism. Raises TypeError for non-isomorphic
+        Requires kind Isomorphism. Raises TypeError for non-isomorphic
         lenses.
         '''
         if not self._is_kind(Isomorphism):
             raise TypeError('Must be an instance of Isomorphism to .flip()')
+        message = 'Optic has no implementation of .flip()'
+        raise NotImplementedError(message)
+
+    def re(self):
+        if not self._is_kind(Review):
+            raise TypeError('Must be an instance of Review to .re()')
+        message = 'Optic has no implementation of .re()'
+        raise NotImplementedError(message)
 
     def kind(self):
         '''Returns a class representing the 'kind' of optic.'''
@@ -254,7 +266,18 @@ class Lens(Getter, Traversal):
 
 
 class Review(LensLike):
-    pass
+    '''A review is an optic that is capable of constructing states from
+    a focus.
+    '''
+
+    def __init__(self, pack):
+        self.pack = pack
+
+    def re(self):
+        return Getter(self.pack)
+
+    def __repr__(self):
+        return 'Review({!r})'.format(self.pack)
 
 
 class Prism(Traversal, Review):
@@ -357,6 +380,9 @@ class Isomorphism(Lens, Prism):
     def pack(self, focus):
         return self.backwards(focus)
 
+    def re(self):
+        return Isomorphism(self.backwards, self.forwards)
+
     def flip(self):
         return Isomorphism(self.backwards, self.forwards)
 
@@ -411,8 +437,10 @@ class ComposedLens(LensLike):
         return res(state)
 
     def flip(self):
-        super(ComposedLens, self).flip()
         return ComposedLens([l.flip() for l in reversed(self.lenses)])
+
+    def re(self):
+        return ComposedLens([l.re() for l in self.lenses])
 
     def compose(self, other):
         result = ComposedLens(self.lenses + [other])

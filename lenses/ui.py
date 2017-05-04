@@ -227,6 +227,13 @@ class Lens(object):
 
         return self.modify(func)
 
+    def construct(self, focus=None):
+        '''Construct a state given a focus.'''
+        if focus is not None:
+            self = self.bind(focus)
+        self._assert_bound('Lens.construct')
+        return self.lens.re().get(self.state)
+
     def add_lens(self, other):
         '''Refine the current focus of this lens by composing it with
         another lens object. Can be a `lenses.optics.LensLike` or
