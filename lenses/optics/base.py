@@ -84,7 +84,7 @@ class LensLike(object):
         message = 'Tried to use unimplemented lens {}.'
         raise NotImplementedError(message.format(type(self)))
 
-    def get(self, state):
+    def view(self, state):
         '''Returns the focus within `state`. If multiple items are
         focused then it will attempt to join them together as a monoid.
         See `lenses.typeclass.mappend`.
@@ -93,18 +93,18 @@ class LensLike(object):
         optic has no way to get any foci.
 
         For technical reasons, this method requires there to be at least
-        one foci at the end of the get. It will raise ValueError when
+        one foci at the end of the view. It will raise ValueError when
         there is none.
         '''
         if not self._is_kind(Fold):
-            raise TypeError('Must be an instance of Fold to .get()')
+            raise TypeError('Must be an instance of Fold to .view()')
 
         guard = object()
         const = Functorisor(lambda a: Const(Nothing()),
                             lambda a: Const(Just(a)))
         result = self.func(const, state).unwrap().maybe(guard)
         if result is guard:
-            raise ValueError('No focus to get')
+            raise ValueError('No focus to view')
         return result
 
     def get_all(self, state):
@@ -271,7 +271,7 @@ class Review(LensLike):
 
         >>> Review(abs)
         Review(<built-in function abs>)
-        >>> Review(abs).re().get(-1)
+        >>> Review(abs).re().view(-1)
         1
     '''
 

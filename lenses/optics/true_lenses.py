@@ -211,7 +211,7 @@ class TupleLens(Lens):
                 raise TypeError('TupleLens only works with lenses')
 
     def getter(self, state):
-        return tuple(lens.get(state) for lens in self.lenses)
+        return tuple(lens.view(state) for lens in self.lenses)
 
     def setter(self, state, focus):
         for lens, new_value in zip(self.lenses, focus):

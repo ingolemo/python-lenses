@@ -143,7 +143,7 @@ class Lens(object):
         if state is not None:
             self = self.bind(state)
         self._assert_bound('Lens.get_monoid')
-        return self.lens.get(self.state)
+        return self.lens.view(self.state)
 
     def set(self, newvalue, state=None):
         '''Set the focus to `newvalue`.
@@ -232,7 +232,7 @@ class Lens(object):
         if focus is not None:
             self = self.bind(focus)
         self._assert_bound('Lens.construct')
-        return self.lens.re().get(self.state)
+        return self.lens.re().view(self.state)
 
     def add_lens(self, other):
         '''Refine the current focus of this lens by composing it with

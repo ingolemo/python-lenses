@@ -58,7 +58,7 @@ from lenses import optics as b
 
 def test_LensLike():
     with pytest.raises(TypeError):
-        b.LensLike().get(None)
+        b.LensLike().view(None)
 
 
 def test_LensLike_func_not_implemented():
@@ -68,7 +68,7 @@ def test_LensLike_func_not_implemented():
 
 def test_LensLike_no_focus_raises():
     with pytest.raises(ValueError):
-        b.EachTraversal().get([])
+        b.EachTraversal().view([])
 
 
 def test_cannot_get_all_with_setter():
@@ -96,17 +96,17 @@ def test_lens_and():
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
-def test_BothTraversal_get():
-    assert b.BothTraversal().get(['1', '2']) == '12'
+def test_BothTraversal_view():
+    assert b.BothTraversal().view(['1', '2']) == '12'
 
 
 def test_BothTraversal_set():
     assert b.BothTraversal().set(['1', '2'], 4) == [4, 4]
 
 
-def test_ComposedLens_nolenses_get():
+def test_ComposedLens_nolenses_view():
     obj = object()
-    assert b.ComposedLens([]).get(obj) is obj
+    assert b.ComposedLens([]).view(obj) is obj
 
 
 def test_ComposedLens_nolenses_set():
@@ -123,12 +123,12 @@ def test_ComposedLens_compose_simplifies():
     assert isinstance(l & l, b.TrivialIso)
 
 
-def test_DecodeIso_get():
-    assert b.DecodeIso().get(b'hello') == 'hello'
+def test_DecodeIso_view():
+    assert b.DecodeIso().view(b'hello') == 'hello'
 
 
-def test_DecodeIso_get_with_args():
-    assert b.DecodeIso('utf-8').get(b'caf\xc3\xa9') == u'caf\xe9'
+def test_DecodeIso_view_with_args():
+    assert b.DecodeIso('utf-8').view(b'caf\xc3\xa9') == u'caf\xe9'
 
 
 def test_DecodeIso_set():
@@ -193,10 +193,10 @@ def test_EachTraversal_set_filtered():
     assert b.EachTraversal(f).set([1, 2, 3], 4) == []
 
 
-def test_ErrorLens_get():
+def test_ErrorLens_view():
     class CustomException(Exception): pass
     with pytest.raises(CustomException):
-        b.ErrorIso(CustomException('a message')).get(object())
+        b.ErrorIso(CustomException('a message')).view(object())
 
 
 def test_ErrorLens_set():
@@ -210,19 +210,19 @@ def test_ErrorLens_repr_with_seperate_message():
     assert repr(lens) == "ErrorIso('test', 'a message')"
 
 
-def test_FilteringPrism_get():
-    l = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
-    assert l.set([1, -1, 1], 3) == [3, -1, 3]
-
-
-def test_FilteringPrism_set():
+def test_FilteringPrism_get_all():
     l = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
     assert l.get_all([1, -1, 1]) == [1, 1]
 
 
-def test_GetattrLens_get():
+def test_FilteringPrism_set():
+    l = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
+    assert l.set([1, -1, 1], 3) == [3, -1, 3]
+
+
+def test_GetattrLens_view():
     Tup = collections.namedtuple('Tup', 'attr')
-    assert b.GetattrLens('attr').get(Tup(1)) == 1
+    assert b.GetattrLens('attr').view(Tup(1)) == 1
 
 
 def test_GetattrLens_set():
@@ -241,9 +241,9 @@ class C(object):
     sublens = lens().attr
 
 
-def test_GetZoomAttrTraversal_get_attr():
+def test_GetZoomAttrTraversal_view_attr():
     state = C('c')
-    b.GetZoomAttrTraversal('attr').get(state) == 'c'
+    b.GetZoomAttrTraversal('attr').view(state) == 'c'
 
 
 def test_GetZoomAttrTraversal_set_attr():
@@ -251,9 +251,9 @@ def test_GetZoomAttrTraversal_set_attr():
     b.GetZoomAttrTraversal('attr').set(state, 'b') == C('b')
 
 
-def test_GetZoomAttrTraversal_get_zoom():
+def test_GetZoomAttrTraversal_view_zoom():
     state = C('c')
-    b.GetZoomAttrTraversal('sublens').get(state) == 'c'
+    b.GetZoomAttrTraversal('sublens').view(state) == 'c'
 
 
 def test_GetZoomAttrTraversal_set_zoom():
@@ -261,18 +261,18 @@ def test_GetZoomAttrTraversal_set_zoom():
     b.GetZoomAttrTraversal('sublens').set(state, 'b') == C('b')
 
 
-def test_GetitemLens_get():
-    assert b.GetitemLens(0).get([1, 2, 3]) == 1
+def test_GetitemLens_view():
+    assert b.GetitemLens(0).view([1, 2, 3]) == 1
 
 
 def test_GetitemLens_set():
     assert b.GetitemLens(0).set([1, 2, 3], 4) == [4, 2, 3]
 
 
-def test_Lens_get():
+def test_Lens_view():
     my_lens = b.Lens(lambda a: a[:-1], lambda s, a: a + '!')
     state = 'hello!'
-    assert my_lens.get(state) == 'hello'
+    assert my_lens.view(state) == 'hello'
 
 
 def test_Lens_set():
@@ -296,8 +296,8 @@ def test_Lens_meaningful_repr():
     assert repr(setter) in repr(l)
 
 
-def test_Isomorphism_get():
-    assert b.Isomorphism(int, str).get('1') == 1
+def test_Isomorphism_view():
+    assert b.Isomorphism(int, str).view('1') == 1
 
 
 def test_IsomorphismLens_set():
@@ -320,22 +320,22 @@ def test_IsomorphismLens_pack():
     assert b.Isomorphism(int, str).pack(1) == '1'
 
 
-def test_IsomorphismLens_get_flip():
-    assert b.Isomorphism(int, str).flip().get(1) == '1'
+def test_IsomorphismLens_view_flip():
+    assert b.Isomorphism(int, str).flip().view(1) == '1'
 
 
 def test_IsomorphismLens_set_flip():
     assert b.Isomorphism(int, str).flip().set(1, '2') == 2
 
 
-def test_ItemLens_get():
+def test_ItemLens_view():
     data = {0: 'hello', 1: 'world'}
-    assert b.ItemLens(1).get(data) == (1, 'world')
+    assert b.ItemLens(1).view(data) == (1, 'world')
 
 
-def test_ItemLens_get_nonexistent():
+def test_ItemLens_view_nonexistent():
     data = {0: 'hello', 1: 'world'}
-    assert b.ItemLens(3).get(data) is None
+    assert b.ItemLens(3).view(data) is None
 
 
 def test_ItemLens_set():
@@ -344,14 +344,14 @@ def test_ItemLens_set():
     assert l.set(data, (2, 'everyone')) == {0: 'hello', 2: 'everyone'}
 
 
-def test_ItemByValueLens_get():
+def test_ItemByValueLens_view():
     data = {'hello': 0, 'world': 1}
-    assert b.ItemByValueLens(1).get(data) == ('world', 1)
+    assert b.ItemByValueLens(1).view(data) == ('world', 1)
 
 
-def test_ItemByValueLens_get_nonexistent():
+def test_ItemByValueLens_view_nonexistent():
     data = {'hello': 0, 'world': 1}
-    assert b.ItemByValueLens(2).get(data) is None
+    assert b.ItemByValueLens(2).view(data) is None
 
 
 def test_ItemByValueLens_set():
@@ -389,10 +389,10 @@ def test_ItemsTraversal_modify_empty():
     assert my_lens.modify({}, lambda a: a + 1) == {}
 
 
-def test_JsonIso_get():
+def test_JsonIso_view():
     l = b.JsonIso()
     data = '{"numbers":[1, 2, 3]}'
-    assert l.get(data) == {'numbers': [1, 2, 3]}
+    assert l.view(data) == {'numbers': [1, 2, 3]}
 
 
 def test_JsonIso_set():
@@ -401,9 +401,9 @@ def test_JsonIso_set():
     assert l.set(data, {'numbers': []}) == '{"numbers": []}'
 
 
-def test_TrivialIso_get():
+def test_TrivialIso_view():
     obj = object()
-    assert b.TrivialIso().get(obj) is obj
+    assert b.TrivialIso().view(obj) is obj
 
 
 def test_TrivialIso_set():
@@ -411,11 +411,11 @@ def test_TrivialIso_set():
     assert b.TrivialIso().set(obj1, obj2) is obj2
 
 
-def test_TupleLens_get_with_LensLike():
+def test_TupleLens_view_with_LensLike():
     data = {'hello': 0, 'world': 1}
     get = b.GetitemLens
     my_lens = b.TupleLens(get('hello'), get('world'))
-    assert my_lens.get(data) == (0, 1)
+    assert my_lens.view(data) == (0, 1)
 
 
 def test_TupleLens_set_with_LensLike():
@@ -425,10 +425,10 @@ def test_TupleLens_set_with_LensLike():
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
 
 
-def test_TupleLens_get_with_Lens():
+def test_TupleLens_view_with_Lens():
     data = {'hello': 0, 'world': 1}
     my_lens = b.TupleLens(lens()['hello'], lens()['world'])
-    assert my_lens.get(data) == (0, 1)
+    assert my_lens.view(data) == (0, 1)
 
 
 def test_TupleLens_set_with_Lens():
@@ -442,10 +442,10 @@ def test_TupleLens_only_works_with_lenses():
         b.TupleLens(b.EachTraversal())
 
 
-def test_ZoomTraversal_get():
+def test_ZoomTraversal_view():
     l = b.GetitemLens(0) & b.ZoomTraversal()
     data = [lens([1, 2, 3])[1]]
-    assert l.get(data) == 2
+    assert l.view(data) == 2
 
 
 def test_ZoomTraversal_set():
