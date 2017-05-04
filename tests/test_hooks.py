@@ -29,7 +29,7 @@ def test_setitem_imm_list():
 
 
 def test_setitem_imm_str():
-    assert s.setitem_immutable('hello', 0, 'j') == 'jello'
+    assert s.setitem_immutable(u'hello', 0, u'j') == u'jello'
 
 
 def test_setitem_imm_tuple():
