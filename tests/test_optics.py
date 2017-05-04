@@ -71,9 +71,9 @@ def test_LensLike_no_focus_raises():
         b.EachTraversal().view([])
 
 
-def test_cannot_get_all_with_setter():
+def test_cannot_to_list_of_with_setter():
     with pytest.raises(TypeError):
-        b.ForkedSetter(b.GetitemLens(0), b.GetitemLens(1)).get_all([1, 2])
+        b.ForkedSetter(b.GetitemLens(0), b.GetitemLens(1)).to_list_of([1, 2])
 
 
 def test_cannot_modify_with_fold():
@@ -135,16 +135,16 @@ def test_DecodeIso_set():
     assert b.DecodeIso('ascii', 'replace').set(b'', u'\xe9') == b'?'
 
 
-def test_EachTraversal_get_all():
-    assert b.EachTraversal().get_all([1, 2, 3]) == [1, 2, 3]
+def test_EachTraversal_to_list_of():
+    assert b.EachTraversal().to_list_of([1, 2, 3]) == [1, 2, 3]
 
 
 def test_EachTraversal_set():
     assert b.EachTraversal().set([1, 2, 3], 4) == [4, 4, 4]
 
 
-def test_EachTraversal_get_all_on_set():
-    assert sorted(b.EachTraversal().get_all({1, 2, 3})) == [1, 2, 3]
+def test_EachTraversal_to_list_of_on_set():
+    assert sorted(b.EachTraversal().to_list_of({1, 2, 3})) == [1, 2, 3]
 
 
 def test_EachTraversal_set_on_set():
@@ -155,16 +155,16 @@ def test_EachTraversal_modify_on_set():
     assert b.EachTraversal().modify({1, 2, 3}, lambda a: a + 1) == {2, 3, 4}
 
 
-def test_EachTraversal_get_all_empty():
-    assert b.EachTraversal().get_all([]) == []
+def test_EachTraversal_to_list_of_empty():
+    assert b.EachTraversal().to_list_of([]) == []
 
 
 def test_EachTraversal_set_empty():
     assert b.EachTraversal().set([], 4) == []
 
 
-def test_EachTraversal_get_all_with_starting_None():
-    assert b.EachTraversal(filter_none=True).get_all([None, None]) == []
+def test_EachTraversal_to_list_of_with_starting_None():
+    assert b.EachTraversal(filter_none=True).to_list_of([None, None]) == []
 
 
 def test_EachTraversal_set_with_starting_None():
@@ -175,10 +175,10 @@ def test_EachTraversal_set_None():
     assert b.EachTraversal(filter_none=True).set([1, 2, 3], None) == []
 
 
-def test_EachTraversal_get_all_with_starting_filtered():
+def test_EachTraversal_to_list_of_with_starting_filtered():
     def f(a):
         return a != 2
-    assert b.EachTraversal(f).get_all([1, 2, 3]) == [1, 3]
+    assert b.EachTraversal(f).to_list_of([1, 2, 3]) == [1, 3]
 
 
 def test_EachTraversal_set_with_starting_filtered():
@@ -210,9 +210,9 @@ def test_ErrorLens_repr_with_seperate_message():
     assert repr(lens) == "ErrorIso('test', 'a message')"
 
 
-def test_FilteringPrism_get_all():
+def test_FilteringPrism_to_list_of():
     l = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
-    assert l.get_all([1, -1, 1]) == [1, 1]
+    assert l.to_list_of([1, -1, 1]) == [1, 1]
 
 
 def test_FilteringPrism_set():
@@ -366,15 +366,15 @@ def test_ItemByValueLens_set_nonexistent():
         'hello': 0, 'world': 1, 'test': 2}
 
 
-def test_ItemsTraversal_get_all():
+def test_ItemsTraversal_to_list_of():
     data = {0: 'zero', 1: 'one'}
     my_lens = b.ItemsTraversal()
-    assert sorted(my_lens.get_all(data)) == [(0, 'zero'), (1, 'one')]
+    assert sorted(my_lens.to_list_of(data)) == [(0, 'zero'), (1, 'one')]
 
 
-def test_ItemsTraversal_get_all_empty():
+def test_ItemsTraversal_to_list_of_empty():
     my_lens = b.ItemsTraversal()
-    assert sorted(my_lens.get_all({})) == []
+    assert sorted(my_lens.to_list_of({})) == []
 
 
 def test_ItemsTraversal_modify():

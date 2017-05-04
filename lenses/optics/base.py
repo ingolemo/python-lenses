@@ -107,14 +107,14 @@ class LensLike(object):
             raise ValueError('No focus to view')
         return result
 
-    def get_all(self, state):
+    def to_list_of(self, state):
         '''Returns a list of all the foci within `state`.
 
         Requires kind Fold. This method will raise TypeError if the
         optic has no way to get any foci.
         '''
         if not self._is_kind(Fold):
-            raise TypeError('Must be an instance of Fold to .get_all()')
+            raise TypeError('Must be an instance of Fold to .to_list_of()')
 
         consttup = Functorisor(lambda a: Const([]),
                                lambda a: Const([a]))

@@ -115,7 +115,7 @@ class Lens(object):
         if state is not None:
             self = self.bind(state)
         self._assert_bound('Lens.get')
-        return self.lens.get_all(self.state)[0]
+        return self.lens.to_list_of(self.state)[0]
 
     def get_all(self, state=None):
         '''Get multiple values focused by the lens. Returns them as a
@@ -130,7 +130,7 @@ class Lens(object):
         if state is not None:
             self = self.bind(state)
         self._assert_bound('Lens.get_all')
-        return self.lens.get_all(self.state)
+        return self.lens.to_list_of(self.state)
 
     def get_monoid(self, state=None):
         '''Get the values focused by the lens, merging them together by
