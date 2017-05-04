@@ -320,12 +320,12 @@ def test_IsomorphismLens_pack():
     assert b.Isomorphism(int, str).pack(1) == '1'
 
 
-def test_IsomorphismLens_view_flip():
-    assert b.Isomorphism(int, str).flip().view(1) == '1'
+def test_IsomorphismLens_view_from_():
+    assert b.Isomorphism(int, str).from_().view(1) == '1'
 
 
-def test_IsomorphismLens_set_flip():
-    assert b.Isomorphism(int, str).flip().set(1, '2') == 2
+def test_IsomorphismLens_set_from_():
+    assert b.Isomorphism(int, str).from_().set(1, '2') == 2
 
 
 def test_ItemLens_view():

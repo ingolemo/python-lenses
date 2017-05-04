@@ -274,7 +274,7 @@ class Lens(object):
             b'["hello", "world"]'
         '''
         self._assert_unbound('Lens.flip')
-        return Lens(self.state, self.lens.flip())
+        return Lens(self.state, self.lens.from_())
 
     def __get__(self, instance, owner):
         if instance is None:

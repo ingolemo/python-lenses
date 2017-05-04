@@ -152,7 +152,7 @@ class LensLike(object):
         '''
         return ComposedLens([self]).compose(other)
 
-    def flip(self):
+    def from_(self):
         '''Flips an isomorphism so that it works in the opposite
         direction. Only works if the lens is actually an isomorphism.
 
@@ -160,8 +160,8 @@ class LensLike(object):
         lenses.
         '''
         if not self._is_kind(Isomorphism):
-            raise TypeError('Must be an instance of Isomorphism to .flip()')
-        message = 'Optic has no implementation of .flip()'
+            raise TypeError('Must be an instance of Isomorphism to .from_()')
+        message = 'Optic has no implementation of .from_()'
         raise NotImplementedError(message)
 
     def re(self):
@@ -388,7 +388,7 @@ class Isomorphism(Lens, Prism):
     def re(self):
         return Isomorphism(self.backwards, self.forwards)
 
-    def flip(self):
+    def from_(self):
         return Isomorphism(self.backwards, self.forwards)
 
     def func(self, f, state):
@@ -441,8 +441,8 @@ class ComposedLens(LensLike):
 
         return res(state)
 
-    def flip(self):
-        return ComposedLens([l.flip() for l in reversed(self.lenses)])
+    def from_(self):
+        return ComposedLens([l.from_() for l in reversed(self.lenses)])
 
     def re(self):
         return ComposedLens([l.re() for l in self.lenses])
