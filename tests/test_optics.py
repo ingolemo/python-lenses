@@ -86,6 +86,11 @@ def test_cannot_set_with_fold():
         b.IterableFold().set([1, 2, 3], 4)
 
 
+def test_cannot_re_with_fold():
+    with pytest.raises(TypeError):
+        b.IterableFold().re()
+
+
 def test_composition_of_fold_and_setter_is_invalid():
     with pytest.raises(RuntimeError):
         b.IterableFold() & b.ForkedSetter()
