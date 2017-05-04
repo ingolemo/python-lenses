@@ -7,6 +7,7 @@ import lenses.typeclass as tc
 
 
 class MonoidProduct(object):
+
     def __init__(self, n):
         self.n = n
 
@@ -78,13 +79,18 @@ def data_funcs(wrapper):
         lambda a: a + '!',
         lambda a: (a + '#')[0],
     ]))
+    unistringfuncs = streaming(sampled_from([
+        lambda a: a + u'!',
+        lambda a: (a + u'#')[0],
+    ]))
+    def make_option(strategy, funcs):
+        return strat.tuples(strategy, wrapper(strategy), funcs)
     return one_of(
-        strat.tuples(strat.integers(), wrapper(strat.integers()), intfuncs),
-        strat.tuples(
-            strat.floats(allow_nan=False),
-            wrapper(strat.floats(allow_nan=False)),
-            floatfuncs),
-        strat.tuples(strat.text(), wrapper(strat.text()), stringfuncs), )
+        make_option(strat.integers(), intfuncs),
+        make_option(strat.floats(allow_nan=False), floatfuncs),
+        make_option(strat.text(), stringfuncs),
+        make_option(strat.characters(), unistringfuncs),
+    )
 
 
 @hypothesis.given(monoids())
