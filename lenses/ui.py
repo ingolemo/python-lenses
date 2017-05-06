@@ -1,7 +1,11 @@
+from typing import (Any, Callable, Generic, List, Optional, Type, Union, cast)
+
 import copy
 import functools
 
 from . import optics
+from .maybe import Just
+from .typevars import S, T, A, B, X, Y
 
 # we skip all the augmented artithmetic methods because the point of the
 # lenses library is not to mutate anything
@@ -21,6 +25,7 @@ transparent_dunders = ('''
 
 
 def _carry_op(name):
+    # type: (str) -> Any
     def operation(self, *args, **kwargs):
         return self.modify(lambda a: getattr(a, name)(*args, **kwargs))
 
@@ -31,6 +36,7 @@ def _carry_op(name):
 
 
 def _add_extra_methods(cls):
+    # type: (Type[Lens]) -> Type[Lens]
     for dunder in transparent_dunders:
         setattr(cls, dunder, _carry_op(dunder))
 
@@ -38,29 +44,24 @@ def _add_extra_methods(cls):
 
 
 @_add_extra_methods
-class Lens(object):
+class Lens(Generic[S, T, A, B]):
     'A user-friendly object for interacting with the lenses library'
     __slots__ = ['state', 'lens']
 
     def __init__(self, state=None, lens=None):
+        # type: (Optional[S], Optional[optics.LensLike]) -> None
         if lens is None:
             lens = optics.TrivialIso()
-        self.state = state
-        self.lens = lens
+        self.state = state  # type: Optional[S]
+        self.lens = lens  # type: optics.LensLike
 
     def __repr__(self):
+        # type: () -> str
         return '{}({!r}, {!r})'.format(self.__class__.__name__,
                                        self.state, self.lens)
 
-    def _assert_bound(self, name):
-        if self.state is None:
-            raise ValueError('{} requires a bound lens'.format(name))
-
-    def _assert_unbound(self, name):
-        if self.state is not None:
-            raise ValueError('{} requires an unbound lens'.format(name))
-
     def get(self, state=None):
+        # type: (Optional[S]) -> B
         '''Get the first value focused by the lens.
 
             >>> from lenses import lens
@@ -71,10 +72,12 @@ class Lens(object):
         '''
         if state is not None:
             self = self.bind(state)
-        self._assert_bound('Lens.get')
+        if self.state is None:
+            raise ValueError('Lens.get requires a bound lens')
         return self.lens.to_list_of(self.state)[0]
 
     def get_all(self, state=None):
+        # type: (Optional[S]) -> List[B]
         '''Get multiple values focused by the lens. Returns them as
         a list.
 
@@ -86,10 +89,12 @@ class Lens(object):
         '''
         if state is not None:
             self = self.bind(state)
-        self._assert_bound('Lens.get_all')
+        if self.state is None:
+            raise ValueError('Lens.get_all requires a bound lens')
         return self.lens.to_list_of(self.state)
 
     def get_monoid(self, state=None):
+        # type: (Optional[S]) -> B
         '''Get the values focused by the lens, merging them together by
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
@@ -99,10 +104,12 @@ class Lens(object):
         '''
         if state is not None:
             self = self.bind(state)
-        self._assert_bound('Lens.get_monoid')
+        if self.state is None:
+            raise ValueError('Lens.get_monoid requires a bound lens')
         return self.lens.view(self.state)
 
     def set(self, newvalue, state=None):
+        # type: (B, Optional[S]) -> T
         '''Set the focus to `newvalue`.
 
             >>> from lenses import lens
@@ -111,10 +118,12 @@ class Lens(object):
         '''
         if state is not None:
             self = self.bind(state)
-        self._assert_bound('Lens.set')
+        if self.state is None:
+            raise ValueError('Lens.set requires a bound lens')
         return self.lens.set(self.state, newvalue)
 
     def modify(self, func, state=None):
+        # type: (Callable[[A], B], Optional[S]) -> T
         '''Apply a function to the focus.
 
             >>> from lenses import lens
@@ -125,10 +134,12 @@ class Lens(object):
         '''
         if state is not None:
             self = self.bind(state)
-        self._assert_bound('Lens.modify')
+        if self.state is None:
+            raise ValueError('Lens.modify requires a bound lens')
         return self.lens.over(self.state, func)
 
     def call(self, method_name, *args, **kwargs):
+        # type: (str, *Any, **Any) -> T
         '''Call a method on the focus. The method must return a new
         value for the focus.
 
@@ -147,11 +158,13 @@ class Lens(object):
             del kwargs['state']
 
         def func(a):
-            return getattr(a, method_name)(*args, **kwargs)
+            # type: (A) -> B
+            return cast(B, getattr(a, method_name)(*args, **kwargs))
 
         return self.modify(func)
 
     def call_mut(self, method_name, *args, **kwargs):
+        # type: (str, *Any, **Any) -> T
         '''Call a method on the focus that will mutate it in place.
         Works by making a deep copy of the focus before calling the
         mutating method on it. The return value of that method is ignored.
@@ -178,20 +191,22 @@ class Lens(object):
             del kwargs['shallow']
 
         def func(a):
+            # type: (A) -> B
             a = copy.copy(a) if shallow else copy.deepcopy(a)
             getattr(a, method_name)(*args, **kwargs)
-            return a
+            return cast(B, a)
 
         return self.modify(func)
 
-    def construct(self, focus=None):
+    def construct(self, focus):
+        # type: (A) -> S
         '''Construct a state given a focus.'''
-        if focus is not None:
-            self = self.bind(focus)
-        self._assert_bound('Lens.construct')
-        return self.lens.re().view(self.state)
+        if self.state is not None:
+            raise ValueError('Lens.construct requires an unbound lens')
+        return self.lens.re().view(focus)
 
     def add_lens(self, other):
+        # type: (Union[optics.LensLike, Lens[A, B, X, Y]]) -> Lens[S, T, X, Y]
         '''Refine the current focus of this lens by composing it with
         another lens object. Can be a `lenses.optics.LensLike` or an
         unbound `lenses.Lens`.
@@ -204,13 +219,15 @@ class Lens(object):
         if isinstance(other, optics.LensLike):
             return Lens(self.state, self.lens.compose(other))
         elif isinstance(other, Lens):
-            other._assert_unbound('Lens.add_lens')
+            if other.state is not None:
+                raise ValueError('Lens.add_lens requires an unbound lens')
             return Lens(self.state, self.lens.compose(other.lens))
         else:
             raise TypeError('''Cannot add lens of type {!r}.'''
                             .format(type(other)))
 
     def bind(self, state):
+        # type: (S) -> Lens[S, T, A, B]
         '''Bind this lens to a specific `state`. Raises `ValueError`
         when the lens has already been bound.
 
@@ -218,10 +235,12 @@ class Lens(object):
             >>> lens()[1].bind([1, 2, 3]).get()
             2
         '''
-        self._assert_unbound('Lens.bind')
+        if self.state is not None:
+            raise ValueError('Lens.bind requires an unbound lens')
         return Lens(state, self.lens)
 
     def flip(self):
+        # type: () -> Lens[A, B, S, T]
         '''Flips the direction of the lens. The lens must be unbound
         and all the underlying operations must be isomorphisms.
 
@@ -230,10 +249,12 @@ class Lens(object):
             >>> json_encoder.bind(['hello', 'world']).get()  # doctest: +SKIP
             b'["hello", "world"]'
         '''
-        self._assert_unbound('Lens.flip')
-        return Lens(self.state, self.lens.from_())
+        if self.state is not None:
+            raise ValueError('Lens.flip requires an unbound lens')
+        return Lens(None, self.lens.from_())
 
     def both_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''A traversal that focuses both items [0] and [1].
 
             >>> from lenses import lens
@@ -247,6 +268,7 @@ class Lens(object):
         return self.add_lens(optics.BothTraversal())
 
     def decode_(self, encoding='utf-8', errors='strict'):
+        # type: (str, str) -> Lens[S, T, X, Y]
         '''An isomorphism that decodes and encodes its focus on the
         fly. Lets you focus a byte string as a unicode string. The
         arguments have the same meanings as `bytes.decode`. Analogous to
@@ -263,6 +285,7 @@ class Lens(object):
         return self.add_lens(optics.DecodeIso(encoding, errors))
 
     def each_(self, filter_func=None, filter_none=False):
+        # type: (Callable[[A], bool], bool) -> Lens[S, T, X, Y]
         '''A traversal that iterates over its state, focusing everything
         it iterates over. It uses `lenses.hooks.fromiter` to reform
         the state afterwards so it should work with any iterable that
@@ -291,6 +314,7 @@ class Lens(object):
         return self.add_lens(optics.EachTraversal(filter_func, filter_none))
 
     def error_(self, exception, message=None):
+        # type: (Exception, Optional[str]) -> Lens[S, T, X, Y]
         '''An optic that raises an exception whenever it tries to focus
         something. If `message is None` then the exception will be
         raised unmodified. If `message is not None` then when the lens
@@ -319,6 +343,7 @@ class Lens(object):
         return self.add_lens(optics.ErrorIso(exception, message))
 
     def f_(self, getter):
+        # type: (Callable[[A], X]) -> Lens[S, T, X, Y]
         '''An optic that wraps a getter function. A getter function is
         one that takes a state and returns a value derived from that
         state. The function is called on the focus before it is returned.
@@ -336,6 +361,7 @@ class Lens(object):
         return self.add_lens(optics.Getter(getter))
 
     def filter_(self, predicate):
+        # type: (Callable[[A], bool]) -> Lens[S, T, X, Y]
         '''A prism that only focuses a value if the predicate returns
         `True` when called with that value as an argument. Best used
         when composed after a traversal. It only prevents the traversal
@@ -361,6 +387,7 @@ class Lens(object):
         return self.add_lens(optics.FilteringPrism(predicate))
 
     def fork_(self, *lenses):
+        # type: (*Union[Lens[A, B, X, Y], optics.LensLike])-> Lens[S, T, X, Y]
         '''A setter representing the parallel composition of several
         sub-lenses.
 
@@ -373,6 +400,7 @@ class Lens(object):
         return self.add_lens(optics.ForkedSetter(*lenses))
 
     def get_(self, key, default=None):
+        # type: (Any, Optional[Y]) -> Lens[S, T, X, Y]
         '''A lens that focuses an item inside a container by calling
         its `get` method, allowing you to specify a default value for
         missing keys.  Analogous to `dict.get`.
@@ -390,6 +418,7 @@ class Lens(object):
         return self.add_lens(optics.GetitemOrElseLens(key, default))
 
     def getattr_(self, name):
+        # type: (str) -> Lens[S, T, X, Y]
         '''A lens that focuses an attribute of an object. Analogous to
         `getattr`.
 
@@ -406,6 +435,7 @@ class Lens(object):
         return self.add_lens(optics.GetattrLens(name))
 
     def getitem_(self, key):
+        # type: (Any) -> Lens[S, T, X, Y]
         '''A lens that focuses an item inside a container. Analogous to
         `operator.itemgetter`.
 
@@ -426,6 +456,7 @@ class Lens(object):
         return self.add_lens(optics.GetitemLens(key))
 
     def getter_setter_(self, getter, setter):
+        # type: (Callable[[A], X], Callable[[A, Y], B]) -> Lens[S, T, X, Y]
         '''An optic that wraps a pair of getter and setter functions. A
         getter function is one that takes a state and returns a value
         derived from that state. A setter function takes an old state
@@ -455,6 +486,7 @@ class Lens(object):
         return self.add_lens(optics.Lens(getter, setter))
 
     def getzoomattr_(self, name):
+        # type: (str) -> Lens[S, T, X, Y]
         '''A traversal that focuses an attribute of an object, though if
         that attribute happens to be a lens it will zoom the lens. This
         is used internally to make lenses that are attributes of objects
@@ -480,6 +512,7 @@ class Lens(object):
         return self.add_lens(optics.GetZoomAttrTraversal(name))
 
     def instance_(self, type_):
+        # type: (Type) -> Lens[S, T, X, Y]
         '''A prism that focuses a value only when that value is an
         instance of `type_`.
 
@@ -498,6 +531,7 @@ class Lens(object):
         return self.add_lens(optics.InstancePrism(type_))
 
     def iso_(self, forwards, backwards):
+        # type: (Callable[[A], X], Callable[[Y], B]) -> Lens[S, T, X, Y]
         '''A lens based on an isomorphism. An isomorphism can be
         formed by two functions that mirror each other; they can convert
         forwards and backwards between a state and a focus without losing
@@ -537,6 +571,7 @@ class Lens(object):
         return self.add_lens(optics.Isomorphism(forwards, backwards))
 
     def item_(self, key):
+        # type: (Any) -> Lens[S, T, X, Y]
         '''A lens that focuses a single item (key-value pair) in a
         dictionary by its key. Set an item to `None` to remove it from
         the dictionary.
@@ -558,6 +593,7 @@ class Lens(object):
         return self.add_lens(optics.ItemLens(key))
 
     def item_by_value_(self, value):
+        # type: (Any) -> Lens[S, T, X, Y]
         '''A lens that focuses a single item (key-value pair) in a
         dictionary by its value. Set an item to `None` to remove it
         from the dictionary. This lens assumes that there will only be
@@ -581,6 +617,7 @@ class Lens(object):
         return self.add_lens(optics.ItemByValueLens(value))
 
     def items_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''A traversal focusing key-value tuples that are the items of
         a dictionary. Analogous to `dict.items`.
 
@@ -597,6 +634,7 @@ class Lens(object):
         return self.add_lens(optics.ItemsTraversal())
 
     def iter_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''A fold that can get values from any iterable object in python
         by iterating over it. Like any fold, you cannot set values.
 
@@ -621,6 +659,7 @@ class Lens(object):
         return self.add_lens(optics.IterableFold())
 
     def json_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''An isomorphism that focuses a string containing json data as
         its parsed equivalent. Analogous to `json.loads`.
 
@@ -636,6 +675,7 @@ class Lens(object):
         return self.add_lens(optics.JsonIso())
 
     def just_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''A prism that focuses the value inside a `lenses.maybe.Just`
         object.
 
@@ -655,6 +695,7 @@ class Lens(object):
         return self.add_lens(optics.JustPrism())
 
     def keys_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''A traversal focusing the keys of a dictionary. Analogous to
         `dict.keys`.
 
@@ -671,6 +712,7 @@ class Lens(object):
         return self.add_lens(optics.KeysTraversal())
 
     def listwrap_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''An isomorphism that wraps its state up in a list. This is
         occasionally useful when you need to make hetrogenous data more
         uniform. Analogous to `lambda state: [state]`.
@@ -692,6 +734,7 @@ class Lens(object):
         return self.add_lens(optics.ListWrapIso())
 
     def norm_(self, setter):
+        # type: (Callable[[A], X]) -> Lens[S, T, X, Y]
         '''An isomorphism that applies a function as it sets a new
         focus without regard to the old state. It will get foci without
         transformation. This lens allows you to pre-process values before
@@ -728,6 +771,7 @@ class Lens(object):
         return self.add_lens(optics.NormalisingIso(setter))
 
     def prism_(self, unpack, pack):
+        # type: (Callable[[A], Just[X]], Callable[[Y], B]) -> Lens[S, T, X, Y]
         '''A prism is an optic made from a pair of functions that pack and
         unpack a state where the unpacking process can potentially fail.
 
@@ -762,6 +806,7 @@ class Lens(object):
         return self.add_lens(optics.Prism(unpack, pack))
 
     def tuple_(self, *lenses):
+        # type: (*Union[optics.LensLike, Lens[A, B, X, Y]]) -> Lens[S, T, X, Y]
         '''A lens that combines the focuses of other lenses into a
         single tuple. The sublenses must be optics of kind Lens; this
         means no Traversals.
@@ -790,6 +835,7 @@ class Lens(object):
         return self.add_lens(optics.TupleLens(*lenses))
 
     def values_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''A traversal focusing the values of a dictionary. Analogous to
         `dict.values`.
 
@@ -806,6 +852,7 @@ class Lens(object):
         return self.add_lens(optics.ValuesTraversal())
 
     def zoom_(self):
+        # type: () -> Lens[S, T, X, Y]
         '''Follows its state as if it were a bound `Lens` object.
 
             >>> from lenses import lens
@@ -820,6 +867,7 @@ class Lens(object):
         return self.add_lens(optics.ZoomTraversal())
 
     def zoomattr_(self, name):
+        # type: (str) -> Lens[S, T, X, Y]
         '''A lens that looks up an attribute on its target and follows
         it as if were a bound `Lens` object. Ignores the state, if any,
         of the lens that is being looked up.
@@ -843,28 +891,34 @@ class Lens(object):
         return self.add_lens(optics.ZoomAttrTraversal(name))
 
     def __get__(self, instance, owner):
+        # type: (Optional[S], Type) -> Lens[S, T, A, B]
         if instance is None:
             return self
         return self.bind(instance)
 
     def __getattr__(self, name):
+        # type: (str) -> Any
         if name.endswith('_'):
             raise AttributeError('Not a valid lens constructor')
 
         if name.startswith('call_mut_'):
             def caller(*args, **kwargs):
+                # type: (*Any, **Any) -> T
                 return self.call_mut(name[9:], *args, **kwargs)
             return caller
 
         if name.startswith('call_'):
             def caller(*args, **kwargs):
+                # type: (*Any, **Any) -> T
                 return self.call(name[5:], *args, **kwargs)
             return caller
 
         return self.add_lens(optics.GetZoomAttrTraversal(name))
 
     def __getitem__(self, name):
+        # type: (Any) -> Lens[S, T, X, Y]
         return self.add_lens(optics.GetitemLens(name))
 
     def _underlying_lens(self):
+        # type: () -> optics.LensLike
         return self.lens

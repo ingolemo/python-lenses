@@ -216,6 +216,7 @@ class ZoomAttrTraversal(Traversal):
     '''
 
     def __init__(self, name):
+        # type: (str) -> None
         self.name = name
 
     def func(self, f, state):

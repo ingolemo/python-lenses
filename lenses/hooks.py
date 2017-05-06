@@ -2,14 +2,17 @@
 various lenses to operate on your own custom data structures.
 '''
 
+from typing import Any, Dict, Iterable, Iterator, List, Set, Tuple
 from singledispatch import singledispatch
-
 import copy
 import sys
+
+from .typevars import A, B
 
 
 @singledispatch
 def setitem_immutable(self, key, value):
+    # type: (Any, Any, Any) -> Any
     '''Takes an object, a key, and a value and produces a new object
     that is a copy of the original but with `value` as the new value of
     `key`.
@@ -49,24 +52,28 @@ def setitem_immutable(self, key, value):
 if sys.version_info[0] > 2:
     @setitem_immutable.register(bytes)
     def _bytes_setitem_immutable(self, key, value):
+        # type: (bytes, int, int) -> bytes
         data = bytearray(self)
         data[key] = value
         return bytes(data)
 
     @setitem_immutable.register(str)
     def _str_setitem_immutable(self, key, value):
+        # type: (str, int, str) -> str
         data = list(self)
         data[key] = value
         return ''.join(data)
 else:
     @setitem_immutable.register(str)
     def _bytes_setitem_immutable(self, key, value):
+        # type: (str, int, int) -> str
         data = bytearray(self)
         data[key] = value
         return bytes(data)
 
     @setitem_immutable.register(unicode)
     def _str_setitem_immutable(self, key, value):
+        # type: (unicode, int, int) -> unicode
         data = list(self)
         data[key] = value
         return ''.join(data)
@@ -74,12 +81,14 @@ else:
 
 @setitem_immutable.register(tuple)
 def _tuple_setitem_immutable(self, key, value):
+    # type: (Tuple[A, ...], int, A) -> Tuple[A, ...]
     return tuple(value if i == key else item
                  for i, item in enumerate(self))
 
 
 @singledispatch
 def setattr_immutable(self, name, value):
+    # type: (Any, Any, Any) -> Any
     '''Takes an object, a string, and a value and produces a new object
     that is a copy of the original but with the attribute called `name`
     set to `value`.
@@ -120,6 +129,7 @@ def setattr_immutable(self, name, value):
 
 @setattr_immutable.register(tuple)
 def _tuple_setattr_immutable(self, name, value):
+    # type: (Any, str, A) -> Any
     # setting attributes on a tuple probably means we really have a
     # namedtuple so we can use self._fields to understand the names
     data = (value if field == name else item
@@ -129,6 +139,7 @@ def _tuple_setattr_immutable(self, name, value):
 
 @singledispatch
 def to_iter(self):
+    # type: (Any) -> Any
     '''Takes an object and produces an iterable. It is
     intended as the inverse of the `from_iter` function.
 
@@ -157,11 +168,13 @@ def to_iter(self):
 
 @to_iter.register(dict)
 def _dict_to_iter(self):
+    # type: (Dict[A, B]) -> Iterator[Tuple[A, B]]
     return iter(self.items())
 
 
 @singledispatch
 def from_iter(self, iterable):
+    # type: (Any, Any) -> Any
     '''Takes an object and an iterable and produces a new object that is
     a copy of the original with data from `iterable` reincorporated. It
     is intended as the inverse of the `to_iter` function. Any state in
@@ -194,23 +207,28 @@ def from_iter(self, iterable):
 if sys.version_info[0] > 2:
     @from_iter.register(bytes)
     def _bytes_from_iter(self, iterable):
+        # type: (bytes, Iterable[int]) -> bytes
         return bytes(iterable)
 
     @from_iter.register(str)
     def _str_from_iter(self, iterable):
+        # type: (str, Iterable[str]) -> str
         return ''.join(iterable)
 else:
     @from_iter.register(str)
     def _bytes_from_iter(self, iterable):
+        # type: (str, Iterable[str]) -> str
         return ''.join(map(chr, iterable))
 
     @from_iter.register(unicode)
     def _str_from_iter(self, iterable):
+        # type: (unicode, Iterable[unicode]) -> unicode
         return ''.join(iterable)
 
 
 @from_iter.register(dict)
 def _dict_from_iter(self, iterable):
+    # type: (Dict, Iterable[Tuple[A, B]]) -> Dict[A, B]
     new = self.copy()
     new.clear()
     new.update(iterable)
@@ -219,16 +237,19 @@ def _dict_from_iter(self, iterable):
 
 @from_iter.register(list)
 def _list_from_iter(self, iterable):
+    # type: (List, Iterable[A]) -> List[A]
     return list(iterable)
 
 
 @from_iter.register(set)
 def _set_from_iter(self, iterable):
+    # type: (Set, Iterable[A]) -> Set[A]
     return set(iterable)
 
 
 @from_iter.register(tuple)
 def _tuple_from_iter(self, iterable):
+    # type: (Tuple, Iterable[A]) -> Tuple[A, ...]
     # we need to use `type(self)` to handle namedtuples and perhaps
     # other subclasses
     return type(self)(iterable)

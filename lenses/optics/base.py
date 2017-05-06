@@ -1,8 +1,11 @@
-from ..identity import Identity
+from typing import Callable, Generic, Iterable, List, Optional
+
 from ..const import Const
 from ..functorisor import Functorisor
-from ..maybe import Just, Nothing
+from ..identity import Identity
 from .. import typeclass
+from ..maybe import Just, Nothing
+from ..typevars import S, T, A, B
 
 
 class LensLike(object):
@@ -85,6 +88,7 @@ class LensLike(object):
         raise NotImplementedError(message.format(type(self)))
 
     def view(self, state):
+        # type: (S) -> B
         '''Returns the focus within `state`. If multiple items are
         focused then it will attempt to join them together as a monoid.
         See `lenses.typeclass.mappend`.
@@ -108,6 +112,7 @@ class LensLike(object):
         return result
 
     def to_list_of(self, state):
+        # type: (S) -> List[B]
         '''Returns a list of all the foci within `state`.
 
         Requires kind Fold. This method will raise TypeError if the
@@ -121,6 +126,7 @@ class LensLike(object):
         return self.func(consttup, state).unwrap()
 
     def over(self, state, fn):
+        # type: (S, Callable[[A], B]) -> T
         '''Applies a function `fn` to all the foci within `state`.
 
         Requires kind Setter. This method will raise TypeError when the
@@ -134,6 +140,7 @@ class LensLike(object):
         return self.func(identfn, state).unwrap()
 
     def set(self, state, value):
+        # type: (S, B) -> T
         '''Sets all the foci within `state` to `value`.
 
         Requires kind Setter. This method will raise TypeError when the
@@ -147,12 +154,14 @@ class LensLike(object):
         return self.func(ident, state).unwrap()
 
     def compose(self, other):
+        # type: (LensLike) -> LensLike
         '''Composes another lens with this one. The result is a lens
         that feeds the foci of `self` into the state of `other`.
         '''
         return ComposedLens([self]).compose(other)
 
     def from_(self):
+        # type: () -> LensLike
         '''Flips an isomorphism so that it works in the opposite
         direction. Only works if the lens is actually an isomorphism.
 
@@ -165,6 +174,7 @@ class LensLike(object):
         raise NotImplementedError(message)
 
     def re(self):
+        # type: () -> LensLike
         if not self._is_kind(Review):
             raise TypeError('Must be an instance of Review to .re()')
         message = 'Optic has no implementation of .re()'
@@ -211,6 +221,7 @@ class Getter(Fold):
     '''
 
     def __init__(self, getter):
+        # type: (Callable[[S], A]) -> None
         self.getter = getter
 
     def func(self, f, state):
@@ -253,6 +264,7 @@ class Lens(Getter, Traversal):
     '''
 
     def __init__(self, getter, setter):
+        # type: (Callable[[S], A], Callable[[S, B], T]) -> None
         self.getter = getter
         self.setter = setter
 
@@ -276,6 +288,7 @@ class Review(LensLike):
     '''
 
     def __init__(self, pack):
+        # type: (Callable[[B], T]) -> None
         self.pack = pack
 
     def re(self):
@@ -322,7 +335,7 @@ class Prism(Traversal, Review):
 
     def func(self, f, state):
         result = self.unpack(state)
-        if result.is_nothing:
+        if result.is_nothing():
             return f.pure(state)
         return typeclass.fmap(f(result.unwrap()), self.pack)
 
@@ -370,6 +383,7 @@ class Isomorphism(Lens, Prism):
     '''
 
     def __init__(self, forwards, backwards):
+        # type: (Callable[[S], A], Callable[[B], T]) -> None
         self.forwards = forwards
         self.backwards = backwards
 
@@ -417,6 +431,7 @@ class ComposedLens(LensLike):
     '''
 
     def __init__(self, lenses=()):
+        # type: (Iterable[LensLike]) -> None
         self.lenses = list(self._filter_lenses(lenses))
 
     @staticmethod
@@ -492,6 +507,7 @@ class ErrorIso(Isomorphism):
     '''
 
     def __init__(self, exception, message=None):
+        # type: (Exception, Optional[str]) -> None
         self.exception = exception
         self.message = message
 
@@ -521,6 +537,7 @@ class TrivialIso(Isomorphism):
     '''
 
     def __init__(self):
+        # type: () -> None
         pass
 
     def forwards(self, state):
@@ -531,3 +548,9 @@ class TrivialIso(Isomorphism):
 
     def __repr__(self):
         return 'TrivialIso()'
+
+__all__ = [
+    'LensLike', 'Fold', 'Setter', 'Getter', 'Traversal', 'Lens',
+    'Review', 'Prism', 'Isomorphism', 'Equality', 'ComposedLens',
+    'TrivialIso', 'ErrorIso',
+]

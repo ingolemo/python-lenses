@@ -121,17 +121,12 @@ def test_lens_call_mut_state_keyword():
 
 def test_lens_construct():
     obj = object()
-    assert lens(obj).just_().construct() == maybe.Just(obj)
-
-
-def test_lens_construct_focus_keyword():
-    obj = object()
-    assert lens().just_().construct(focus=obj) == maybe.Just(obj)
+    assert lens().just_().construct(obj) == maybe.Just(obj)
 
 
 def test_lens_construct_composed():
     obj = object()
-    assert lens(obj).just_().iso_(int, str).construct() == maybe.Just(str(obj))
+    assert lens().just_().iso_(int, str).construct(obj) == maybe.Just(str(obj))
 
 
 def test_lens_add_lens_trivial_LensLike():

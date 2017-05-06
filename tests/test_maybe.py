@@ -4,12 +4,8 @@ from lenses.maybe import Nothing, Just
 import lenses
 
 
-def test_Nothing_is_singleton():
-    assert Nothing() is Nothing()
-
-
 def test_Nothing_map():
-    assert Nothing().map(str) is Nothing()
+    assert Nothing().map(str) == Nothing()
 
 
 def test_Nothing_add_Nothing():

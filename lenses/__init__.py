@@ -14,10 +14,14 @@ The entry point to this library is the `lens` function, which returns a
     Lens(None, TrivialIso())
 '''
 
+from typing import Optional
+
+from .typevars import S, T
 from .ui import Lens
 
 
 def lens(obj=None):
+    # type: (Optional[S]) -> Lens[S, T, S, T]
     '''Returns a simple Lens bound to `obj`. If `obj is None` then the
     Lens object is unbound.'''
     return Lens(obj)

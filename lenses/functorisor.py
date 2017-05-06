@@ -1,7 +1,6 @@
 from .typeclass import fmap
 
-
-class Functorisor:
+class Functorisor(object):
     '''A Functorisor is a wrapper around an ordinary function that carries
     information about the return type of that function. Specifically
     it wraps functions that return an applicative functor. In haskell
@@ -21,8 +20,8 @@ class Functorisor:
         self.pure = pure_func
         self.func = func
 
-    def __call__(self, *args, **kwargs):
-        return self.func(*args, **kwargs)
+    def __call__(self, arg):
+        return self.func(arg)
 
     def map(self, f):
         def new_f(a):

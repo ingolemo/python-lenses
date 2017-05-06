@@ -1,3 +1,5 @@
+from typing import Callable
+
 from .base import Isomorphism
 
 
@@ -16,6 +18,7 @@ class DecodeIso(Isomorphism):
     '''
 
     def __init__(self, encoding='utf-8', errors='strict'):
+        # type: (str, str) -> None
         self.encoding = encoding
         self.errors = errors
 
@@ -45,6 +48,7 @@ class JsonIso(Isomorphism):
     '''
 
     def __init__(self):
+        # type: () -> None
         self.json_mod = __import__('json')
 
     def forwards(self, state):
@@ -78,6 +82,7 @@ class ListWrapIso(Isomorphism):
     '''
 
     def __init__(self):
+        # type: () -> None
         pass
 
     def forwards(self, state):

@@ -1,3 +1,5 @@
+from typing import Any
+
 from .. import hooks
 from .. import typeclass
 
@@ -20,6 +22,7 @@ class GetattrLens(Lens):
     '''
 
     def __init__(self, name):
+        # type: (str) -> None
         self.name = name
 
     def getter(self, state):
@@ -52,6 +55,7 @@ class GetitemLens(Lens):
     '''
 
     def __init__(self, key):
+        # type: (Any) -> None
         self.key = key
 
     def getter(self, state):
@@ -81,6 +85,7 @@ class GetitemOrElseLens(GetitemLens):
     '''
 
     def __init__(self, key, default=None):
+        # type: (Any, Any) -> None
         self.key = key
         self.default = default
 
@@ -112,6 +117,7 @@ class ItemLens(Lens):
     '''
 
     def __init__(self, key):
+        # type: (Any) -> None
         self.key = key
 
     def getter(self, state):
