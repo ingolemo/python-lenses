@@ -1,3 +1,5 @@
+from typing import Optional
+
 from . import hooks
 from . import typeclass
 
@@ -65,7 +67,7 @@ class Maybe(object):
         return self.item
 
 class Nothing(Maybe):
-    instance = None
+    instance = None # type: Optional[Nothing]
 
     def __new__(cls):
         if cls.instance is None:
