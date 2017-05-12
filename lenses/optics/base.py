@@ -1,4 +1,4 @@
-from typing import Callable, Generic, Iterable, List, Optional
+from typing import Callable, Generic, Iterable, List, Optional, cast
 
 from ..const import Const
 from ..functorisor import Functorisor
@@ -87,6 +87,20 @@ class LensLike(object):
         message = 'Tried to use unimplemented lens {}.'
         raise NotImplementedError(message.format(type(self)))
 
+    def preview(self, state):
+        # type: (S) -> Just[B]
+        '''Previews a potentially non-existant focus within
+        `state`. Returns `Just(focus)` if it exists, Nothing otherwise.
+
+        Requires kind Fold.
+        '''
+        if not self._is_kind(Fold):
+            raise TypeError('Must be an instance of Fold to .preview()')
+
+        const = Functorisor(lambda a: Const(Nothing()),
+                            lambda a: Const(Just(a)))
+        return self.func(const, state).unwrap()
+
     def view(self, state):
         # type: (S) -> B
         '''Returns the focus within `state`. If multiple items are
@@ -104,12 +118,10 @@ class LensLike(object):
             raise TypeError('Must be an instance of Fold to .view()')
 
         guard = object()
-        const = Functorisor(lambda a: Const(Nothing()),
-                            lambda a: Const(Just(a)))
-        result = self.func(const, state).unwrap().maybe(guard)
+        result = self.preview(state).maybe(guard)
         if result is guard:
             raise ValueError('No focus to view')
-        return result
+        return cast(B, result)
 
     def to_list_of(self, state):
         # type: (S) -> List[B]
