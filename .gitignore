@@ -2,5 +2,6 @@
 .coverage
 .eggs/
 .hypothesis/
+.mypy_cache/
 lenses.egg-info/
 venv/
