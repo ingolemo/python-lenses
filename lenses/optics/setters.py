@@ -15,7 +15,7 @@ class ForkedSetter(Setter):
     '''
 
     def __init__(self, *lenses):
-        self.lenses = [lens._underlying_lens() for lens in lenses]
+        self.lenses = lenses
 
     def func(self, f, state):
         for lens in self.lenses:

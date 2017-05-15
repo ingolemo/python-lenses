@@ -211,7 +211,7 @@ class TupleLens(Lens):
     '''
 
     def __init__(self, *lenses):
-        self.lenses = [l._underlying_lens() for l in lenses]
+        self.lenses = lenses
         for lens in self.lenses:
             if not lens._is_kind(Lens):
                 raise TypeError('TupleLens only works with lenses')

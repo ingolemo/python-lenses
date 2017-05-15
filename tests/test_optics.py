@@ -430,18 +430,6 @@ def test_TupleLens_set_with_LensLike():
     assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
 
 
-def test_TupleLens_view_with_Lens():
-    data = {'hello': 0, 'world': 1}
-    my_lens = b.TupleLens(lens()['hello'], lens()['world'])
-    assert my_lens.view(data) == (0, 1)
-
-
-def test_TupleLens_set_with_Lens():
-    data = {'hello': 0, 'world': 1}
-    my_lens = b.TupleLens(lens()['hello'], lens()['world'])
-    assert my_lens.set(data, (3, 4)) == {'hello': 3, 'world': 4}
-
-
 def test_TupleLens_only_works_with_lenses():
     with pytest.raises(TypeError):
         b.TupleLens(b.EachTraversal())

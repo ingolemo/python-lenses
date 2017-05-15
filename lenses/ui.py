@@ -397,7 +397,8 @@ class Lens(Generic[S, T, A, B]):
             >>> lens([[0, 0], 0, 0]).fork_(lens()[0][1], lens()[2]).set(1)
             [[0, 1], 0, 1]
         '''
-        return self.add_lens(optics.ForkedSetter(*lenses))
+        true_lenses = [l._underlying_lens() for l in lenses]
+        return self.add_lens(optics.ForkedSetter(*true_lenses))
 
     def get_(self, key, default=None):
         # type: (Any, Optional[Y]) -> Lens[S, T, X, Y]
@@ -832,7 +833,8 @@ class Lens(Generic[S, T, A, B]):
             >>> tl.bind(state).each_().each_() + 10
             ([11, 12, 13], 4, [15, 16])
         '''
-        return self.add_lens(optics.TupleLens(*lenses))
+        true_lenses = [l._underlying_lens() for l in lenses]
+        return self.add_lens(optics.TupleLens(*true_lenses))
 
     def values_(self):
         # type: () -> Lens[S, T, X, Y]
