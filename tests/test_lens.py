@@ -218,7 +218,7 @@ def test_lens_descriptor_doesnt_bind_from_class():
 
         first = lens()._private_items[0]
 
-    assert MyClass.first.state is None
+    assert MyClass.first._state is None
 
 
 def test_lens_descriptor_zoom():

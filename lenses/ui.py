@@ -46,19 +46,19 @@ def _add_extra_methods(cls):
 @_add_extra_methods
 class Lens(Generic[S, T, A, B]):
     'A user-friendly object for interacting with the lenses library'
-    __slots__ = ['state', 'lens']
+    __slots__ = ['_state', '_optic']
 
     def __init__(self, state=None, lens=None):
         # type: (Optional[S], Optional[optics.LensLike]) -> None
         if lens is None:
             lens = optics.TrivialIso()
-        self.state = state  # type: Optional[S]
-        self.lens = lens  # type: optics.LensLike
+        self._state = state  # type: Optional[S]
+        self._optic = lens  # type: optics.LensLike
 
     def __repr__(self):
         # type: () -> str
         return '{}({!r}, {!r})'.format(self.__class__.__name__,
-                                       self.state, self.lens)
+                                       self._state, self._optic)
 
     def get(self, state=None):
         # type: (Optional[S]) -> B
@@ -72,9 +72,9 @@ class Lens(Generic[S, T, A, B]):
         '''
         if state is not None:
             self = self.bind(state)
-        if self.state is None:
+        if self._state is None:
             raise ValueError('Lens.get requires a bound lens')
-        return self.lens.to_list_of(self.state)[0]
+        return self._optic.to_list_of(self._state)[0]
 
     def get_all(self, state=None):
         # type: (Optional[S]) -> List[B]
@@ -89,9 +89,9 @@ class Lens(Generic[S, T, A, B]):
         '''
         if state is not None:
             self = self.bind(state)
-        if self.state is None:
+        if self._state is None:
             raise ValueError('Lens.get_all requires a bound lens')
-        return self.lens.to_list_of(self.state)
+        return self._optic.to_list_of(self._state)
 
     def get_monoid(self, state=None):
         # type: (Optional[S]) -> B
@@ -104,9 +104,9 @@ class Lens(Generic[S, T, A, B]):
         '''
         if state is not None:
             self = self.bind(state)
-        if self.state is None:
+        if self._state is None:
             raise ValueError('Lens.get_monoid requires a bound lens')
-        return self.lens.view(self.state)
+        return self._optic.view(self._state)
 
     def set(self, newvalue, state=None):
         # type: (B, Optional[S]) -> T
@@ -118,9 +118,9 @@ class Lens(Generic[S, T, A, B]):
         '''
         if state is not None:
             self = self.bind(state)
-        if self.state is None:
+        if self._state is None:
             raise ValueError('Lens.set requires a bound lens')
-        return self.lens.set(self.state, newvalue)
+        return self._optic.set(self._state, newvalue)
 
     def modify(self, func, state=None):
         # type: (Callable[[A], B], Optional[S]) -> T
@@ -134,9 +134,9 @@ class Lens(Generic[S, T, A, B]):
         '''
         if state is not None:
             self = self.bind(state)
-        if self.state is None:
+        if self._state is None:
             raise ValueError('Lens.modify requires a bound lens')
-        return self.lens.over(self.state, func)
+        return self._optic.over(self._state, func)
 
     def call(self, method_name, *args, **kwargs):
         # type: (str, *Any, **Any) -> T
@@ -201,9 +201,9 @@ class Lens(Generic[S, T, A, B]):
     def construct(self, focus):
         # type: (A) -> S
         '''Construct a state given a focus.'''
-        if self.state is not None:
+        if self._state is not None:
             raise ValueError('Lens.construct requires an unbound lens')
-        return self.lens.re().view(focus)
+        return self._optic.re().view(focus)
 
     def add_lens(self, other):
         # type: (Union[optics.LensLike, Lens[A, B, X, Y]]) -> Lens[S, T, X, Y]
@@ -217,11 +217,11 @@ class Lens(Generic[S, T, A, B]):
             2
         '''
         if isinstance(other, optics.LensLike):
-            return Lens(self.state, self.lens.compose(other))
+            return Lens(self._state, self._optic.compose(other))
         elif isinstance(other, Lens):
-            if other.state is not None:
+            if other._state is not None:
                 raise ValueError('Lens.add_lens requires an unbound lens')
-            return Lens(self.state, self.lens.compose(other.lens))
+            return Lens(self._state, self._optic.compose(other._optic))
         else:
             raise TypeError('''Cannot add lens of type {!r}.'''
                             .format(type(other)))
@@ -235,9 +235,9 @@ class Lens(Generic[S, T, A, B]):
             >>> lens()[1].bind([1, 2, 3]).get()
             2
         '''
-        if self.state is not None:
+        if self._state is not None:
             raise ValueError('Lens.bind requires an unbound lens')
-        return Lens(state, self.lens)
+        return Lens(state, self._optic)
 
     def flip(self):
         # type: () -> Lens[A, B, S, T]
@@ -249,9 +249,9 @@ class Lens(Generic[S, T, A, B]):
             >>> json_encoder.bind(['hello', 'world']).get()  # doctest: +SKIP
             b'["hello", "world"]'
         '''
-        if self.state is not None:
+        if self._state is not None:
             raise ValueError('Lens.flip requires an unbound lens')
-        return Lens(None, self.lens.from_())
+        return Lens(None, self._optic.from_())
 
     def both_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -923,4 +923,4 @@ class Lens(Generic[S, T, A, B]):
 
     def _underlying_lens(self):
         # type: () -> optics.LensLike
-        return self.lens
+        return self._optic

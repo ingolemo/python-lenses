@@ -241,7 +241,7 @@ class ZoomTraversal(Traversal):
     '''
 
     def func(self, f, state):
-        return state._underlying_lens().func(f, state.state)
+        return state._underlying_lens().func(f, state._state)
 
     def __repr__(self):
         return 'ZoomTraversal()'
