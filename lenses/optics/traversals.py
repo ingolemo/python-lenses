@@ -43,12 +43,11 @@ def collect_args(n):
 class BothTraversal(Traversal):
     '''A traversal that focuses both items [0] and [1].
 
-        >>> from lenses import lens
-        >>> lens().both_()
-        Lens(None, BothTraversal())
-        >>> lens([1, 2, 3]).both_().get_all()
+        >>> BothTraversal()
+        BothTraversal()
+        >>> BothTraversal().to_list_of([1, 2, 3])
         [1, 2]
-        >>> lens([1, 2, 3]).both_().set(4)
+        >>> BothTraversal().set([1, 2, 3], 4)
         [4, 4, 3]
     '''
 
@@ -73,24 +72,22 @@ class EachTraversal(Traversal):
     supports. Analogous to `iter`.
 
         >>> from lenses import lens
-        >>> data = [1, 2, 3]
-        >>> lens().each_()
-        Lens(None, EachTraversal())
-        >>> lens(data).each_().get_all()
+        >>> state = [1, 2, 3]
+        >>> EachTraversal()
+        EachTraversal()
+        >>> EachTraversal().to_list_of(state)
         [1, 2, 3]
-        >>> lens(data).each_().modify(lambda n: n + 1)
+        >>> EachTraversal().over(state, lambda n: n + 1)
         [2, 3, 4]
-        >>> lens(data).each_(filter_none=True).set(None)
+        >>> EachTraversal(filter_none=True).set(state, None)
         []
 
     For technical reasons, this lens iterates over dictionaries by their
     items and not just their keys.
 
-        >>> data = {'one': 1}
-        >>> lens(data).each_().get_all()
+        >>> state = {'one': 1}
+        >>> EachTraversal().to_list_of(state)
         [('one', 1)]
-        >>> lens(data).each_()[1] + 1
-        {'one': 2}
     '''
 
     def __init__(self, filter_func=None, filter_none=False, *_):
@@ -125,21 +122,6 @@ class GetZoomAttrTraversal(Traversal):
     transparent. If you already know whether you are focusing a lens or
     a non-lens you should be explicit and use a ZoomAttrTraversal or a
     GetAttrLens respectively.
-
-        >>> from lenses import lens
-        >>> from collections import namedtuple
-        >>> Triple = namedtuple('Triple', 'left middle right')
-        >>> state = Triple(1, 10, lens().middle)
-        >>> lens().left
-        Lens(None, GetZoomAttrTraversal('left'))
-        >>> lens(state).left.get()
-        1
-        >>> lens(state).left.set(3)
-        Triple(left=3, middle=10, right=Lens(None, GetZoomAttrTraversal('middle')))
-        >>> lens(state).right.get()
-        10
-        >>> lens(state).right.set(13)
-        Triple(left=1, middle=13, right=Lens(None, GetZoomAttrTraversal('middle')))
     '''
 
     def __init__(self, name):
@@ -164,14 +146,13 @@ class ItemsTraversal(Traversal):
     '''A traversal focusing key-value tuples that are the items of a
     dictionary. Analogous to `dict.items`.
 
-        >>> from lenses import lens
         >>> from collections import OrderedDict
-        >>> data = OrderedDict([(1, 10), (2, 20)])
-        >>> lens().items_()
-        Lens(None, ItemsTraversal())
-        >>> lens(data).items_().get_all()
+        >>> state = OrderedDict([(1, 10), (2, 20)])
+        >>> ItemsTraversal()
+        ItemsTraversal()
+        >>> ItemsTraversal().to_list_of(state)
         [(1, 10), (2, 20)]
-        >>> lens(data).items_()[1].modify(lambda n: n + 1)
+        >>> ItemsTraversal().over(state, lambda n: (n[0], n[1] + 1))
         OrderedDict([(1, 11), (2, 21)])
     '''
 
@@ -197,22 +178,6 @@ class ZoomAttrTraversal(Traversal):
     '''A lens that looks up an attribute on its target and follows it as
     if were a bound `Lens` object. Ignores the state, if any, of the
     lens that is being looked up.
-
-        >>> from lenses import lens
-        >>> class ClassWithLens(object):
-        ...     def __init__(self, items):
-        ...         self._private_items = items
-        ...     def __repr__(self):
-        ...         return 'ClassWithLens({!r})'.format(self._private_items)
-        ...     first = lens()._private_items[0]
-        ...
-        >>> data = (ClassWithLens([1, 2, 3]), 4)
-        >>> lens().zoomattr_('first')
-        Lens(None, ZoomAttrTraversal('first'))
-        >>> lens(data)[0].zoomattr_('first').get()
-        1
-        >>> lens(data)[0].zoomattr_('first').set(5)
-        (ClassWithLens([5, 2, 3]), 4)
     '''
 
     def __init__(self, name):
@@ -231,13 +196,13 @@ class ZoomTraversal(Traversal):
     '''Follows its state as if it were a bound `Lens` object.
 
         >>> from lenses import lens
-        >>> data = [lens([1, 2])[1], 4]
-        >>> lens().zoom_()
-        Lens(None, ZoomTraversal())
-        >>> lens(data)[0].zoom_().get()
+        >>> ZoomTraversal()
+        ZoomTraversal()
+        >>> state = lens([1, 2])[1]
+        >>> ZoomTraversal().view(state)
         2
-        >>> lens(data)[0].zoom_().set(3)
-        [[1, 3], 4]
+        >>> ZoomTraversal().set(state, 3)
+        [1, 3]
     '''
 
     def func(self, f, state):

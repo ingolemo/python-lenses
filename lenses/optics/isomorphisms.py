@@ -8,12 +8,11 @@ class DecodeIso(Isomorphism):
     Lets you focus a byte string as a unicode string. The arguments have
     the same meanings as `bytes.decode`. Analogous to `bytes.decode`.
 
-        >>> from lenses import lens
-        >>> lens().decode_(encoding='utf8')
-        Lens(None, DecodeIso('utf8', 'strict'))
-        >>> lens(b'hello').decode_().get()  # doctest: +SKIP
+        >>> DecodeIso()
+        DecodeIso('utf-8', 'strict')
+        >>> DecodeIso().view(b'hello')  # doctest: +SKIP
         'hello'
-        >>> lens(b'hello').decode_().set('world')  # doctest: +SKIP
+        >>> DecodeIso().set(b'hello', 'world')  # doctest: +SKIP
         b'world'
     '''
 
@@ -37,14 +36,13 @@ class JsonIso(Isomorphism):
     '''An isomorphism that focuses a string containing json data as its
     parsed equivalent. Analogous to `json.loads`.
 
-        >>> from lenses import lens
-        >>> data = '[{"points": [4, 7]}]'
-        >>> lens().json_()
-        Lens(None, JsonIso())
-        >>> lens(data).json_()[0]['points'][1].get()
-        7
-        >>> lens(data).json_()[0]['points'][0].set(8)
-        '[{"points": [8, 7]}]'
+        >>> JsonIso()
+        JsonIso()
+        >>> state = '[{"points": [4, 7]}]'
+        >>> JsonIso().view(state) # doctest: +SKIP
+        [{'points': [4, 7]}]
+        >>> JsonIso().set(state, [{'points': [3]}])
+        '[{"points": [3]}]'
     '''
 
     def __init__(self):
@@ -66,15 +64,20 @@ class ListWrapIso(Isomorphism):
     occasionally useful when you need to make hetrogenous data more
     uniform. Analogous to `lambda state: [state]`.
 
-        >>> from lenses import lens
-        >>> lens().listwrap_()
-        Lens(None, ListWrapIso())
-        >>> lens(0).listwrap_().get()
+        >>> ListWrapIso()
+        ListWrapIso()
+        >>> ListWrapIso().view(0)
         [0]
-        >>> lens(0).listwrap_().set([1])
+        >>> ListWrapIso().set(0, [1])
         1
-        >>> l = lens().tuple_(lens()[0], lens()[1].listwrap_())
-        >>> l.bind([[1, 3], 4]).each_().each_().get_all()
+
+        >>> import lenses
+        >>> gi = lenses.optics.GetitemLens
+        >>> tup = lenses.optics.TupleLens
+        >>> each = lenses.optics.EachTraversal()
+        >>> state = [[1, 3], 4]
+        >>> l = tup(gi(0), gi(1) & ListWrapIso()) & each & each
+        >>> l.to_list_of(state)
         [1, 3, 4]
 
     Also serves as an example that lenses do not always have to
@@ -109,24 +112,21 @@ class NormalisingIso(Isomorphism):
 
     Equivalent to `Isomorphism((lambda s: s), setter)`.
 
-        >>> from lenses import lens
         >>> def real_only(num):
         ...     return num.real
         ...
-        >>> lens().norm_(real_only)
-        Lens(None, NormalisingIso(<function real_only at ...>))
-        >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).get()
+        >>> NormalisingIso(real_only)
+        NormalisingIso(<function real_only at ...>)
+        >>> NormalisingIso(real_only).view(1.0)
         1.0
-        >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).set(4+7j)
-        [4.0, 2.0, 3.0]
+        >>> NormalisingIso(real_only).set(1.0, 4+7j)
+        4.0
 
     Types with constructors that do conversion are often good targets
     for this lens:
 
-        >>> lens([1, 2, 3])[0].norm_(int).set(4.0)
-        [4, 2, 3]
-        >>> lens([1, 2, 3])[1].norm_(int).set('5')
-        [1, 5, 3]
+        >>> NormalisingIso(int).set(1, '4')
+        4
     '''
 
     def __init__(self, setter):

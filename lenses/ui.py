@@ -408,7 +408,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().get_('foo')
-            Lens(None, GetitemOrElseLens('foo'))
+            Lens(None, GetitemOrElseLens('foo', default=None))
             >>> lens({'foo': 'bar'}).get_('baz').get()
             >>> lens({'foo': 'bar'}).get_('baz', []).get()
             []

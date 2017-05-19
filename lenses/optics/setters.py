@@ -7,10 +7,13 @@ __all__ = ['ForkedSetter']
 class ForkedSetter(Setter):
     '''A setter representing the parallel composition of several sub-lenses.
 
-        >>> from lenses import lens
-        >>> lens().fork_(lens()[0], lens()[2])
-        Lens(None, ForkedSetter(GetitemLens(0), GetitemLens(2)))
-        >>> lens([[0, 0], 0, 0]).fork_(lens()[0][1], lens()[2]).set(1)
+        >>> import lenses
+        >>> gi = lenses.optics.GetitemLens
+        >>> fs = ForkedSetter(gi(0) & gi(1), gi(2))
+        >>> fs
+        ForkedSetter(GetitemLens(0) & GetitemLens(1), GetitemLens(2))
+        >>> state = [[0, 0], 0, 0]
+        >>> fs.set(state, 1)
         [[0, 1], 0, 1]
     '''
 

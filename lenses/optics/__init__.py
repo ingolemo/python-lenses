@@ -11,14 +11,13 @@ class KeysTraversal(ComposedLens):
     '''A traversal focusing the keys of a dictionary. Analogous to
     `dict.keys`.
 
-        >>> from lenses import lens
+        >>> KeysTraversal()
+        KeysTraversal()
         >>> from collections import OrderedDict
-        >>> data = OrderedDict([(1, 10), (2, 20)])
-        >>> lens().keys_()
-        Lens(None, KeysTraversal())
-        >>> lens(data).keys_().get_all()
+        >>> state = OrderedDict([(1, 10), (2, 20)])
+        >>> KeysTraversal().to_list_of(state)
         [1, 2]
-        >>> lens(data).keys_().modify(lambda n: n + 1)
+        >>> KeysTraversal().over(state, lambda n: n + 1)
         OrderedDict([(2, 10), (3, 20)])
     '''
 
@@ -33,14 +32,13 @@ class ValuesTraversal(ComposedLens):
     '''A traversal focusing the values of a dictionary. Analogous to
     `dict.values`.
 
-        >>> from lenses import lens
+        >>> ValuesTraversal()
+        ValuesTraversal()
         >>> from collections import OrderedDict
-        >>> data = OrderedDict([(1, 10), (2, 20)])
-        >>> lens().values_()
-        Lens(None, ValuesTraversal())
-        >>> lens(data).values_().get_all()
+        >>> state = OrderedDict([(1, 10), (2, 20)])
+        >>> ValuesTraversal().to_list_of(state)
         [10, 20]
-        >>> lens(data).values_().modify(lambda n: n + 1)
+        >>> ValuesTraversal().over(state, lambda n: n + 1)
         OrderedDict([(1, 11), (2, 21)])
     '''
 

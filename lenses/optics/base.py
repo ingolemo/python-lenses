@@ -223,13 +223,10 @@ class Getter(Fold):
     that takes a state and returns a value derived from that state. The
     function is called on the focus before it is returned.
 
-        >>> from lenses import lens
-        >>> lens().f_(abs)
-        Lens(None, Getter(<built-in function abs>))
-        >>> lens(-1).f_(abs).get()
+        >>> Getter(abs)
+        Getter(<built-in function abs>)
+        >>> Getter(abs).view(-1)
         1
-        >>> lens([-1, 2, -3]).each_().f_(abs).get_all()
-        [1, 2, 3]
     '''
 
     def __init__(self, getter):
@@ -253,7 +250,6 @@ class Lens(Getter, Traversal):
     that state. A setter function takes an old state and a new value
     and uses them to construct a new state.
 
-        >>> from lenses import lens
         >>> def getter(state):
         ...     'Get the average of a list'
         ...     return sum(state) // len(state)
@@ -264,15 +260,13 @@ class Lens(Getter, Traversal):
         ...     prefix = old_state[:-1]
         ...     return prefix + [target_sum - sum(prefix)]
         ...
-        >>> average_lens = lens().getter_setter_(getter, setter)
-        >>> average_lens
-        Lens(None, Lens(<function getter...>, <function setter...>))
-        >>> average_lens.bind([1, 2, 4, 5]).get()
+        >>> average = Lens(getter, setter)
+        >>> average
+        Lens(<function getter...>, <function setter...>)
+        >>> average.view([1, 2, 4, 5])
         3
-        >>> average_lens.bind([1, 2, 3]).set(4)
+        >>> average.set([1, 2, 3], 4)
         [1, 2, 9]
-        >>> average_lens.bind([1, 2, 3]) - 1
-        [1, 2, 0]
     '''
 
     def __init__(self, getter, setter):
@@ -322,7 +316,6 @@ class Prism(Traversal, Review):
 
     Parsing strings is a common situation when prisms are useful:
 
-        >>> from lenses import lens
         >>> from lenses.maybe import Nothing, Just
         >>> def pack(focus):
         ...     return str(focus)
@@ -331,11 +324,11 @@ class Prism(Traversal, Review):
         ...         return Just(int(state))
         ...     except ValueError:
         ...         return Nothing()
-        >>> lens().prism_(unpack, pack)
-        Lens(None, Prism(<function unpack ...>, <function pack ...>))
-        >>> lens('42').prism_(unpack, pack).get_all()
+        >>> Prism(unpack, pack)
+        Prism(<function unpack ...>, <function pack ...>)
+        >>> Prism(unpack, pack).to_list_of('42')
         [42]
-        >>> lens('fourty two').prism_(unpack, pack).get_all()
+        >>> Prism(unpack, pack).to_list_of('fourty two')
         []
 
     All prisms are also traversals that have exactly zero or one foci.
@@ -376,21 +369,20 @@ class Isomorphism(Lens, Prism):
     arrays. Isomorphism makes it easy to store data in one form, but
     interact with it in a more convenient form.
 
-        >>> from lenses import lens
-        >>> lens().iso_(chr, ord)
-        Lens(None, Isomorphism(<built-in function chr>, <built-in function ord>))
-        >>> lens(65).iso_(chr, ord).get()
+        >>> Isomorphism(chr, ord)
+        Isomorphism(<built-in function chr>, <built-in function ord>)
+        >>> Isomorphism(chr, ord).view(65)
         'A'
-        >>> lens(65).iso_(chr, ord).set('B')
+        >>> Isomorphism(chr, ord).set(65, 'B')
         66
 
     Due to their symmetry, isomorphisms can be flipped, thereby swapping
     thier forwards and backwards functions:
 
-        >>> flipped = lens().iso_(chr, ord).flip()
+        >>> flipped = Isomorphism(chr, ord).from_()
         >>> flipped
-        Lens(None, Isomorphism(<built-in function ord>, <built-in function chr>))
-        >>> flipped.bind('A').get()
+        Isomorphism(<built-in function ord>, <built-in function chr>)
+        >>> flipped.view('A')
         65
     '''
 
@@ -435,9 +427,10 @@ class ComposedLens(LensLike):
     imposing any constraints on what can happen. The sublenses are in
     charge of what capabilities they support.
 
-        >>> from lenses import lens
-        >>> lens()[0][1]
-        Lens(None, GetitemLens(0) & GetitemLens(1))
+        >>> import lenses
+        >>> gi = lenses.optics.GetitemLens
+        >>> ComposedLens((gi(0), gi(1)))
+        GetitemLens(0) & GetitemLens(1)
 
     (The ComposedLens is represented above by the `&` symbol)
     '''
@@ -499,20 +492,19 @@ class ErrorIso(Isomorphism):
     exception will be called with the resulting formatted message as
     it's only argument. Useful for debugging.
 
-        >>> from lenses import lens
-        >>> lens().error_(Exception())
-        Lens(None, ErrorIso(Exception()))
-        >>> lens().error_(Exception, '{}')  # doctest: +SKIP
-        Lens(None, ErrorLens(<class 'Exception'>, '{}'))
-        >>> lens(True).error_(Exception).get()
+        >>> ErrorIso(Exception())
+        ErrorIso(Exception())
+        >>> ErrorIso(Exception, '{}')  # doctest: +SKIP
+        ErrorLens(<class 'Exception'>, '{}')
+        >>> ErrorIso(Exception).view(True)
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?
         Exception
-        >>> lens(True).error_(Exception('An error occurred')).set(False)
+        >>> ErrorIso(Exception('An error occurred')).set(True, False)
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?
         Exception: An error occurred
-        >>> lens(True).error_(ValueError, 'applied to {}').get()
+        >>> ErrorIso(ValueError, 'applied to {}').view(True)
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?
         ValueError: applied to True
@@ -539,12 +531,11 @@ class TrivialIso(Isomorphism):
     manipulate the state in any way. Mostly used as a "null" lens.
     Analogous to `lambda a: a`.
 
-        >>> from lenses import lens
-        >>> lens()
-        Lens(None, TrivialIso())
-        >>> lens(True).get()
+        >>> TrivialIso()
+        TrivialIso()
+        >>> TrivialIso().view(True)
         True
-        >>> lens(True).set(False)
+        >>> TrivialIso().set(True, False)
         False
     '''
 

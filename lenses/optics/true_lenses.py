@@ -10,14 +10,13 @@ class GetattrLens(Lens):
     '''A lens that focuses an attribute of an object. Analogous to
     `getattr`.
 
-        >>> from lenses import lens
+        >>> GetattrLens('left')
+        GetattrLens('left')
         >>> from collections import namedtuple
         >>> Pair = namedtuple('Pair', 'left right')
-        >>> lens().getattr_('left')
-        Lens(None, GetattrLens('left'))
-        >>> lens(Pair(1, 2)).getattr_('left').get()
+        >>> GetattrLens('left').view(Pair(1, 2))
         1
-        >>> lens(Pair(1, 2)).getattr_('right').set(3)
+        >>> GetattrLens('right').set(Pair(1, 2), 3)
         Pair(left=1, right=3)
     '''
 
@@ -39,19 +38,12 @@ class GetitemLens(Lens):
     '''A lens that focuses an item inside a container. Analogous to
     `operator.itemgetter`.
 
-        >>> from lenses import lens
-        >>> lens()[0]
-        Lens(None, GetitemLens(0))
-        >>> lens().getitem_(0)
-        Lens(None, GetitemLens(0))
-        >>> lens([1, 2, 3])[0].get()
+        >>> GetitemLens('foo')
+        GetitemLens('foo')
+        >>> GetitemLens('foo').view({'foo': 1})
         1
-        >>> lens({'hello': 'world'})['hello'].get()
-        'world'
-        >>> lens([1, 2, 3])[0].set(4)
-        [4, 2, 3]
-        >>> lens({'hello': 'world'})['hello'].set('universe')
-        {'hello': 'universe'}
+        >>> GetitemLens('foo').set({'foo': 1}, 2)
+        {'foo': 2}
     '''
 
     def __init__(self, key):
@@ -73,15 +65,17 @@ class GetitemOrElseLens(GetitemLens):
     method, allowing you to specify a default value for missing keys.
     Analogous to `dict.get`.
 
-        >>> from lenses import lens
-        >>> lens().get_('foo')
-        Lens(None, GetitemOrElseLens('foo'))
-        >>> lens({'foo': 'bar'}).get_('baz').get()
-        >>> lens({'foo': 'bar'}).get_('baz', []).get()
-        []
-        >>> from collections import OrderedDict
-        >>> lens(OrderedDict({'foo': 'bar'})).get_('baz').set('qux')
-        OrderedDict([('foo', 'bar'), ('baz', 'qux')])
+        >>> GetitemOrElseLens('foo', 0)
+        GetitemOrElseLens('foo', default=0)
+        >>> state = {'foo': 1}
+        >>> GetitemOrElseLens('foo', 0).view(state)
+        1
+        >>> GetitemOrElseLens('baz', 0).view(state)
+        0
+        >>> GetitemOrElseLens('foo', 0).set(state, 2)
+        {'foo': 2}
+        >>> GetitemOrElseLens('baz', 0).over({}, lambda a: a + 10)
+        {'baz': 10}
     '''
 
     def __init__(self, key, default=None):
@@ -93,7 +87,8 @@ class GetitemOrElseLens(GetitemLens):
         return state.get(self.key, self.default)
 
     def __repr__(self):
-        return 'GetitemOrElseLens({!r})'.format(self.key)
+        message = 'GetitemOrElseLens({!r}, default={!r})'
+        return message.format(self.key, self.default)
 
 
 class ItemLens(Lens):
@@ -101,18 +96,17 @@ class ItemLens(Lens):
     dictionary by its key. Set an item to `None` to remove it from the
     dictionary.
 
-        >>> from lenses import lens
+        >>> ItemLens(1)
+        ItemLens(1)
         >>> from collections import OrderedDict
-        >>> data = OrderedDict([(1, 10), (2, 20)])
-        >>> lens().item_(1)
-        Lens(None, ItemLens(1))
-        >>> lens(data).item_(1).get()
+        >>> state = OrderedDict([(1, 10), (2, 20)])
+        >>> ItemLens(1).view(state)
         (1, 10)
-        >>> lens(data).item_(3).get() is None
+        >>> ItemLens(3).view(state) is None
         True
-        >>> lens(data).item_(1).set((1, 11))
+        >>> ItemLens(1).set(state, (1, 11))
         OrderedDict([(1, 11), (2, 20)])
-        >>> lens(data).item_(1).set(None)
+        >>> ItemLens(1).set(state, None)
         OrderedDict([(2, 20)])
     '''
 
@@ -147,18 +141,17 @@ class ItemByValueLens(Lens):
     with that particular value. If you violate that assumption then
     you're on your own.
 
-        >>> from lenses import lens
+        >>> ItemByValueLens(10)
+        ItemByValueLens(10)
         >>> from collections import OrderedDict
-        >>> data = OrderedDict([(1, 10), (2, 20)])
-        >>> lens().item_by_value_(10)
-        Lens(None, ItemByValueLens(10))
-        >>> lens(data).item_by_value_(10).get()
+        >>> state = OrderedDict([(1, 10), (2, 20)])
+        >>> ItemByValueLens(10).view(state)
         (1, 10)
-        >>> lens(data).item_by_value_(30).get() is None
+        >>> ItemByValueLens(30).view(state) is None
         True
-        >>> lens(data).item_by_value_(10).set((3, 10))
+        >>> ItemByValueLens(10).set(state, (3, 10))
         OrderedDict([(2, 20), (3, 10)])
-        >>> lens(data).item_by_value_(10).set(None)
+        >>> ItemByValueLens(10).set(state, None)
         OrderedDict([(2, 20)])
     '''
 
@@ -188,26 +181,24 @@ class TupleLens(Lens):
     tuple. The sublenses must be optics of kind Lens; this means no
     Traversals.
 
-        >>> from lenses import lens
-        >>> lens().tuple_()
-        Lens(None, TupleLens())
-        >>> tl = lens().tuple_(lens()[0], lens()[2])
+        >>> tl = TupleLens(GetitemLens(0), GetitemLens(2))
         >>> tl
-        Lens(None, TupleLens(GetitemLens(0), GetitemLens(2)))
-        >>> tl.bind([1, 2, 3, 4]).get()
+        TupleLens(GetitemLens(0), GetitemLens(2))
+        >>> tl.view([1, 2, 3, 4])
         (1, 3)
-        >>> tl.bind([1, 2, 3, 4]).set((5, 6))
+        >>> tl.set([1, 2, 3, 4], (5, 6))
         [5, 2, 6, 4]
 
     This lens is particularly useful when immediately followed by
     an EachLens, allowing you to traverse data even when it comes
     from disparate locations within the state.
 
+        >>> import lenses
+        >>> each = lenses.optics.EachTraversal()
+        >>> tee = tl & each & each
         >>> state = ([1, 2, 3], 4, [5, 6])
-        >>> tl.bind(state).each_().each_().get_all()
+        >>> tee.to_list_of(state)
         [1, 2, 3, 5, 6]
-        >>> tl.bind(state).each_().each_() + 10
-        ([11, 12, 13], 4, [15, 16])
     '''
 
     def __init__(self, *lenses):

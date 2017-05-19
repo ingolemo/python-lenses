@@ -11,20 +11,21 @@ class FilteringPrism(Prism):
     it does not filter out values the way that python's regular `filter`
     function does.
 
-        >>> from lenses import lens
-        >>> lens().filter_(all)
-        Lens(None, FilteringPrism(<built-in function all>))
-        >>> data = [[1, 2], [0], ['a'], ['', 'b']]
-        >>> lens(data).each_().filter_(all).get_all()
+        >>> FilteringPrism(all)
+        FilteringPrism(<built-in function all>)
+        >>> import lenses
+        >>> each = lenses.optics.EachTraversal()
+        >>> state = [[1, 2], [0], ['a'], ['', 'b']]
+        >>> (each & FilteringPrism(all)).to_list_of(state)
         [[1, 2], ['a']]
-        >>> lens(data).each_().filter_(all).set(2)
+        >>> (each & FilteringPrism(all)).set(state, 2)
         [2, [0], 2, ['', 'b']]
 
     The filtering is done to foci before the lens' manipulation is
     applied. This means that the resulting foci can still violate the
     predicate if the manipulating function doesn't respect it:
 
-        >>> lens(['', 2, '']).each_().filter_(bool).set(None)
+        >>> (each & FilteringPrism(bool)).set(['', 2, ''], None)
         ['', None, '']
     '''
 
@@ -47,16 +48,15 @@ class InstancePrism(FilteringPrism):
     '''A prism that focuses a value only when that value is an instance
     of `type_`.
 
-        >>> from lenses import lens
-        >>> lens().instance_(int)
-        Lens(None, InstancePrism(...))
-        >>> lens(1).instance_(int).get_all()
+        >>> InstancePrism(int)
+        InstancePrism(...)
+        >>> InstancePrism(int).to_list_of(1)
         [1]
-        >>> lens(1).instance_(float).get_all()
+        >>> InstancePrism(float).to_list_of(1)
         []
-        >>> lens(1).instance_(int).set(2)
+        >>> InstancePrism(int).set(1, 2)
         2
-        >>> lens(1).instance_(float).set(2)
+        >>> InstancePrism(float).set(1, 2)
         1
     '''
 
@@ -74,17 +74,16 @@ class JustPrism(Prism):
     '''A prism that focuses the value inside a `lenses.maybe.Just`
     object.
 
-        >>> from lenses import lens
         >>> from lenses.maybe import Just, Nothing
-        >>> lens().just_()
-        Lens(None, JustPrism())
-        >>> lens(Just(1)).just_().get_all()
+        >>> JustPrism()
+        JustPrism()
+        >>> JustPrism().to_list_of(Just(1))
         [1]
-        >>> lens(Nothing()).just_().get_all()
+        >>> JustPrism().to_list_of(Nothing())
         []
-        >>> lens(Just(1)).just_().set(2)
+        >>> JustPrism().set(Just(1), 2)
         Just(2)
-        >>> lens(Nothing()).just_().set(2)
+        >>> JustPrism().set(Nothing(), 2)
         Nothing()
     '''
 
