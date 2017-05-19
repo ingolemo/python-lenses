@@ -192,33 +192,26 @@ copies are made. This makes lenses more memory efficient than using
 
 If you pass no arguments to the `lens` function then you will get an
 unbound `Lens` object. An unbound lens can be manipulated in all the
-ways that a bound lens can except that you can't call any of the methods
-that manipulate the state (such as `get` and `set`).
+ways that a bound lens can.
 
 	>>> unbound_lens = lens()
 	>>> index_one = unbound_lens[1]
 
-You can then attach a state to the lens using the `bind` method which
-returns a bound lens just as if you'd passed the state to `lens`. You
-can then call state manipulating methods as normal:
+When you call a method on an unbound lens that requires a state, it
+returns a curried function that takes a state before doing whatever it
+would normally do.
 
-	>>> index_one.bind({1: 'one', 2: 'two'}).get()
+	>>> index_one_getter = index_one.get()
+	>>> index_one_getter({1: 'one', 2: 'two'})
 	'one'
 
-In other words, `lens(state)` and `lens().bind(state)` are equivalent.
 Lenses don't actually care about their state in any way until they need
-to manipulate it. The same lens will work on states of any type so long
+to manipulate it. The same function will work on states of any type so long
 as that type supports the necessary operations. We used the `index_one`
 lens above on a dictionary, but it works just fine on a list too:
 
-	>>> index_one.bind(['eine', 'zwei', 'drei']).get()
+	>>> index_one_getter(['eine', 'zwei', 'drei'])
 	'zwei'
-
-You can also call a state manipulating method on an unbound lens and pass
-the state in as a keyword-only argument:
-
-	>>> index_one.get(state={1: 'one', 2: 'two'})
-	'one'
 
 You can use unbound Lens objects as descriptors. That is, if you set a
 lens as a class attribute and you access that attribute from an instance,

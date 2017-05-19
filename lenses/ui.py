@@ -45,98 +45,9 @@ def _add_extra_methods(cls):
 
 @_add_extra_methods
 class Lens(Generic[S, T, A, B]):
-    'A user-friendly object for interacting with the lenses library'
-    __slots__ = ['_state', '_optic']
-
-    def __init__(self, state=None, lens=None):
-        # type: (Optional[S], Optional[optics.LensLike]) -> None
-        if lens is None:
-            lens = optics.TrivialIso()
-        self._state = state  # type: Optional[S]
-        self._optic = lens  # type: optics.LensLike
-
-    def __repr__(self):
-        # type: () -> str
-        return '{}({!r}, {!r})'.format(self.__class__.__name__,
-                                       self._state, self._optic)
-
-    def get(self, state=None):
-        # type: (Optional[S]) -> B
-        '''Get the first value focused by the lens.
-
-            >>> from lenses import lens
-            >>> lens([1, 2, 3]).get()
-            [1, 2, 3]
-            >>> lens([1, 2, 3])[0].get()
-            1
-        '''
-        if state is not None:
-            self = self.bind(state)
-        if self._state is None:
-            raise ValueError('Lens.get requires a bound lens')
-        return self._optic.to_list_of(self._state)[0]
-
-    def get_all(self, state=None):
-        # type: (Optional[S]) -> List[B]
-        '''Get multiple values focused by the lens. Returns them as
-        a list.
-
-            >>> from lenses import lens
-            >>> lens([1, 2, 3])[0].get_all()
-            [1]
-            >>> lens([1, 2, 3]).both_().get_all()
-            [1, 2]
-        '''
-        if state is not None:
-            self = self.bind(state)
-        if self._state is None:
-            raise ValueError('Lens.get_all requires a bound lens')
-        return self._optic.to_list_of(self._state)
-
-    def get_monoid(self, state=None):
-        # type: (Optional[S]) -> B
-        '''Get the values focused by the lens, merging them together by
-        treating them as a monoid. See `lenses.typeclass.mappend`.
-
-            >>> from lenses import lens
-            >>> lens([[], [1], [2, 3]]).each_().get_monoid()
-            [1, 2, 3]
-        '''
-        if state is not None:
-            self = self.bind(state)
-        if self._state is None:
-            raise ValueError('Lens.get_monoid requires a bound lens')
-        return self._optic.view(self._state)
-
-    def set(self, newvalue, state=None):
-        # type: (B, Optional[S]) -> T
-        '''Set the focus to `newvalue`.
-
-            >>> from lenses import lens
-            >>> lens([1, 2, 3])[1].set(4)
-            [1, 4, 3]
-        '''
-        if state is not None:
-            self = self.bind(state)
-        if self._state is None:
-            raise ValueError('Lens.set requires a bound lens')
-        return self._optic.set(self._state, newvalue)
-
-    def modify(self, func, state=None):
-        # type: (Callable[[A], B], Optional[S]) -> T
-        '''Apply a function to the focus.
-
-            >>> from lenses import lens
-            >>> lens([1, 2, 3])[1].modify(str)
-            [1, '2', 3]
-            >>> lens([1, 2, 3])[1].modify(lambda n: n + 10)
-            [1, 12, 3]
-        '''
-        if state is not None:
-            self = self.bind(state)
-        if self._state is None:
-            raise ValueError('Lens.modify requires a bound lens')
-        return self._optic.over(self._state, func)
+    '''This class contains all the methods that are common to both
+    the BoundLens and UnboundLens classes. It is not intended to be
+    instantiated directly.'''
 
     def call(self, method_name, *args, **kwargs):
         # type: (str, *Any, **Any) -> T
@@ -153,10 +64,6 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(['alpha', 'beta', 'gamma'])[2].call_upper()
             ['alpha', 'beta', 'GAMMA']
         '''
-        if 'state' in kwargs:
-            self = self.bind(kwargs['state'])
-            del kwargs['state']
-
         def func(a):
             # type: (A) -> B
             return cast(B, getattr(a, method_name)(*args, **kwargs))
@@ -181,10 +88,6 @@ class Lens(Generic[S, T, A, B]):
             >>> lens([[3, 1, 2], [5, 4]])[0].call_mut_sort()
             [[1, 2, 3], [5, 4]]
         '''
-        if 'state' in kwargs:
-            self = self.bind(kwargs['state'])
-            del kwargs['state']
-
         shallow = False
         if 'shallow' in kwargs:
             shallow = kwargs['shallow']
@@ -198,68 +101,13 @@ class Lens(Generic[S, T, A, B]):
 
         return self.modify(func)
 
-    def construct(self, focus):
-        # type: (A) -> S
-        '''Construct a state given a focus.'''
-        if self._state is not None:
-            raise ValueError('Lens.construct requires an unbound lens')
-        return self._optic.re().view(focus)
-
-    def add_lens(self, other):
-        # type: (Union[optics.LensLike, Lens[A, B, X, Y]]) -> Lens[S, T, X, Y]
-        '''Refine the current focus of this lens by composing it with
-        another lens object. Can be a `lenses.optics.LensLike` or an
-        unbound `lenses.Lens`.
-
-            >>> from lenses import lens
-            >>> second_first = lens()[1][0]
-            >>> lens([[0, 1], [2, 3]]).add_lens(second_first).get()
-            2
-        '''
-        if isinstance(other, optics.LensLike):
-            return Lens(self._state, self._optic.compose(other))
-        elif isinstance(other, Lens):
-            if other._state is not None:
-                raise ValueError('Lens.add_lens requires an unbound lens')
-            return Lens(self._state, self._optic.compose(other._optic))
-        else:
-            raise TypeError('''Cannot add lens of type {!r}.'''
-                            .format(type(other)))
-
-    def bind(self, state):
-        # type: (S) -> Lens[S, T, A, B]
-        '''Bind this lens to a specific `state`. Raises `ValueError`
-        when the lens has already been bound.
-
-            >>> from lenses import lens
-            >>> lens()[1].bind([1, 2, 3]).get()
-            2
-        '''
-        if self._state is not None:
-            raise ValueError('Lens.bind requires an unbound lens')
-        return Lens(state, self._optic)
-
-    def flip(self):
-        # type: () -> Lens[A, B, S, T]
-        '''Flips the direction of the lens. The lens must be unbound
-        and all the underlying operations must be isomorphisms.
-
-            >>> from lenses import lens
-            >>> json_encoder = lens().decode_().json_().flip()
-            >>> json_encoder.bind(['hello', 'world']).get()  # doctest: +SKIP
-            b'["hello", "world"]'
-        '''
-        if self._state is not None:
-            raise ValueError('Lens.flip requires an unbound lens')
-        return Lens(None, self._optic.from_())
-
     def both_(self):
         # type: () -> Lens[S, T, X, Y]
         '''A traversal that focuses both items [0] and [1].
 
             >>> from lenses import lens
             >>> lens().both_()
-            Lens(None, BothTraversal())
+            UnboundLens(BothTraversal())
             >>> lens([1, 2, 3]).both_().get_all()
             [1, 2]
             >>> lens([1, 2, 3]).both_().set(4)
@@ -276,7 +124,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().decode_(encoding='utf8')
-            Lens(None, DecodeIso('utf8', 'strict'))
+            UnboundLens(DecodeIso('utf8', 'strict'))
             >>> lens(b'hello').decode_().get()  # doctest: +SKIP
             'hello'
             >>> lens(b'hello').decode_().set('world')  # doctest: +SKIP
@@ -294,7 +142,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> data = [1, 2, 3]
             >>> lens().each_()
-            Lens(None, EachTraversal())
+            UnboundLens(EachTraversal())
             >>> lens(data).each_().get_all()
             [1, 2, 3]
             >>> lens(data).each_() + 1
@@ -324,9 +172,9 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().error_(Exception())
-            Lens(None, ErrorIso(Exception()))
+            UnboundLens(ErrorIso(Exception()))
             >>> lens().error_(Exception, '{}')
-            Lens(None, ErrorIso(<...Exception...>, '{}'))
+            UnboundLens(ErrorIso(<...Exception...>, '{}'))
             >>> lens(True).error_(Exception).get()
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
@@ -350,7 +198,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().f_(abs)
-            Lens(None, Getter(<built-in function abs>))
+            UnboundLens(Getter(<built-in function abs>))
             >>> lens(-1).f_(abs).get()
             1
             >>> lens([-1, 2, -3]).each_().f_(abs).get_all()
@@ -370,7 +218,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().filter_(all)
-            Lens(None, FilteringPrism(<built-in function all>))
+            UnboundLens(FilteringPrism(<built-in function all>))
             >>> data = [[1, 2], [0], ['a'], ['', 'b']]
             >>> lens(data).each_().filter_(all).get_all()
             [[1, 2], ['a']]
@@ -393,7 +241,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().fork_(lens()[0], lens()[2])
-            Lens(None, ForkedSetter(GetitemLens(0), GetitemLens(2)))
+            UnboundLens(ForkedSetter(GetitemLens(0), GetitemLens(2)))
             >>> lens([[0, 0], 0, 0]).fork_(lens()[0][1], lens()[2]).set(1)
             [[0, 1], 0, 1]
         '''
@@ -408,7 +256,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().get_('foo')
-            Lens(None, GetitemOrElseLens('foo', default=None))
+            UnboundLens(GetitemOrElseLens('foo', default=None))
             >>> lens({'foo': 'bar'}).get_('baz').get()
             >>> lens({'foo': 'bar'}).get_('baz', []).get()
             []
@@ -427,7 +275,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from collections import namedtuple
             >>> Pair = namedtuple('Pair', 'left right')
             >>> lens().getattr_('left')
-            Lens(None, GetattrLens('left'))
+            UnboundLens(GetattrLens('left'))
             >>> lens(Pair(1, 2)).getattr_('left').get()
             1
             >>> lens(Pair(1, 2)).getattr_('right').set(3)
@@ -442,9 +290,9 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens()[0]
-            Lens(None, GetitemLens(0))
+            UnboundLens(GetitemLens(0))
             >>> lens().getitem_(0)
-            Lens(None, GetitemLens(0))
+            UnboundLens(GetitemLens(0))
             >>> lens([1, 2, 3])[0].get()
             1
             >>> lens({'hello': 'world'})['hello'].get()
@@ -476,7 +324,7 @@ class Lens(Generic[S, T, A, B]):
             ...
             >>> average_lens = lens().getter_setter_(getter, setter)
             >>> average_lens
-            Lens(None, Lens(<function getter...>, <function setter...>))
+            UnboundLens(Lens(<function getter...>, <function setter...>))
             >>> average_lens.bind([1, 2, 4, 5]).get()
             3
             >>> average_lens.bind([1, 2, 3]).set(4)
@@ -500,15 +348,15 @@ class Lens(Generic[S, T, A, B]):
             >>> Triple = namedtuple('Triple', 'left mid right')
             >>> state = Triple(1, 2, lens().mid)
             >>> lens().left
-            Lens(None, GetZoomAttrTraversal('left'))
+            UnboundLens(GetZoomAttrTraversal('left'))
             >>> lens(state).left.get()
             1
             >>> lens(state).left.set(3)
-            Triple(left=3, mid=2, right=Lens(None, GetZoomAttrTraversal('mid')))
+            Triple(left=3, mid=2, right=UnboundLens(GetZoomAttrTraversal('mid')))
             >>> lens(state).right.get()
             2
             >>> lens(state).right.set(4)
-            Triple(left=1, mid=4, right=Lens(None, GetZoomAttrTraversal('mid')))
+            Triple(left=1, mid=4, right=UnboundLens(GetZoomAttrTraversal('mid')))
         '''
         return self.add_lens(optics.GetZoomAttrTraversal(name))
 
@@ -519,7 +367,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().instance_(int)
-            Lens(None, InstancePrism(...))
+            UnboundLens(InstancePrism(...))
             >>> lens(1).instance_(int).get_all()
             [1]
             >>> lens(1).instance_(float).get_all()
@@ -554,7 +402,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().iso_(chr, ord)
-            Lens(None, Isomorphism(<... chr>, <... ord>))
+            UnboundLens(Isomorphism(<... chr>, <... ord>))
             >>> lens(65).iso_(chr, ord).get()
             'A'
             >>> lens(65).iso_(chr, ord).set('B')
@@ -565,7 +413,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> flipped = lens().iso_(chr, ord).flip()
             >>> flipped
-            Lens(None, Isomorphism(<... ord>, <... chr>))
+            UnboundLens(Isomorphism(<... ord>, <... chr>))
             >>> flipped.bind('A').get()
             65
         '''
@@ -581,7 +429,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens().item_(1)
-            Lens(None, ItemLens(1))
+            UnboundLens(ItemLens(1))
             >>> lens(data).item_(1).get()
             (1, 10)
             >>> lens(data).item_(3).get() is None
@@ -605,7 +453,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens().item_by_value_(10)
-            Lens(None, ItemByValueLens(10))
+            UnboundLens(ItemByValueLens(10))
             >>> lens(data).item_by_value_(10).get()
             (1, 10)
             >>> lens(data).item_by_value_(30).get() is None
@@ -626,7 +474,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens().items_()
-            Lens(None, ItemsTraversal())
+            UnboundLens(ItemsTraversal())
             >>> lens(data).items_().get_all()
             [(1, 10), (2, 20)]
             >>> lens(data).items_()[1].modify(lambda n: n + 1)
@@ -641,7 +489,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().iter_()
-            Lens(None, IterableFold())
+            UnboundLens(IterableFold())
             >>> lens({2, 1, 3}).iter_().get_all()
             [1, 2, 3]
             >>> def numbers():
@@ -667,7 +515,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> data = '[{"points": [4, 7]}]'
             >>> lens().json_()
-            Lens(None, JsonIso())
+            UnboundLens(JsonIso())
             >>> lens(data).json_()[0]['points'][1].get()
             7
             >>> lens(data).json_()[0]['points'][0].set(8)
@@ -683,7 +531,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> from lenses.maybe import Just, Nothing
             >>> lens().just_()
-            Lens(None, JustPrism())
+            UnboundLens(JustPrism())
             >>> lens(Just(1)).just_().get_all()
             [1]
             >>> lens(Nothing()).just_().get_all()
@@ -704,7 +552,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens().keys_()
-            Lens(None, KeysTraversal())
+            UnboundLens(KeysTraversal())
             >>> lens(data).keys_().get_all()
             [1, 2]
             >>> lens(data).keys_().modify(lambda n: n + 1)
@@ -720,7 +568,7 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().listwrap_()
-            Lens(None, ListWrapIso())
+            UnboundLens(ListWrapIso())
             >>> lens(0).listwrap_().get()
             [0]
             >>> lens(0).listwrap_().set([1])
@@ -755,7 +603,7 @@ class Lens(Generic[S, T, A, B]):
             ...     return num.real
             ...
             >>> lens().norm_(real_only)
-            Lens(None, NormalisingIso(<function real_only at ...>))
+            UnboundLens(NormalisingIso(<function real_only at ...>))
             >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).get()
             1.0
             >>> lens([1.0, 2.0, 3.0])[0].norm_(real_only).set(4+7j)
@@ -796,7 +644,7 @@ class Lens(Generic[S, T, A, B]):
             ...         return Nothing()
             ...
             >>> lens().prism_(unpack, pack)
-            Lens(None, Prism(<function unpack ...>, <function pack ...>))
+            UnboundLens(Prism(<function unpack ...>, <function pack ...>))
             >>> lens('42').prism_(unpack, pack).get_all()
             [42]
             >>> lens('fourty two').prism_(unpack, pack).get_all()
@@ -814,10 +662,10 @@ class Lens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> lens().tuple_()
-            Lens(None, TupleLens())
+            UnboundLens(TupleLens())
             >>> tl = lens().tuple_(lens()[0], lens()[2])
             >>> tl
-            Lens(None, TupleLens(GetitemLens(0), GetitemLens(2)))
+            UnboundLens(TupleLens(GetitemLens(0), GetitemLens(2)))
             >>> tl.bind([1, 2, 3, 4]).get()
             (1, 3)
             >>> tl.bind([1, 2, 3, 4]).set((5, 6))
@@ -845,7 +693,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens().values_()
-            Lens(None, ValuesTraversal())
+            UnboundLens(ValuesTraversal())
             >>> lens(data).values_().get_all()
             [10, 20]
             >>> lens(data).values_().modify(lambda n: n + 1)
@@ -860,7 +708,7 @@ class Lens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> data = [lens([1, 2])[1], 4]
             >>> lens().zoom_()
-            Lens(None, ZoomTraversal())
+            UnboundLens(ZoomTraversal())
             >>> lens(data)[0].zoom_().get()
             2
             >>> lens(data)[0].zoom_().set(3)
@@ -884,19 +732,13 @@ class Lens(Generic[S, T, A, B]):
             ...
             >>> data = (ClassWithLens([1, 2, 3]), 4)
             >>> lens().zoomattr_('first')
-            Lens(None, ZoomAttrTraversal('first'))
+            UnboundLens(ZoomAttrTraversal('first'))
             >>> lens(data)[0].zoomattr_('first').get()
             1
             >>> lens(data)[0].zoomattr_('first').set(5)
             (ClassWithLens([5, 2, 3]), 4)
         '''
         return self.add_lens(optics.ZoomAttrTraversal(name))
-
-    def __get__(self, instance, owner):
-        # type: (Optional[S], Type) -> Lens[S, T, A, B]
-        if instance is None:
-            return self
-        return self.bind(instance)
 
     def __getattr__(self, name):
         # type: (str) -> Any
@@ -915,11 +757,255 @@ class Lens(Generic[S, T, A, B]):
                 return self.call(name[5:], *args, **kwargs)
             return caller
 
-        return self.add_lens(optics.GetZoomAttrTraversal(name))
+        return self.getzoomattr_(name)
 
     def __getitem__(self, name):
         # type: (Any) -> Lens[S, T, X, Y]
         return self.add_lens(optics.GetitemLens(name))
+
+class UnboundLens(Lens[S, T, A, B]):
+    __slots__ = ['_optic']
+
+    def __init__(self, optic):
+        self._optic = optic
+
+    def __repr__(self):
+        # type: () -> str
+        return 'UnboundLens({!r})'.format(self._optic)
+
+    def get(self):
+        # type: () -> Callable[[S], B]
+        '''Get the first value focused by the lens.
+
+            >>> from lenses import lens
+            >>> getter = lens().get()
+            >>> getter([1, 2, 3])
+            [1, 2, 3]
+            >>> zero_item_getter = lens()[0].get()
+            >>> zero_item_getter([1, 2, 3])
+            1
+        '''
+        def getter(state):
+            return self.bind(state).get()
+        return getter
+
+    def get_all(self):
+        # type: () -> Callable[[S], List[B]]
+        '''Get multiple values focused by the lens. Returns them as
+        a list.
+
+            >>> from lenses import lens
+            >>> get_all_item_zero = lens()[0].get_all()
+            >>> get_all_item_zero([1, 2, 3])
+            [1]
+            >>> get_both = lens().both_().get_all()
+            >>> get_both([1, 2, 3])
+            [1, 2]
+        '''
+        def getter(state):
+            return self.bind(state).get_all()
+        return getter
+
+    def get_monoid(self):
+        # type: () -> Callable[[S], B]
+        '''Get the values focused by the lens, merging them together by
+        treating them as a monoid. See `lenses.typeclass.mappend`.
+
+            >>> from lenses import lens
+            >>> get_each_monoidally = lens().each_().get_monoid()
+            >>> get_each_monoidally([[], [1], [2, 3]])
+            [1, 2, 3]
+        '''
+        def getter(state):
+            return self.bind(state).get_monoid()
+        return getter
+
+    def set(self, newvalue):
+        # type: (B) -> Callable[[S], T]
+        '''Set the focus to `newvalue`.
+
+            >>> from lenses import lens
+            >>> set_item_one_to_four = lens()[1].set(4)
+            >>> set_item_one_to_four([1, 2, 3])
+            [1, 4, 3]
+        '''
+        def setter(state):
+            return self.bind(state).set(newvalue)
+        return setter
+
+    def modify(self, func):
+        # type: (Callable[[A], B]) -> Callable[[S], T]
+        '''Apply a function to the focus.
+
+            >>> from lenses import lens
+            >>> convert_item_one_to_string = lens()[1].modify(str)
+            >>> convert_item_one_to_string([1, 2, 3])
+            [1, '2', 3]
+            >>> add_ten_to_item_one = lens()[1].modify(lambda n: n + 10)
+            >>> add_ten_to_item_one([1, 2, 3])
+            [1, 12, 3]
+        '''
+        def modifier(state):
+            return self.bind(state).modify(func)
+        return modifier
+
+    def construct(self, focus):
+        # type: (A) -> S
+        '''Construct a state given a focus.'''
+        return self._optic.re().view(focus)
+
+
+    def flip(self):
+        # type: () -> UnboundLens[A, B, S, T]
+        '''Flips the direction of the lens. The lens must be unbound
+        and all the underlying operations must be isomorphisms.
+
+            >>> from lenses import lens
+            >>> json_encoder = lens().decode_().json_().flip()
+            >>> json_encoder.bind(['hello', 'world']).get()  # doctest: +SKIP
+            b'["hello", "world"]'
+        '''
+        return UnboundLens(self._optic.from_())
+
+    def bind(self, state):
+        # type: (S) -> BoundLens[S, T, A, B]
+        '''Bind this lens to a specific `state`.
+
+            >>> from lenses import lens
+            >>> lens()[1].bind([1, 2, 3]).get()
+            2
+        '''
+        return BoundLens(state, self._optic)
+
+    def add_lens(self, other):
+        # type: (Union[optics.LensLike, UnboundLens[A, B, X, Y]]) -> UnboundLens[S, T, X, Y]
+        '''Refine the current focus of this lens by composing it with
+        another lens object. Can be a `lenses.optics.LensLike` or an
+        unbound `lenses.Lens`.
+
+            >>> from lenses import lens
+            >>> first = lens()[0]
+            >>> second = lens()[1]
+            >>> second_first = second.add_lens(first)
+            >>> get_second_then_first = second_first.get()
+            >>> get_second_then_first([[0, 1], [2, 3]])
+            2
+        '''
+        if isinstance(other, optics.LensLike):
+            return UnboundLens(self._optic.compose(other))
+        elif isinstance(other, UnboundLens):
+            return UnboundLens(self._optic.compose(other._optic))
+        elif isinstance(other, BoundLens):
+            raise ValueError('Lens.add_lens requires an unbound lens')
+        else:
+            raise TypeError('''Cannot add lens of type {!r}.'''
+                            .format(type(other)))
+
+    def __get__(self, instance, owner):
+        # type: (Optional[S], Type) -> Lens[S, T, A, B]
+        if instance is None:
+            return self
+        return self.bind(instance)
+
+    def _underlying_lens(self):
+        # type: () -> optics.LensLike
+        return self._optic
+
+
+class BoundLens(Lens[S, T, A, B]):
+    __slots__ = ['_state', '_optic']
+
+    def __init__(self, state, optic):
+        # type: (S, optics.LensLike) -> None
+        self._state = state
+        self._optic = optic
+
+    def __repr__(self):
+        # type: () -> str
+        return 'BoundLens({!r}, {!r})'.format(self._state, self._optic)
+
+    def get(self):
+        # type: () -> B
+        '''Get the first value focused by the lens.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3]).get()
+            [1, 2, 3]
+            >>> lens([1, 2, 3])[0].get()
+            1
+        '''
+        return self._optic.to_list_of(self._state)[0]
+
+    def get_all(self):
+        # type: () -> List[B]
+        '''Get multiple values focused by the lens. Returns them as
+        a list.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3])[0].get_all()
+            [1]
+            >>> lens([1, 2, 3]).both_().get_all()
+            [1, 2]
+        '''
+        return self._optic.to_list_of(self._state)
+
+    def get_monoid(self):
+        # type: () -> B
+        '''Get the values focused by the lens, merging them together by
+        treating them as a monoid. See `lenses.typeclass.mappend`.
+
+            >>> from lenses import lens
+            >>> lens([[], [1], [2, 3]]).each_().get_monoid()
+            [1, 2, 3]
+        '''
+        return self._optic.view(self._state)
+
+    def set(self, newvalue):
+        # type: (B) -> T
+        '''Set the focus to `newvalue`.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3])[1].set(4)
+            [1, 4, 3]
+        '''
+        return self._optic.set(self._state, newvalue)
+
+    def modify(self, func):
+        # type: (Callable[[A], B]) -> T
+        '''Apply a function to the focus.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3])[1].modify(str)
+            [1, '2', 3]
+            >>> lens([1, 2, 3])[1].modify(lambda n: n + 10)
+            [1, 12, 3]
+        '''
+        return self._optic.over(self._state, func)
+
+    def bind(self, state):
+        raise ValueError('Lens already bound')
+
+    def add_lens(self, other):
+        # type: (Union[optics.LensLike, UnboundLens[A, B, X, Y]]) -> BoundLens[S, T, X, Y]
+        '''Refine the current focus of this lens by composing it with
+        another lens object. Can be a `lenses.optics.LensLike` or an
+        unbound `lenses.Lens`.
+
+            >>> from lenses import lens
+            >>> first = lens()[0]
+            >>> second = lens([[0, 1], [2, 3]])[1]
+            >>> second.add_lens(first).get()
+            2
+        '''
+        if isinstance(other, optics.LensLike):
+            return BoundLens(self._state, self._optic.compose(other))
+        elif isinstance(other, UnboundLens):
+            return BoundLens(self._state, self._optic.compose(other._optic))
+        elif isinstance(other, BoundLens):
+            raise ValueError('Lens.add_lens requires an unbound lens')
+        else:
+            raise TypeError('''Cannot add lens of type {!r}.'''
+                            .format(type(other)))
 
     def _underlying_lens(self):
         # type: () -> optics.LensLike

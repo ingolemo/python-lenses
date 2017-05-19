@@ -2,6 +2,7 @@ import collections
 
 import pytest
 
+import lenses
 from lenses import lens, optics, maybe
 
 
@@ -11,24 +12,12 @@ def test_lens_get():
     assert lens([1, 2, 3])[1].get() == 2
 
 
-def test_lens_get_state_keyword():
-    assert lens()[1].get(state=[1, 2, 3]) == 2
-
-
 def test_lens_get_all():
     assert lens([[1, 2], [3, 4]]).both_()[1].get_all() == [2, 4]
 
 
-def test_lens_get_all_state_keyword():
-    assert lens().each_().get_all(state=[1, 2, 3]) == [1, 2, 3]
-
-
 def test_lens_get_monoid():
     assert lens([[1, 2], [3, 4]]).both_().get_monoid() == [1, 2, 3, 4]
-
-
-def test_lens_get_monoid_state_keyword():
-    assert lens().each_().get_monoid(state=[1, 2, 3]) == 6
 
 
 def test_lens_set():
@@ -36,17 +25,9 @@ def test_lens_set():
     assert lens([1, 2, 3])[1].set(5) == [1, 5, 3]
 
 
-def test_lens_set_state_keyword():
-    assert lens()[1].set(4, state=[1, 2, 3]) == [1, 4, 3]
-
-
 def test_lens_modify():
     assert lens(10).modify(lambda a: a + 1) == 11
     assert lens([1, 2, 3])[0].modify(lambda a: a + 5) == [6, 2, 3]
-
-
-def test_lens_modify_state_keyword():
-    assert lens()[1].modify(str, state=[1, 2, 3]) == [1, '2', 3]
 
 
 def test_lens_call():
@@ -71,10 +52,6 @@ def test_lens_call_kwargs():
 
 def test_lens_call_kwargs_implicitly():
     assert lens('h').call_encode(encoding='utf-8') == b'h'
-
-
-def test_lens_call_state_keyword():
-    assert lens()[1].call('union', {4}, state=[1, {2}, 3]) == [1, {2, 4}, 3]
 
 
 def test_lens_call_mut():
@@ -115,10 +92,6 @@ def test_lens_call_mut_shallow():
     assert result[0] is state[0]
 
 
-def test_lens_call_mut_state_keyword():
-    assert lens().call_mut('append', 3, state=[1, 2]) == [1, 2, 3]
-
-
 def test_lens_construct():
     obj = object()
     assert lens().just_().construct(obj) == maybe.Just(obj)
@@ -150,6 +123,29 @@ def test_lens_add_lens_bound_lens():
         lens([1, 2]).add_lens(lens(1))
 
 
+def test_lens_add_lens_invalid():
+    with pytest.raises(TypeError):
+        lens([1, 2]).add_lens(1)
+
+
+def test_unbound_lens_add_lens_trivial_lens():
+    assert (lens().add_lens(lens()) + [3])([1, 2]) == [1, 2, 3]
+
+
+def test_unbound_lens_add_lens_nontrivial_lens():
+    assert lens().add_lens(lens()[1]).set(3)([1, 2]) == [1, 3]
+
+
+def test_unbound_lens_add_lens_bound_lens():
+    with pytest.raises(ValueError):
+        lens().add_lens(lens(1))
+
+
+def test_unbound_lens_add_lens_invalid():
+    with pytest.raises(TypeError):
+        lens().add_lens(1)
+
+
 def test_lens_add_lens_bad_lens():
     with pytest.raises(TypeError):
         lens([1, 2]).add_lens(1)
@@ -160,8 +156,7 @@ def test_lens_bind():
 
 
 def test_lens_no_bind():
-    with pytest.raises(ValueError):
-        lens().get()
+    lens().get()  # assert doesn't raise
 
 
 def test_lens_no_double_bind():
@@ -182,11 +177,6 @@ def test_lens_flip_composed():
 def test_lens_flip_composed_not_isomorphism():
     with pytest.raises(TypeError):
         lens().decode_()[0].flip()
-
-
-def test_lens_flip_bound():
-    with pytest.raises(ValueError):
-        lens(1).iso_(str, int).flip()
 
 
 def test_lens_flip_not_isomorphism():
@@ -218,7 +208,7 @@ def test_lens_descriptor_doesnt_bind_from_class():
 
         first = lens()._private_items[0]
 
-    assert MyClass.first._state is None
+    assert isinstance(MyClass.first, lenses.UnboundLens)
 
 
 def test_lens_descriptor_zoom():
@@ -240,14 +230,8 @@ def test_lens_descriptor_zoom():
     assert lens(data)[0].first.set(4) == (MyClass([4, 2, 3]),)
 
 
-def test_lens_error_on_bound_and_state():
-    with pytest.raises(ValueError):
-        lens([1, 2, 3])[1].get(state=[4, 5, 6])
-
-
-def test_lens_error_on_unbound_and_no_state():
-    with pytest.raises(ValueError):
-        lens()[1].get()
+def test_lens_unbound_and_no_state():
+    assert lens()[1].get()([1, 2, 3]) == 2
 
 
 # Testing that Lens properly passes though dunder methods
