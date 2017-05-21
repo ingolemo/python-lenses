@@ -1,4 +1,4 @@
-from typing import (Callable, List, Optional, Type, Union)
+from typing import (Callable, List, Optional, Type)
 
 from .. import optics
 from ..typevars import S, T, A, B, X, Y
@@ -122,10 +122,9 @@ class UnboundLens(Lens[S, T, A, B]):
         return BoundLens(state, self._optic)
 
     def add_lens(self, other):
-        # type: (Union[optics.LensLike, UnboundLens[A, B, X, Y]]) -> UnboundLens[S, T, X, Y]
+        # type: (UnboundLens[A, B, X, Y]) -> UnboundLens[S, T, X, Y]
         '''Refine the current focus of this lens by composing it with
-        another lens object. Can be a `lenses.optics.LensLike` or an
-        unbound `lenses.Lens`.
+        another lens object. The other lens must be unbound.
 
             >>> from lenses import lens
             >>> first = lens()[0]
@@ -135,15 +134,10 @@ class UnboundLens(Lens[S, T, A, B]):
             >>> get_second_then_first([[0, 1], [2, 3]])
             2
         '''
-        if isinstance(other, optics.LensLike):
-            return UnboundLens(self._optic.compose(other))
-        elif isinstance(other, UnboundLens):
-            return UnboundLens(self._optic.compose(other._optic))
-        elif isinstance(other, BoundLens):
-            raise ValueError('Lens.add_lens requires an unbound lens')
-        else:
-            raise TypeError('''Cannot add lens of type {!r}.'''
-                            .format(type(other)))
+        if not isinstance(other, UnboundLens):
+            message = 'Cannot add lens of type {!r}.'
+            raise TypeError(message.format(type(other)))
+        return self._compose_optic(other._optic)
 
     def __get__(self, instance, owner):
         # type: (Optional[S], Type) -> Lens[S, T, A, B]
@@ -236,10 +230,9 @@ class BoundLens(Lens[S, T, A, B]):
         raise ValueError('Lens already bound')
 
     def add_lens(self, other):
-        # type: (Union[optics.LensLike, UnboundLens[A, B, X, Y]]) -> BoundLens[S, T, X, Y]
+        # type: (UnboundLens[A, B, X, Y]) -> BoundLens[S, T, X, Y]
         '''Refine the current focus of this lens by composing it with
-        another lens object. Can be a `lenses.optics.LensLike` or an
-        unbound `lenses.Lens`.
+        another lens object. The other lens must be unbound.
 
             >>> from lenses import lens
             >>> first = lens()[0]
@@ -247,15 +240,10 @@ class BoundLens(Lens[S, T, A, B]):
             >>> second.add_lens(first).get()
             2
         '''
-        if isinstance(other, optics.LensLike):
-            return BoundLens(self._state, self._optic.compose(other))
-        elif isinstance(other, UnboundLens):
-            return BoundLens(self._state, self._optic.compose(other._optic))
-        elif isinstance(other, BoundLens):
-            raise ValueError('Lens.add_lens requires an unbound lens')
-        else:
-            raise TypeError('''Cannot add lens of type {!r}.'''
-                            .format(type(other)))
+        if not isinstance(other, UnboundLens):
+            message = 'Cannot add lens of type {!r}.'
+            raise TypeError(message.format(type(other)))
+        return self._compose_optic(other._optic)
 
     def _underlying_lens(self):
         # type: () -> optics.LensLike

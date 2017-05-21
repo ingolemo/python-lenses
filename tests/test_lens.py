@@ -102,14 +102,6 @@ def test_lens_construct_composed():
     assert lens().just_().iso_(int, str).construct(obj) == maybe.Just(str(obj))
 
 
-def test_lens_add_lens_trivial_LensLike():
-    assert lens([1, 2]).add_lens(optics.TrivialIso()) + [3] == [1, 2, 3]
-
-
-def test_lens_add_lens_nontrivial_LensLike():
-    assert lens([1, 2]).add_lens(optics.GetitemLens(1)).set(3) == [1, 3]
-
-
 def test_lens_add_lens_trivial_lens():
     assert lens([1, 2]).add_lens(lens()) + [3] == [1, 2, 3]
 
@@ -119,7 +111,7 @@ def test_lens_add_lens_nontrivial_lens():
 
 
 def test_lens_add_lens_bound_lens():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         lens([1, 2]).add_lens(lens(1))
 
 
@@ -137,7 +129,7 @@ def test_unbound_lens_add_lens_nontrivial_lens():
 
 
 def test_unbound_lens_add_lens_bound_lens():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         lens().add_lens(lens(1))
 
 
