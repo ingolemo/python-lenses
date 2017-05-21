@@ -4,7 +4,8 @@ without mutating them.
 A simple overview for this module is available in the file `readme.md`
 or at http://github.com/ingolemo/python-lenses . More detailed
 information for each object is available in the relevant docstrings.
-`help(lenses.Lens)` is particularly useful.
+`help(lenses.BoundLens)` and `help(lenses.UnboundLens)` are particularly
+useful.
 
 The entry point to this library is the `lens` function, which returns a
 `Lens` object:
