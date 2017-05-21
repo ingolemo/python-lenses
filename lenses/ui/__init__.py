@@ -30,7 +30,7 @@ class UnboundLens(Lens[S, T, A, B]):
             1
         '''
         def getter(state):
-            return self.bind(state).get()
+            return self._optic.to_list_of(state)[0]
         return getter
 
     def get_all(self):
@@ -47,7 +47,7 @@ class UnboundLens(Lens[S, T, A, B]):
             [1, 2]
         '''
         def getter(state):
-            return self.bind(state).get_all()
+            return self._optic.to_list_of(state)
         return getter
 
     def get_monoid(self):
@@ -61,7 +61,7 @@ class UnboundLens(Lens[S, T, A, B]):
             [1, 2, 3]
         '''
         def getter(state):
-            return self.bind(state).get_monoid()
+            return self._optic.view(state)
         return getter
 
     def set(self, newvalue):
@@ -74,7 +74,7 @@ class UnboundLens(Lens[S, T, A, B]):
             [1, 4, 3]
         '''
         def setter(state):
-            return self.bind(state).set(newvalue)
+            return self._optic.set(state, newvalue)
         return setter
 
     def modify(self, func):
@@ -90,7 +90,7 @@ class UnboundLens(Lens[S, T, A, B]):
             [1, 12, 3]
         '''
         def modifier(state):
-            return self.bind(state).modify(func)
+            return self._optic.over(state, func)
         return modifier
 
     def construct(self, focus):
