@@ -3,9 +3,9 @@ from typing import (Callable, List, Optional, Type)
 from .. import optics
 from ..typevars import S, T, A, B, X, Y
 
-from .base import Lens
+from .base import BaseUiLens
 
-class UnboundLens(Lens[S, T, A, B]):
+class UnboundLens(BaseUiLens[S, T, A, B]):
     'An unbound lens is a lens that has not been bound to any state.'
 
     __slots__ = ['_optic']
@@ -131,7 +131,7 @@ class UnboundLens(Lens[S, T, A, B]):
         return self._compose_optic(other._optic)
 
     def __get__(self, instance, owner):
-        # type: (Optional[S], Type) -> Lens[S, T, A, B]
+        # type: (Optional[S], Type) -> BaseUiLens[S, T, A, B]
         if instance is None:
             return self
         return BoundLens(instance, self._optic)
@@ -145,7 +145,7 @@ class UnboundLens(Lens[S, T, A, B]):
         return UnboundLens(self._optic.compose(optic))
 
 
-class BoundLens(Lens[S, T, A, B]):
+class BoundLens(BaseUiLens[S, T, A, B]):
     'A bound lens is a lens that has been bound to a specific state.'
 
     __slots__ = ['_state', '_optic']
