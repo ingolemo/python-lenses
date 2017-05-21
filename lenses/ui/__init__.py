@@ -155,6 +155,10 @@ class UnboundLens(Lens[S, T, A, B]):
         # type: () -> optics.LensLike
         return self._optic
 
+    def _compose_optic(self, optic):
+        # type: (optics.LensLike) -> UnboundLens[S, T, X, Y]
+        return UnboundLens(self._optic.compose(optic))
+
 
 class BoundLens(Lens[S, T, A, B]):
     'A bound lens is a lens that has been bound to a specific state.'
@@ -256,3 +260,7 @@ class BoundLens(Lens[S, T, A, B]):
     def _underlying_lens(self):
         # type: () -> optics.LensLike
         return self._optic
+
+    def _compose_optic(self, optic):
+        # type: (optics.LensLike) -> BoundLens[S, T, X, Y]
+        return BoundLens(self._state, self._optic.compose(optic))

@@ -112,7 +112,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens([1, 2, 3]).both_().set(4)
             [4, 4, 3]
         '''
-        return self.add_lens(optics.BothTraversal())
+        return self._compose_optic(optics.BothTraversal())
 
     def decode_(self, encoding='utf-8', errors='strict'):
         # type: (str, str) -> Lens[S, T, X, Y]
@@ -129,7 +129,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(b'hello').decode_().set('world')  # doctest: +SKIP
             b'world'
         '''
-        return self.add_lens(optics.DecodeIso(encoding, errors))
+        return self._compose_optic(optics.DecodeIso(encoding, errors))
 
     def each_(self, filter_func=None, filter_none=False):
         # type: (Callable[[A], bool], bool) -> Lens[S, T, X, Y]
@@ -158,7 +158,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data).each_()[1] + 1
             {'one': 2}
         '''
-        return self.add_lens(optics.EachTraversal(filter_func, filter_none))
+        return self._compose_optic(optics.EachTraversal(filter_func, filter_none))
 
     def error_(self, exception, message=None):
         # type: (Exception, Optional[str]) -> Lens[S, T, X, Y]
@@ -187,7 +187,7 @@ class Lens(Generic[S, T, A, B]):
               File "<stdin>", line 1, in ?
             ValueError: applied to True
         '''
-        return self.add_lens(optics.ErrorIso(exception, message))
+        return self._compose_optic(optics.ErrorIso(exception, message))
 
     def f_(self, getter):
         # type: (Callable[[A], X]) -> Lens[S, T, X, Y]
@@ -205,7 +205,7 @@ class Lens(Generic[S, T, A, B]):
 
         This optic cannot be used to set or modify values.
         '''
-        return self.add_lens(optics.Getter(getter))
+        return self._compose_optic(optics.Getter(getter))
 
     def filter_(self, predicate):
         # type: (Callable[[A], bool]) -> Lens[S, T, X, Y]
@@ -231,7 +231,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(['', 2, '']).each_().filter_(bool).set(None)
             ['', None, '']
         '''
-        return self.add_lens(optics.FilteringPrism(predicate))
+        return self._compose_optic(optics.FilteringPrism(predicate))
 
     def fork_(self, *lenses):
         # type: (*Union[Lens[A, B, X, Y], optics.LensLike])-> Lens[S, T, X, Y]
@@ -245,7 +245,7 @@ class Lens(Generic[S, T, A, B]):
             [[0, 1], 0, 1]
         '''
         true_lenses = [l._underlying_lens() for l in lenses]
-        return self.add_lens(optics.ForkedSetter(*true_lenses))
+        return self._compose_optic(optics.ForkedSetter(*true_lenses))
 
     def get_(self, key, default=None):
         # type: (Any, Optional[Y]) -> Lens[S, T, X, Y]
@@ -263,7 +263,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(OrderedDict({'foo': 'bar'})).get_('baz').set('qux')
             OrderedDict([('foo', 'bar'), ('baz', 'qux')])
         '''
-        return self.add_lens(optics.GetitemOrElseLens(key, default))
+        return self._compose_optic(optics.GetitemOrElseLens(key, default))
 
     def getattr_(self, name):
         # type: (str) -> Lens[S, T, X, Y]
@@ -280,7 +280,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(Pair(1, 2)).getattr_('right').set(3)
             Pair(left=1, right=3)
         '''
-        return self.add_lens(optics.GetattrLens(name))
+        return self._compose_optic(optics.GetattrLens(name))
 
     def getitem_(self, key):
         # type: (Any) -> Lens[S, T, X, Y]
@@ -301,7 +301,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens({'hello': 'world'})['hello'].set('universe')
             {'hello': 'universe'}
         '''
-        return self.add_lens(optics.GetitemLens(key))
+        return self._compose_optic(optics.GetitemLens(key))
 
     def getter_setter_(self, getter, setter):
         # type: (Callable[[A], X], Callable[[A, Y], B]) -> Lens[S, T, X, Y]
@@ -331,7 +331,7 @@ class Lens(Generic[S, T, A, B]):
             >>> average_lens.bind([1, 2, 3]) - 1
             [1, 2, 0]
         '''
-        return self.add_lens(optics.Lens(getter, setter))
+        return self._compose_optic(optics.Lens(getter, setter))
 
     def getzoomattr_(self, name):
         # type: (str) -> Lens[S, T, X, Y]
@@ -357,7 +357,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(state).right.set(4)
             Triple(left=1, mid=4, right=UnboundLens(GetZoomAttrTraversal('mid')))
         '''
-        return self.add_lens(optics.GetZoomAttrTraversal(name))
+        return self._compose_optic(optics.GetZoomAttrTraversal(name))
 
     def instance_(self, type_):
         # type: (Type) -> Lens[S, T, X, Y]
@@ -376,7 +376,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(1).instance_(float).set(2)
             1
         '''
-        return self.add_lens(optics.InstancePrism(type_))
+        return self._compose_optic(optics.InstancePrism(type_))
 
     def iso_(self, forwards, backwards):
         # type: (Callable[[A], X], Callable[[Y], B]) -> Lens[S, T, X, Y]
@@ -416,7 +416,7 @@ class Lens(Generic[S, T, A, B]):
             >>> flipped.bind('A').get()
             65
         '''
-        return self.add_lens(optics.Isomorphism(forwards, backwards))
+        return self._compose_optic(optics.Isomorphism(forwards, backwards))
 
     def item_(self, key):
         # type: (Any) -> Lens[S, T, X, Y]
@@ -438,7 +438,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data).item_(1).set(None)
             OrderedDict([(2, 20)])
         '''
-        return self.add_lens(optics.ItemLens(key))
+        return self._compose_optic(optics.ItemLens(key))
 
     def item_by_value_(self, value):
         # type: (Any) -> Lens[S, T, X, Y]
@@ -462,7 +462,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data).item_by_value_(10).set(None)
             OrderedDict([(2, 20)])
         '''
-        return self.add_lens(optics.ItemByValueLens(value))
+        return self._compose_optic(optics.ItemByValueLens(value))
 
     def items_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -479,7 +479,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data).items_()[1].modify(lambda n: n + 1)
             OrderedDict([(1, 11), (2, 21)])
         '''
-        return self.add_lens(optics.ItemsTraversal())
+        return self._compose_optic(optics.ItemsTraversal())
 
     def iter_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -504,7 +504,7 @@ class Lens(Generic[S, T, A, B]):
         If you want to be able to set values as you iterate then look
         into the EachTraversal.
         '''
-        return self.add_lens(optics.IterableFold())
+        return self._compose_optic(optics.IterableFold())
 
     def json_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -520,7 +520,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data).json_()[0]['points'][0].set(8)
             '[{"points": [8, 7]}]'
         '''
-        return self.add_lens(optics.JsonIso())
+        return self._compose_optic(optics.JsonIso())
 
     def just_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -540,7 +540,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(Nothing()).just_().set(2)
             Nothing()
         '''
-        return self.add_lens(optics.JustPrism())
+        return self._compose_optic(optics.JustPrism())
 
     def keys_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -557,7 +557,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data).keys_().modify(lambda n: n + 1)
             OrderedDict([(2, 10), (3, 20)])
         '''
-        return self.add_lens(optics.KeysTraversal())
+        return self._compose_optic(optics.KeysTraversal())
 
     def listwrap_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -579,7 +579,7 @@ class Lens(Generic[S, T, A, B]):
         Also serves as an example that lenses do not always have to
         'zoom in' on a focus; they can also 'zoom out'.
         '''
-        return self.add_lens(optics.ListWrapIso())
+        return self._compose_optic(optics.ListWrapIso())
 
     def norm_(self, setter):
         # type: (Callable[[A], X]) -> Lens[S, T, X, Y]
@@ -616,7 +616,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens([1, 2, 3])[1].norm_(int).set('5')
             [1, 5, 3]
         '''
-        return self.add_lens(optics.NormalisingIso(setter))
+        return self._compose_optic(optics.NormalisingIso(setter))
 
     def prism_(self, unpack, pack):
         # type: (Callable[[A], Just[X]], Callable[[Y], B]) -> Lens[S, T, X, Y]
@@ -651,7 +651,7 @@ class Lens(Generic[S, T, A, B]):
 
         All prisms are also traversals that have exactly zero or one foci.
         '''
-        return self.add_lens(optics.Prism(unpack, pack))
+        return self._compose_optic(optics.Prism(unpack, pack))
 
     def tuple_(self, *lenses):
         # type: (*Union[optics.LensLike, Lens[A, B, X, Y]]) -> Lens[S, T, X, Y]
@@ -681,7 +681,7 @@ class Lens(Generic[S, T, A, B]):
             ([11, 12, 13], 4, [15, 16])
         '''
         true_lenses = [l._underlying_lens() for l in lenses]
-        return self.add_lens(optics.TupleLens(*true_lenses))
+        return self._compose_optic(optics.TupleLens(*true_lenses))
 
     def values_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -698,7 +698,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data).values_().modify(lambda n: n + 1)
             OrderedDict([(1, 11), (2, 21)])
         '''
-        return self.add_lens(optics.ValuesTraversal())
+        return self._compose_optic(optics.ValuesTraversal())
 
     def zoom_(self):
         # type: () -> Lens[S, T, X, Y]
@@ -713,7 +713,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data)[0].zoom_().set(3)
             [[1, 3], 4]
         '''
-        return self.add_lens(optics.ZoomTraversal())
+        return self._compose_optic(optics.ZoomTraversal())
 
     def zoomattr_(self, name):
         # type: (str) -> Lens[S, T, X, Y]
@@ -737,7 +737,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(data)[0].zoomattr_('first').set(5)
             (ClassWithLens([5, 2, 3]), 4)
         '''
-        return self.add_lens(optics.ZoomAttrTraversal(name))
+        return self._compose_optic(optics.ZoomAttrTraversal(name))
 
     def __getattr__(self, name):
         # type: (str) -> Any
