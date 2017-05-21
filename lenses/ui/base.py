@@ -324,11 +324,11 @@ class Lens(Generic[S, T, A, B]):
             >>> average_lens = lens().getter_setter_(getter, setter)
             >>> average_lens
             UnboundLens(Lens(<function getter...>, <function setter...>))
-            >>> average_lens.bind([1, 2, 4, 5]).get()
+            >>> average_lens.get()([1, 2, 4, 5])
             3
-            >>> average_lens.bind([1, 2, 3]).set(4)
+            >>> average_lens.set(4)([1, 2, 3])
             [1, 2, 9]
-            >>> average_lens.bind([1, 2, 3]) - 1
+            >>> (average_lens - 1)([1, 2, 3])
             [1, 2, 0]
         '''
         return self._compose_optic(optics.Lens(getter, setter))
@@ -413,7 +413,7 @@ class Lens(Generic[S, T, A, B]):
             >>> flipped = lens().iso_(chr, ord).flip()
             >>> flipped
             UnboundLens(Isomorphism(<... ord>, <... chr>))
-            >>> flipped.bind('A').get()
+            >>> flipped.get()('A')
             65
         '''
         return self._compose_optic(optics.Isomorphism(forwards, backwards))
@@ -573,7 +573,7 @@ class Lens(Generic[S, T, A, B]):
             >>> lens(0).listwrap_().set([1])
             1
             >>> l = lens().tuple_(lens()[0], lens()[1].listwrap_())
-            >>> l.bind([[1, 3], 4]).each_().each_().get_all()
+            >>> l.each_().each_().get_all()([[1, 3], 4])
             [1, 3, 4]
 
         Also serves as an example that lenses do not always have to
@@ -665,9 +665,9 @@ class Lens(Generic[S, T, A, B]):
             >>> tl = lens().tuple_(lens()[0], lens()[2])
             >>> tl
             UnboundLens(TupleLens(GetitemLens(0), GetitemLens(2)))
-            >>> tl.bind([1, 2, 3, 4]).get()
+            >>> tl.get()([1, 2, 3, 4])
             (1, 3)
-            >>> tl.bind([1, 2, 3, 4]).set((5, 6))
+            >>> tl.set((5, 6))([1, 2, 3, 4])
             [5, 2, 6, 4]
 
         This lens is particularly useful when immediately followed by
@@ -675,9 +675,9 @@ class Lens(Generic[S, T, A, B]):
         from disparate locations within the state.
 
             >>> state = ([1, 2, 3], 4, [5, 6])
-            >>> tl.bind(state).each_().each_().get_all()
+            >>> tl.each_().each_().get_all()(state)
             [1, 2, 3, 5, 6]
-            >>> tl.bind(state).each_().each_() + 10
+            >>> (tl.each_().each_() + 10)(state)
             ([11, 12, 13], 4, [15, 16])
         '''
         true_lenses = [l._underlying_lens() for l in lenses]

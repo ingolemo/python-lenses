@@ -106,20 +106,11 @@ class UnboundLens(Lens[S, T, A, B]):
 
             >>> from lenses import lens
             >>> json_encoder = lens().decode_().json_().flip()
-            >>> json_encoder.bind(['hello', 'world']).get()  # doctest: +SKIP
+            >>> json_encode = json_encoder.get()
+            >>> json_encode(['hello', 'world'])  # doctest: +SKIP
             b'["hello", "world"]'
         '''
         return UnboundLens(self._optic.from_())
-
-    def bind(self, state):
-        # type: (S) -> BoundLens[S, T, A, B]
-        '''Bind this lens to a specific `state`.
-
-            >>> from lenses import lens
-            >>> lens()[1].bind([1, 2, 3]).get()
-            2
-        '''
-        return BoundLens(state, self._optic)
 
     def add_lens(self, other):
         # type: (UnboundLens[A, B, X, Y]) -> UnboundLens[S, T, X, Y]
@@ -143,7 +134,7 @@ class UnboundLens(Lens[S, T, A, B]):
         # type: (Optional[S], Type) -> Lens[S, T, A, B]
         if instance is None:
             return self
-        return self.bind(instance)
+        return BoundLens(instance, self._optic)
 
     def _underlying_lens(self):
         # type: () -> optics.LensLike
@@ -225,9 +216,6 @@ class BoundLens(Lens[S, T, A, B]):
             [1, 12, 3]
         '''
         return self._optic.over(self._state, func)
-
-    def bind(self, state):
-        raise ValueError('Lens already bound')
 
     def add_lens(self, other):
         # type: (UnboundLens[A, B, X, Y]) -> BoundLens[S, T, X, Y]

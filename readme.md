@@ -257,10 +257,10 @@ one as its state:
 	>>> index_zero = lens()[0]
 	>>> index_one = lens()[1]
 	>>> zero_then_one = index_zero.add_lens(index_one)
-	>>> zero_then_one.bind([[2, 3], [4, 5]]).get()
+	>>> zero_then_one.get()([[2, 3], [4, 5]])
 	3
 	>>> one_then_zero = index_one.add_lens(index_zero)
-	>>> one_then_zero.bind([[2, 3], [4, 5]]).get()
+	>>> one_then_zero.get()([[2, 3], [4, 5]])
 	4
 
 When you call `a.add_lens(b)`, `b` must be an unbound lens and the

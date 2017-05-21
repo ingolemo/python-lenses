@@ -143,27 +143,14 @@ def test_lens_add_lens_bad_lens():
         lens([1, 2]).add_lens(1)
 
 
-def test_lens_bind():
-    assert lens().bind([1, 2, 3]).get() == [1, 2, 3]
-
-
-def test_lens_no_bind():
-    lens().get()  # assert doesn't raise
-
-
-def test_lens_no_double_bind():
-    with pytest.raises(ValueError):
-        lens(1).bind(2)
-
-
 def test_lens_flip():
     l = lens().iso_(str, int).flip()
-    assert l.bind('1').get() == 1
+    assert l.get()('1') == 1
 
 
 def test_lens_flip_composed():
     l = lens().decode_().json_().flip()
-    assert l.bind([1, 2, 3]).get() == b'[1, 2, 3]'
+    assert l.get()([1, 2, 3]) == b'[1, 2, 3]'
 
 
 def test_lens_flip_composed_not_isomorphism():
