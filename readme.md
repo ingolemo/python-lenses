@@ -26,11 +26,11 @@ The lenses library makes liberal use of docstrings, which you can access
 as normal with the `pydoc` shell command, the `help` function in the
 repl, or by reading the source yourself.
 
-Most users will only need the docs from `lenses.Lens`. If you want to
-add hooks to allow parts of the library to work with custom objects then
-you should check out the `lenses.hooks` module. Most of the fancy lens
-code is in the `lenses.optics` module for those who are curious how
-everything works.
+Most users will only need the docs from `lenses.BoundLens` and
+`lenses.UnboundLens`. If you want to add hooks to allow parts of
+the library to work with custom objects then you should check out
+the `lenses.hooks` module. Most of the fancy lens code is in the
+`lenses.optics` module for those who are curious how everything works.
 
 An example is given in the `examples` folder.
 
@@ -43,11 +43,11 @@ about; a `lens` function:
 	>>> from lenses import lens
 
 If you have a large data structure that you want to manipulate, you can
-pass it to this function and you will receive a bound `Lens` object,
-which is a lens that has been bound to that specific object. The lens
-can then be walked to focus it down on a particular part of the
-data-structure. You walk the lens by getting attributes and items from
-it (anything that would call `__getattr__` or `__getitem__`):
+pass it to this function and you will receive a `BoundLens` object,
+which is a lens that has been bound to that specific object. The
+lens can then be walked to focus it down on a particular part of the
+data-structure. You walk the lens by getting attributes and items from it
+(anything that would call `__getattr__` or `__getitem__`):
 
 	>>> data = [1, 2, 3]
 	>>> my_lens = lens(data)[1]
@@ -191,8 +191,8 @@ copies are made. This makes lenses more memory efficient than using
 ### Unbound Lenses
 
 If you pass no arguments to the `lens` function then you will get an
-unbound `Lens` object. An unbound lens can be manipulated in all the
-ways that a bound lens can.
+`UnboundLens` object. An unbound lens can be manipulated in all the ways
+that a bound lens can.
 
 	>>> unbound_lens = lens()
 	>>> index_one = unbound_lens[1]
@@ -213,8 +213,8 @@ lens above on a dictionary, but it works just fine on a list too:
 	>>> index_one_getter(['eine', 'zwei', 'drei'])
 	'zwei'
 
-You can use unbound Lens objects as descriptors. That is, if you set a
-lens as a class attribute and you access that attribute from an instance,
+You can use unbound lenses as descriptors. That is, if you set a lens
+as a class attribute and you access that attribute from an instance,
 you will get a lens that has been bound to that instance. This allows
 you to conveniently store and access lenses that are likely to be used
 with particular classes as attributes of those classes. Attribute access
@@ -285,10 +285,11 @@ value:
 	{'three': 3}
 
 There are a number of such more complicated lenses defined on `Lens`. To
-help avoid collision with accessing attributes on the state, their names
-all end with a single underscore. See `help(lenses.Lens)` in the repl
-for more. If you need to access an attribute on the state that has been
-shadowed by Lens' methods then you can use `Lens.getattr_(attribute)`.
+help avoid collision with accessing attributes on the state, their
+names all end with a single underscore. See `help(lenses.BoundLens)`
+and `help(lenses.UnboundLens)` in the repl for more. If you need to
+access an attribute on the state that has been shadowed by one of lens'
+methods then you can use `my_lens.getattr_(attribute)`.
 
 For a good example of a more complex lens, check out the `json_` method
 which gives you a lens that can focus a string as though it were a parsed
@@ -336,7 +337,7 @@ of `getter_setter_`.
 All the lenses so far have focused a single object inside a state, but
 it is possible for a lens to have more than one focus. A lens with
 multiple foci is usually referred to as a traversal. A simple traversal
-can be made with the `_both` method. `Lens.both_` focuses the two
+can be made with the `_both` method. `my_lens.both_` focuses the two
 objects at indices `0` and `1` within the state. It is intended to be
 used with tuples of length 2, but will work on any indexable object.
 

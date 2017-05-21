@@ -702,7 +702,7 @@ class Lens(Generic[S, T, A, B]):
 
     def zoom_(self):
         # type: () -> Lens[S, T, X, Y]
-        '''Follows its state as if it were a bound `Lens` object.
+        '''Follows its state as if it were a `BoundLens` object.
 
             >>> from lenses import lens
             >>> data = [lens([1, 2])[1], 4]
@@ -718,7 +718,7 @@ class Lens(Generic[S, T, A, B]):
     def zoomattr_(self, name):
         # type: (str) -> Lens[S, T, X, Y]
         '''A lens that looks up an attribute on its target and follows
-        it as if were a bound `Lens` object. Ignores the state, if any,
+        it as if were a `BoundLens` object. Ignores the state, if any,
         of the lens that is being looked up.
 
             >>> from lenses import lens

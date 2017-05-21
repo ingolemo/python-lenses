@@ -240,3 +240,5 @@ class BoundLens(Lens[S, T, A, B]):
     def _compose_optic(self, optic):
         # type: (optics.LensLike) -> BoundLens[S, T, X, Y]
         return BoundLens(self._state, self._optic.compose(optic))
+
+__all__ = ['UnboundLens', 'BoundLens']

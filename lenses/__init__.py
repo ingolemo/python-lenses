@@ -16,17 +16,19 @@ The entry point to this library is the `lens` function, which returns a
     BoundLens([], TrivialIso())
 '''
 
-from typing import Optional
+from typing import Optional, Union
 
 from .typevars import S, T
 from . import optics
-from .ui import Lens, UnboundLens, BoundLens
+from .ui import UnboundLens, BoundLens
 
 
 def lens(obj=None):
-    # type: (Optional[S]) -> Lens[S, T, S, T]
+    # type: (Optional[S]) -> Union[UnboundLens[S, T, S, T], BoundLens[S, T, S, T]]
     '''Returns a simple Lens bound to `obj`. If `obj is None` then the
     Lens object is unbound.'''
     if obj is None:
         return UnboundLens(optics.TrivialIso())
     return BoundLens(obj, optics.TrivialIso())
+
+__all__ = ['lens', 'optics', 'UnboundLens', 'BoundLens']
