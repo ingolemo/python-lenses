@@ -112,7 +112,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         '''
         return UnboundLens(self._optic.from_())
 
-    def add_lens(self, other):
+    def __and__(self, other):
         # type: (UnboundLens[A, B, X, Y]) -> UnboundLens[S, T, X, Y]
         '''Refine the current focus of this lens by composing it with
         another lens object. The other lens must be unbound.
@@ -120,13 +120,13 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> from lenses import lens
             >>> first = lens()[0]
             >>> second = lens()[1]
-            >>> second_first = second.add_lens(first)
+            >>> second_first = second & first
             >>> get_second_then_first = second_first.get()
             >>> get_second_then_first([[0, 1], [2, 3]])
             2
         '''
         if not isinstance(other, UnboundLens):
-            message = 'Cannot add lens of type {!r}.'
+            message = 'Cannot compose lens of type {!r}.'
             raise TypeError(message.format(type(other)))
         return self._compose_optic(other._optic)
 
@@ -139,6 +139,8 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
     def _compose_optic(self, optic):
         # type: (optics.LensLike) -> UnboundLens[S, T, X, Y]
         return UnboundLens(self._optic.compose(optic))
+
+    add_lens = __and__
 
 
 class BoundLens(BaseUiLens[S, T, A, B]):
@@ -213,7 +215,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''
         return self._optic.over(self._state, func)
 
-    def add_lens(self, other):
+    def __and__(self, other):
         # type: (UnboundLens[A, B, X, Y]) -> BoundLens[S, T, X, Y]
         '''Refine the current focus of this lens by composing it with
         another lens object. The other lens must be unbound.
@@ -221,16 +223,18 @@ class BoundLens(BaseUiLens[S, T, A, B]):
             >>> from lenses import lens
             >>> first = lens()[0]
             >>> second = lens([[0, 1], [2, 3]])[1]
-            >>> second.add_lens(first).get()
+            >>> (second & first).get()
             2
         '''
         if not isinstance(other, UnboundLens):
-            message = 'Cannot add lens of type {!r}.'
+            message = 'Cannot compose lens of type {!r}.'
             raise TypeError(message.format(type(other)))
         return self._compose_optic(other._optic)
 
     def _compose_optic(self, optic):
         # type: (optics.LensLike) -> BoundLens[S, T, X, Y]
         return BoundLens(self._state, self._optic.compose(optic))
+
+    add_lens = __and__
 
 __all__ = ['UnboundLens', 'BoundLens']

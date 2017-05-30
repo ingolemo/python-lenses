@@ -103,44 +103,48 @@ def test_lens_construct_composed():
 
 
 def test_lens_add_lens_trivial_lens():
-    assert lens([1, 2]).add_lens(lens()) + [3] == [1, 2, 3]
+    my_lens = lens([1, 2]) & lens()
+    assert my_lens + [3] == [1, 2, 3]
 
 
 def test_lens_add_lens_nontrivial_lens():
-    assert lens([1, 2]).add_lens(lens()[1]).set(3) == [1, 3]
+    my_lens = lens([1, 2]) & lens()[1]
+    assert my_lens.set(3) == [1, 3]
 
 
 def test_lens_add_lens_bound_lens():
     with pytest.raises(TypeError):
-        lens([1, 2]).add_lens(lens(1))
+        lens([1, 2]) & lens(1)
 
 
 def test_lens_add_lens_invalid():
     with pytest.raises(TypeError):
-        lens([1, 2]).add_lens(1)
+        lens([1, 2]) & 1
 
 
 def test_unbound_lens_add_lens_trivial_lens():
-    assert (lens().add_lens(lens()) + [3])([1, 2]) == [1, 2, 3]
+    my_lens = lens() & lens()
+    assert (my_lens + [3])([1, 2]) == [1, 2, 3]
 
 
 def test_unbound_lens_add_lens_nontrivial_lens():
-    assert lens().add_lens(lens()[1]).set(3)([1, 2]) == [1, 3]
+    my_lens = lens() & lens()[1]
+    assert my_lens.set(3)([1, 2]) == [1, 3]
 
 
 def test_unbound_lens_add_lens_bound_lens():
     with pytest.raises(TypeError):
-        lens().add_lens(lens(1))
+        lens() & lens(1)
 
 
 def test_unbound_lens_add_lens_invalid():
     with pytest.raises(TypeError):
-        lens().add_lens(1)
+        lens() & 1
 
 
 def test_lens_add_lens_bad_lens():
     with pytest.raises(TypeError):
-        lens([1, 2]).add_lens(1)
+        lens([1, 2]) & 1
 
 
 def test_lens_flip():

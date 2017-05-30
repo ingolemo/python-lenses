@@ -9,16 +9,17 @@ from ..typevars import S, T, A, B, X, Y
 
 # we skip all the augmented artithmetic methods because the point of the
 # lenses library is not to mutate anything
+# skip __and__ because it is used for composition
 transparent_dunders = ('''
     __lt__ __le__ __eq__ __ne__ __gt__ __ge__
 
     __add__ __sub__ __mul__ __matmul__ __truediv__
     __floordiv__ __div__ __mod__ __divmod__ __pow__
-    __lshift__ __rshift__ __and__ __xor__ __or__
+    __lshift__ __rshift__ __xor__ __or__
 
     __radd__ __rsub__ __rmul__ __rmatmul__ __rtruediv__
     __rfloordiv__ __rdiv__ __rmod__ __rdivmod__ __rpow__
-    __rlshift__ __rrshift__ __rand__ __rxor__ __ror__
+    __rlshift__ __rrshift__ __rxor__ __ror__
 
     __neg__ __pos__ __invert__
 ''').split()
@@ -96,6 +97,20 @@ class BaseUiLens(Generic[S, T, A, B]):
             getattr(a, method_name)(*args, **kwargs)
             return cast(B, a)
 
+        return self.modify(func)
+
+    def bitwise_and(self, other):
+        # type: (Any) -> T
+        '''Uses the bitwise and operator on the focus. A convenience
+        method since lenses use __and__ for doing composition.
+
+            >>> from lenses import lens
+            >>> lens([1, 2, 3, 4]).each_().bitwise_and(5)
+            [1, 0, 1, 4]
+        '''
+        def func(a):
+            # type: (A) -> B
+            return a & other
         return self.modify(func)
 
     def both_(self):
