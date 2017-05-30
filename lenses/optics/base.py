@@ -216,17 +216,11 @@ class LensLike(object):
         Requires kind Isomorphism. Raises TypeError for non-isomorphic
         lenses.
         '''
-        if not self._is_kind(Isomorphism):
-            raise TypeError('Must be an instance of Isomorphism to .from_()')
-        message = 'Optic has no implementation of .from_()'
-        raise NotImplementedError(message)
+        raise TypeError('Must be an instance of Isomorphism to .from_()')
 
     def re(self):
         # type: () -> LensLike
-        if not self._is_kind(Review):
-            raise TypeError('Must be an instance of Review to .re()')
-        message = 'Optic has no implementation of .re()'
-        raise NotImplementedError(message)
+        raise TypeError('Must be an instance of Review to .re()')
 
     def kind(self):
         '''Returns a class representing the 'kind' of optic.'''
