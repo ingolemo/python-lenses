@@ -1,6 +1,7 @@
 from typing import (Any, Callable, Generic, Optional, Type, cast)
 
 import copy
+import operator
 
 from .. import optics
 from ..maybe import Just
@@ -63,11 +64,8 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens(['alpha', 'beta', 'gamma'])[2].call_upper()
             ['alpha', 'beta', 'GAMMA']
         '''
-        def func(a):
-            # type: (A) -> B
-            return cast(B, getattr(a, method_name)(*args, **kwargs))
-
-        return self.modify(func)
+        caller = operator.methodcaller(method_name, *args, **kwargs)
+        return self.modify(caller)
 
     def call_mut(self, method_name, *args, **kwargs):
         # type: (str, *Any, **Any) -> T
