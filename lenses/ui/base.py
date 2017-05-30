@@ -549,13 +549,14 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens().keys_()
-            UnboundLens(KeysTraversal())
+            UnboundLens(ItemsTraversal() & GetitemLens(0))
             >>> lens(data).keys_().get_all()
             [1, 2]
             >>> lens(data).keys_().modify(lambda n: n + 1)
             OrderedDict([(2, 10), (3, 20)])
         '''
-        return self._compose_optic(optics.KeysTraversal())
+        return self._compose_optic(
+            optics.ItemsTraversal() & optics.GetitemLens(0))
 
     def listwrap_(self):
         # type: () -> BaseUiLens[S, T, X, Y]
@@ -690,13 +691,14 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens().values_()
-            UnboundLens(ValuesTraversal())
+            UnboundLens(ItemsTraversal() & GetitemLens(1))
             >>> lens(data).values_().get_all()
             [10, 20]
             >>> lens(data).values_().modify(lambda n: n + 1)
             OrderedDict([(1, 11), (2, 21)])
         '''
-        return self._compose_optic(optics.ValuesTraversal())
+        return self._compose_optic(
+            optics.ItemsTraversal() & optics.GetitemLens(1))
 
     def zoom_(self):
         # type: () -> BaseUiLens[S, T, X, Y]
