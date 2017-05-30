@@ -35,8 +35,6 @@ class Just(Generic[A]):
         # type: (object) -> bool
         if not isinstance(other, Just):
             return False
-        if other.is_nothing():
-            return False
 
         return bool(self.item == other.item)
 
