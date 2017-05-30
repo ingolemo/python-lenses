@@ -8,6 +8,42 @@ from ..maybe import Just, Nothing
 from ..typevars import S, T, A, B
 
 
+def multiap(func, *args):
+    '''Applies `func` to the data inside the `args` functors
+    incrementally. `func` must be a curried function that takes
+    `len(args)` arguments.
+
+        >>> func = lambda a: lambda b: a + b
+        >>> multiap(func, [1, 10], [100])
+        [101, 110]
+    '''
+    functor = typeclass.fmap(args[0], func)
+    for arg in args[1:]:
+        functor = typeclass.apply(arg, functor)
+    return functor
+
+
+def collect_args(n):
+    '''Returns a function that can be called `n` times with a single
+    argument before returning all the args that have been passed to it
+    in a tuple. Useful as a substitute for functions that can't easily be
+    curried.
+
+        >>> collect_args(3)(1)(2)(3)
+        (1, 2, 3)
+    '''
+    args = []
+
+    def arg_collector(arg):
+        args.append(arg)
+        if len(args) == n:
+            return tuple(args)
+        else:
+            return arg_collector
+
+    return arg_collector
+
+
 class LensLike(object):
     '''A LensLike. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function (`LensLike.func`) that

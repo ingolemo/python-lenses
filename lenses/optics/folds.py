@@ -1,6 +1,5 @@
 from ..const import Const
-from .traversals import collect_args, multiap
-from .base import Fold
+from .base import Fold, collect_args, multiap
 
 class IterableFold(Fold):
     '''A fold that can get values from any iterable object in python by
