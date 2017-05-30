@@ -211,10 +211,10 @@ class LensLike(object):
     def from_(self):
         # type: () -> LensLike
         '''Flips an isomorphism so that it works in the opposite
-        direction. Only works if the lens is actually an isomorphism.
+        direction. Only works if the optic is actually an isomorphism.
 
         Requires kind Isomorphism. Raises TypeError for non-isomorphic
-        lenses.
+        optics.
         '''
         raise TypeError('Must be an instance of Isomorphism to .from_()')
 
