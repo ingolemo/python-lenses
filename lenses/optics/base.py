@@ -326,10 +326,10 @@ class Prism(Traversal, Review):
         ...         return Nothing()
         >>> Prism(unpack, pack)
         Prism(<function unpack ...>, <function pack ...>)
-        >>> Prism(unpack, pack).to_list_of('42')
-        [42]
-        >>> Prism(unpack, pack).to_list_of('fourty two')
-        []
+        >>> Prism(unpack, pack).preview('42')
+        Just(42)
+        >>> Prism(unpack, pack).preview('fourty two')
+        Nothing()
 
     All prisms are also traversals that have exactly zero or one foci.
     '''
