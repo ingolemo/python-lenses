@@ -454,6 +454,25 @@ class Prism(Traversal, Review):
             return f.pure(state)
         return typeclass.fmap(f(result.unwrap()), self.pack)
 
+    def has(self, state):
+        '''Returns `True` when the state would be successfully focused
+        by this prism, otherwise `False`.
+
+            >>> from lenses.maybe import Nothing, Just
+            >>> def pack(focus):
+            ...     return focus
+            >>> def unpack(state):
+            ...     if state > 0:
+            ...         return Just(state)
+            ...     return Nothing()
+            >>> positive = Prism(unpack, pack)
+            >>> positive.has(-1)
+            False
+            >>> positive.has(1)
+            True
+        '''
+        return not self.unpack(state).is_nothing()
+
     def __repr__(self):
         return 'Prism({!r}, {!r})'.format(self.unpack,
                                           self.pack)
