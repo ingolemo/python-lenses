@@ -54,6 +54,11 @@ def test_Just_not_equals_Nothing():
     assert Just(object()) != Nothing()
 
 
+def test_Just_not_equals_object():
+    obj = object
+    assert Just(obj) != obj
+
+
 def test_Just_map():
     assert Just(1).map(str) == Just(str(1))
 
