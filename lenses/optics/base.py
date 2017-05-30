@@ -247,7 +247,38 @@ class LensLike(object):
 
 
 class Fold(LensLike):
-    pass
+    '''An optic that wraps a folder function. A folder function is a
+    function that takes a single argument - the state - and returns
+    an iterable containing all the foci that can be found in that
+    state. Generator functions work particularly well here.
+
+        >>> def iterate_2d_list(rows):
+        ...     for row in rows:
+        ...         for cell in row:
+        ...             yield cell
+        >>> nested_fold = Fold(iterate_2d_list)
+        >>> nested_fold
+        Fold(<function iterate_2d_list at ...>)
+        >>> state = [[1], [2, 3], [4, 5, 6]]
+        >>> nested_fold.to_list_of(state)
+        [1, 2, 3, 4, 5, 6]
+
+    Folds are incapable of setting anything.
+    '''
+
+    def __init__(self, folder):
+        self.folder = folder
+
+    def func(self, f, state):
+        foci = list(self.folder(state))
+        if foci == []:
+            return f.pure(state)
+        collector = collect_args(len(foci))
+        applied = multiap(collector, *map(f, foci))
+        return applied
+
+    def __repr__(self):
+        return 'Fold({!r})'.format(self.folder)
 
 
 class Setter(LensLike):
@@ -272,12 +303,59 @@ class Getter(Fold):
     def func(self, f, state):
         return Const(typeclass.fmap(f(state).unwrap(), self.getter))
 
+    def folder(self, state):
+        yield self.getter(state)
+
     def __repr__(self):
         return 'Getter({!r})'.format(self.getter)
 
 
 class Traversal(Fold, Setter):
-    pass
+    '''An optic that wraps folder and builder functions. The folder
+    function is a function that takes a single argument - the state -
+    and returns an iterable containing all the foci that exist in that
+    state. Generators are a good option for writing folder functions.
+
+    A builder function takes the old state and an list of values and
+    constructs a new state with the old state's values swapped out. The
+    number of values passed to builder for any given state should always
+    be the same as the number of values that the folder function would
+    have returned for that same state.
+
+        >>> def folder(state):
+        ...     'Yields the first and last elements of a list'
+        ...     yield state[0]
+        ...     yield state[-1]
+        >>> def builder(state, values):
+        ...     'Sets the first and last elements of a list'
+        ...     result = list(state)
+        ...     result[0] = values[0]
+        ...     result[-1] = values[1]
+        ...     return result
+        >>> both_ends = Traversal(folder, builder)
+        >>> both_ends
+        Traversal(<function folder at ...>, <function builder at ...>)
+        >>> both_ends.to_list_of([1, 2, 3, 4])
+        [1, 4]
+        >>> both_ends.set([1, 2, 3, 4], 5)
+        [5, 2, 3, 5]
+    '''
+
+    def __init__(self, folder, builder):
+        self.folder = folder
+        self.builder = builder
+
+    def func(self, f, state):
+        foci = list(self.folder(state))
+        if foci == []:
+            return f.pure(state)
+        collector = collect_args(len(foci))
+        applied = multiap(collector, *map(f, foci))
+        apbuilder = lambda values: self.builder(state, values)
+        return typeclass.fmap(applied, apbuilder)
+
+    def __repr__(self):
+        return 'Traversal({!r}, {!r})'.format(self.folder, self.builder)
 
 
 class Lens(Getter, Traversal):
@@ -309,6 +387,9 @@ class Lens(Getter, Traversal):
         # type: (Callable[[S], A], Callable[[S, B], T]) -> None
         self.getter = getter
         self.setter = setter
+
+    def builder(self, state, values):
+        return self.setter(state, values[0])
 
     def func(self, f, state):
         old_value = self.getter(state)
@@ -373,6 +454,14 @@ class Prism(Traversal, Review):
     def __init__(self, unpack, pack):
         self.unpack = unpack
         self.pack = pack
+
+    def folder(self, state):
+        result = self.unpack(state)
+        if not result.is_nothing():
+            yield result.unwrap()
+
+    def builder(self, state, values):
+        return self.pack(values[0])
 
     def func(self, f, state):
         result = self.unpack(state)

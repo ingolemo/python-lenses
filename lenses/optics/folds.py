@@ -22,15 +22,11 @@ class IterableFold(Fold):
     If you want to be able to set values as you iterate then look into
     the EachTraversal.
     '''
+    def __init__(self):
+        pass
 
-    def func(self, f, state):
-        items = list(state)
-        if items == []:
-            return f.pure(state)
-
-        collector = collect_args(len(items))
-        applied = multiap(collector, *map(f, items))
-        return applied
+    def folder(self, state):
+        return iter(state)
 
     def __repr__(self):
         return 'IterableFold()'

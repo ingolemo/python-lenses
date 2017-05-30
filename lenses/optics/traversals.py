@@ -14,16 +14,17 @@ class BothTraversal(Traversal):
         >>> BothTraversal().set([1, 2, 3], 4)
         [4, 4, 3]
     '''
+    def __init__(self):
+        pass
 
-    def func(self, f, state):
-        def multisetter(items):
-            s = hooks.setitem_immutable(state, 0, items[0])
-            s = hooks.setitem_immutable(s, 1, items[1])
-            return s
+    def folder(self, state):
+        yield state[0]
+        yield state[1]
 
-        f0 = f(state[0])
-        f1 = f(state[1])
-        return typeclass.fmap(multiap(collect_args(2), f0, f1), multisetter)
+    def builder(self, state, values):
+        state = hooks.setitem_immutable(state, 0, values[0])
+        state = hooks.setitem_immutable(state, 1, values[1])
+        return state
 
     def __repr__(self):
         return 'BothTraversal()'
@@ -52,18 +53,14 @@ class EachTraversal(Traversal):
         [('one', 1)]
     '''
 
-    def func(self, f, state):
-        items = list(hooks.to_iter(state))
+    def __init__(self):
+        pass
 
-        def build_new_state_from_iter(a):
-            return hooks.from_iter(state, a)
+    def folder(self, state):
+        return hooks.to_iter(state)
 
-        if items == []:
-            return f.pure(build_new_state_from_iter(items))
-
-        collector = collect_args(len(items))
-        applied = multiap(collector, *map(f, items))
-        return typeclass.fmap(applied, build_new_state_from_iter)
+    def builder(self, state, values):
+        return hooks.from_iter(state, values)
 
     def __repr__(self):
         return 'EachTraversal()'
@@ -110,19 +107,17 @@ class ItemsTraversal(Traversal):
         OrderedDict([(1, 11), (2, 21)])
     '''
 
-    def func(self, f, state):
-        items = list(state.items())
-        if items == []:
-            return f.pure(state)
+    def __init__(self):
+        pass
 
-        def dict_builder(args):
-            data = state.copy()
-            data.clear()
-            data.update(a for a in args if a is not None)
-            return data
+    def folder(self, state):
+        return state.items()
 
-        collector = collect_args(len(items))
-        return typeclass.fmap(multiap(collector, *map(f, items)), dict_builder)
+    def builder(self, state, values):
+        data = state.copy()
+        data.clear()
+        data.update(v for v in values if v is not None)
+        return data
 
     def __repr__(self):
         return 'ItemsTraversal()'
@@ -158,6 +153,8 @@ class ZoomTraversal(Traversal):
         >>> ZoomTraversal().set(state, 3)
         [1, 3]
     '''
+    def __init__(self):
+        pass
 
     def func(self, f, state):
         return state._underlying_lens().func(f, state._state)
