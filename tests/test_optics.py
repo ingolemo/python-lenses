@@ -168,36 +168,6 @@ def test_EachTraversal_set_empty():
     assert b.EachTraversal().set([], 4) == []
 
 
-def test_EachTraversal_to_list_of_with_starting_None():
-    assert b.EachTraversal(filter_none=True).to_list_of([None, None]) == []
-
-
-def test_EachTraversal_set_with_starting_None():
-    assert b.EachTraversal(filter_none=True).set([None, None], 4) == []
-
-
-def test_EachTraversal_set_None():
-    assert b.EachTraversal(filter_none=True).set([1, 2, 3], None) == []
-
-
-def test_EachTraversal_to_list_of_with_starting_filtered():
-    def f(a):
-        return a != 2
-    assert b.EachTraversal(f).to_list_of([1, 2, 3]) == [1, 3]
-
-
-def test_EachTraversal_set_with_starting_filtered():
-    def f(a):
-        return a != 2
-    assert b.EachTraversal(f).set([1, 2, 3], 4) == [4, 4]
-
-
-def test_EachTraversal_set_filtered():
-    def f(a):
-        return a != 4
-    assert b.EachTraversal(f).set([1, 2, 3], 4) == []
-
-
 def test_ErrorLens_view():
     class CustomException(Exception): pass
     with pytest.raises(CustomException):

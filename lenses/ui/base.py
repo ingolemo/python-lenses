@@ -131,8 +131,8 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.DecodeIso(encoding, errors))
 
-    def each_(self, filter_func=None, filter_none=False):
-        # type: (Callable[[A], bool], bool) -> BaseUiLens[S, T, X, Y]
+    def each_(self):
+        # type: () -> BaseUiLens[S, T, X, Y]
         '''A traversal that iterates over its state, focusing everything
         it iterates over. It uses `lenses.hooks.fromiter` to reform
         the state afterwards so it should work with any iterable that
@@ -146,8 +146,6 @@ class BaseUiLens(Generic[S, T, A, B]):
             [1, 2, 3]
             >>> lens(data).each_() + 1
             [2, 3, 4]
-            >>> lens(data).each_(filter_none=True).set(None)
-            []
 
         For technical reasons, this lens iterates over dictionaries by
         their items and not just their keys.
@@ -158,7 +156,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens(data).each_()[1] + 1
             {'one': 2}
         '''
-        return self._compose_optic(optics.EachTraversal(filter_func, filter_none))
+        return self._compose_optic(optics.EachTraversal())
 
     def error_(self, exception, message=None):
         # type: (Exception, Optional[str]) -> BaseUiLens[S, T, X, Y]

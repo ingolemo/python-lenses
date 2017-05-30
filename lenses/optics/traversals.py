@@ -79,8 +79,6 @@ class EachTraversal(Traversal):
         [1, 2, 3]
         >>> EachTraversal().over(state, lambda n: n + 1)
         [2, 3, 4]
-        >>> EachTraversal(filter_none=True).set(state, None)
-        []
 
     For technical reasons, this lens iterates over dictionaries by their
     items and not just their keys.
@@ -90,19 +88,11 @@ class EachTraversal(Traversal):
         [('one', 1)]
     '''
 
-    def __init__(self, filter_func=None, filter_none=False, *_):
-        if filter_none:
-            self.filter_func = lambda a: a is not None
-        elif filter_func is None:
-            self.filter_func = lambda a: True
-        else:
-            self.filter_func = filter_func
-
     def func(self, f, state):
-        items = list(filter(self.filter_func, hooks.to_iter(state)))
+        items = list(hooks.to_iter(state))
 
         def build_new_state_from_iter(a):
-            return hooks.from_iter(state, filter(self.filter_func, a))
+            return hooks.from_iter(state, a)
 
         if items == []:
             return f.pure(build_new_state_from_iter(items))
