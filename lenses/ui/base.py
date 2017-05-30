@@ -1,4 +1,4 @@
-from typing import (Any, Callable, Generic, Optional, Type, Union, cast)
+from typing import (Any, Callable, Generic, Optional, Type, cast)
 
 import copy
 
@@ -232,7 +232,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         return self._compose_optic(optics.FilteringPrism(predicate))
 
     def fork_(self, *lenses):
-        # type: (*Union[BaseUiLens[A, B, X, Y], optics.LensLike])-> BaseUiLens[S, T, X, Y]
+        # type: (*BaseUiLens[A, B, X, Y])-> BaseUiLens[S, T, X, Y]
         '''A setter representing the parallel composition of several
         sub-lenses.
 
@@ -242,7 +242,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens([[0, 0], 0, 0]).fork_(lens()[0][1], lens()[2]).set(1)
             [[0, 1], 0, 1]
         '''
-        true_lenses = [l._underlying_lens() for l in lenses]
+        true_lenses = [l._optic for l in lenses]
         return self._compose_optic(optics.ForkedSetter(*true_lenses))
 
     def get_(self, key, default=None):
@@ -652,7 +652,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         return self._compose_optic(optics.Prism(unpack, pack))
 
     def tuple_(self, *lenses):
-        # type: (*Union[optics.LensLike, BaseUiLens[A, B, X, Y]]) -> BaseUiLens[S, T, X, Y]
+        # type: (*BaseUiLens[A, B, X, Y]) -> BaseUiLens[S, T, X, Y]
         '''A lens that combines the focuses of other lenses into a
         single tuple. The sublenses must be optics of kind Lens; this
         means no Traversals.
@@ -678,7 +678,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> (tl.each_().each_() + 10)(state)
             ([11, 12, 13], 4, [15, 16])
         '''
-        true_lenses = [l._underlying_lens() for l in lenses]
+        true_lenses = [l._optic for l in lenses]
         return self._compose_optic(optics.TupleLens(*true_lenses))
 
     def values_(self):

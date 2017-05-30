@@ -237,9 +237,6 @@ class LensLike(object):
             if self._is_kind(optic):
                 return optic
 
-    def _underlying_lens(self):
-        return self
-
     def _is_kind(self, cls):
         return isinstance(self, cls)
 

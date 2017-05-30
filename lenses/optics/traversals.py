@@ -83,7 +83,7 @@ class GetZoomAttrTraversal(Traversal):
     def func(self, f, state):
         attr = getattr(state, self.name)
         try:
-            sublens = attr._underlying_lens()
+            sublens = attr._optic
         except AttributeError:
             sublens = self._getattr_cache
         return sublens.func(f, state)
@@ -134,8 +134,8 @@ class ZoomAttrTraversal(Traversal):
         self.name = name
 
     def func(self, f, state):
-        l = getattr(state, self.name)
-        return l._underlying_lens().func(f, state)
+        optic = getattr(state, self.name)._optic
+        return optic.func(f, state)
 
     def __repr__(self):
         return 'ZoomAttrTraversal({!r})'.format(self.name)
@@ -157,7 +157,7 @@ class ZoomTraversal(Traversal):
         pass
 
     def func(self, f, state):
-        return state._underlying_lens().func(f, state._state)
+        return state._optic.func(f, state._state)
 
     def __repr__(self):
         return 'ZoomTraversal()'

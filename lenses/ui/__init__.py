@@ -136,10 +136,6 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             return self
         return BoundLens(instance, self._optic)
 
-    def _underlying_lens(self):
-        # type: () -> optics.LensLike
-        return self._optic
-
     def _compose_optic(self, optic):
         # type: (optics.LensLike) -> UnboundLens[S, T, X, Y]
         return UnboundLens(self._optic.compose(optic))
@@ -232,10 +228,6 @@ class BoundLens(BaseUiLens[S, T, A, B]):
             message = 'Cannot add lens of type {!r}.'
             raise TypeError(message.format(type(other)))
         return self._compose_optic(other._optic)
-
-    def _underlying_lens(self):
-        # type: () -> optics.LensLike
-        return self._optic
 
     def _compose_optic(self, optic):
         # type: (optics.LensLike) -> BoundLens[S, T, X, Y]
