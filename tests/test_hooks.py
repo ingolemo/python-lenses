@@ -71,6 +71,21 @@ def test_setattr_imm_namedtuple():
     assert s.setattr_immutable(Tup(1), 'attr', 2) == Tup(2)
 
 
+def test_to_iter_custom_class():
+    class C(object):
+
+        def __init__(self, attr):
+            self.attr = attr
+
+        def __eq__(self, other):
+            return self.attr == other.attr
+
+        def _lens_to_iter(self):
+            yield self.attr
+
+    assert list(s.to_iter(C(1))) == [1]
+
+
 def test_from_iter_custom_class():
     class C(object):
 

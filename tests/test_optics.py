@@ -5,7 +5,7 @@ import pytest
 # import hypothesis.strategies as strat
 
 from lenses import lens
-from lenses.maybe import Just
+from lenses.maybe import Just, Nothing
 from lenses import optics as b
 
 
@@ -71,6 +71,11 @@ def test_LensLike_no_focus_raises():
         b.EachTraversal().view([])
 
 
+def test_cannot_preview_with_setter():
+    with pytest.raises(TypeError):
+        b.ForkedSetter(b.GetitemLens(0), b.GetitemLens(1)).preview([1, 2])
+
+
 def test_cannot_to_list_of_with_setter():
     with pytest.raises(TypeError):
         b.ForkedSetter(b.GetitemLens(0), b.GetitemLens(1)).to_list_of([1, 2])
@@ -99,6 +104,19 @@ def test_composition_of_fold_and_setter_is_invalid():
 def test_lens_and():
     my_lens = b.BothTraversal() & b.GetitemLens(1)
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
+
+
+def test_getter_folder():
+    assert list(b.Getter(abs).folder(-1)) == [1]
+
+
+def test_prism_folder_success():
+    obj = object
+    assert list(b.JustPrism().folder(Just(obj))) == [obj]
+
+
+def test_prism_folder_failure():
+    assert list(b.JustPrism().folder(Nothing())) == []
 
 
 def test_BothTraversal_view():
@@ -169,13 +187,15 @@ def test_EachTraversal_set_empty():
 
 
 def test_ErrorLens_view():
-    class CustomException(Exception): pass
+    class CustomException(Exception):
+        pass
     with pytest.raises(CustomException):
         b.ErrorIso(CustomException('a message')).view(object())
 
 
 def test_ErrorLens_set():
-    class CustomException(Exception): pass
+    class CustomException(Exception):
+        pass
     with pytest.raises(CustomException):
         b.ErrorIso(CustomException('a message')).set(object(), object())
 
