@@ -385,9 +385,6 @@ class Lens(Getter, Traversal):
         self.getter = getter
         self.setter = setter
 
-    def builder(self, state, values):
-        return self.setter(state, values[0])
-
     def func(self, f, state):
         old_value = self.getter(state)
         fa = f(old_value)
@@ -456,9 +453,6 @@ class Prism(Traversal, Review):
         result = self.unpack(state)
         if not result.is_nothing():
             yield result.unwrap()
-
-    def builder(self, state, values):
-        return self.pack(values[0])
 
     def func(self, f, state):
         result = self.unpack(state)
