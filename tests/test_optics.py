@@ -4,9 +4,8 @@ import pytest
 # import hypothesis
 # import hypothesis.strategies as strat
 
-from lenses import lens
+from lenses import lens, bind, optics as b
 from lenses.maybe import Just, Nothing
-from lenses import optics as b
 
 
 # def build_lens_strat():
@@ -233,7 +232,7 @@ class C(object):
     def __eq__(self, other):
         return self.attr == other.attr
 
-    sublens = lens().attr
+    sublens = lens.attr
 
 
 def test_GetZoomAttrTraversal_view_attr():
@@ -427,11 +426,11 @@ def test_TupleLens_only_works_with_lenses():
 
 def test_ZoomTraversal_view():
     l = b.GetitemLens(0) & b.ZoomTraversal()
-    data = [lens([1, 2, 3])[1]]
+    data = [bind([1, 2, 3])[1]]
     assert l.view(data) == 2
 
 
 def test_ZoomTraversal_set():
     l = b.GetitemLens(0) & b.ZoomTraversal()
-    data = [lens([1, 2, 3])[1]]
+    data = [bind([1, 2, 3])[1]]
     assert l.set(data, 7) == [[1, 7, 3]]

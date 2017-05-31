@@ -1,35 +1,36 @@
 '''A python module for manipulating deeply nested data structures
 without mutating them.
 
-A simple overview for this module is available in the file `readme.md`
-or at http://github.com/ingolemo/python-lenses . More detailed
-information for each object is available in the relevant docstrings.
-`help(lenses.BoundLens)` and `help(lenses.UnboundLens)` are particularly
-useful.
+A simple overview for this module is available in the file
+`docs/index.md` or at [http://github.com/ingolemo/python-lenses]
+. More detailed information for each object is available in the relevant
+docstrings. `help(lenses.UnboundLens)` is particularly useful.
 
-The entry point to this library is the `lens` function, which returns a
-`Lens` object:
+The entry point to this library is the `lens` object:
 
     >>> from lenses import lens
-    >>> lens()
+    >>> lens
     UnboundLens(TrivialIso())
-    >>> lens([])
-    BoundLens([], TrivialIso())
-'''
 
-from typing import Optional, Union
+You can also obtain a bound lens with the `bind` function.
+
+    >>> bind([1, 2, 3])
+    BoundLens([1, 2, 3], TrivialIso())
+'''
 
 from .typevars import S, T
 from . import optics
-from .ui import UnboundLens, BoundLens
+from . import ui
+
+# included so you can run pydoc lenses.UnboundLens
+from .ui import UnboundLens
 
 
-def lens(obj=None):
-    # type: (Optional[S]) -> Union[UnboundLens[S, T, S, T], BoundLens[S, T, S, T]]
-    '''Returns a simple Lens bound to `obj`. If `obj is None` then the
-    Lens object is unbound.'''
-    if obj is None:
-        return UnboundLens(optics.TrivialIso())
-    return BoundLens(obj, optics.TrivialIso())
+def bind(state):
+    # type: (S) -> ui.BoundLens[S, T, S, T]
+    'Returns a simple BoundLens object bound to `state`.'
+    return ui.BoundLens(state, optics.TrivialIso())
 
-__all__ = ['lens', 'optics', 'UnboundLens', 'BoundLens']
+lens = ui.UnboundLens(optics.TrivialIso()) # type: ui.UnboundLens
+
+__all__ = ['lens', 'bind', 'optics']

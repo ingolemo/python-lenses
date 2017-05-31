@@ -44,7 +44,7 @@ class Board:
         '''Return a board with a cell filled in by the current player. If
         the cell is already occupied then return the board unchanged.'''
         if self.board[y][x] == ' ':
-            return lens(self).board[y][x].set(self.player)
+            return lens.board[y][x].set(self.player)(self)
         return self
 
     @property
@@ -83,7 +83,7 @@ class Board:
             result.append(letter + '  ' + (' │ '.join(row)))
         return '   1   2   3\n' + ('\n  ───┼───┼───\n'.join(result))
 
-    _all_cells = lens().board.each_().each_().get_all()
+    _all_cells = lens.board.each_().each_().get_all()
 
 
 def player_move(board):

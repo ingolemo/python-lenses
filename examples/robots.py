@@ -91,7 +91,7 @@ class GameState:
         }
 
         if input in dirs:
-            new_self = lens(self).player + dirs[input]
+            new_self = (lens.player + dirs[input])(self)
             if not new_self.player.inside():
                 return self, False
             return new_self, True
@@ -100,7 +100,7 @@ class GameState:
         elif input == 'q':
             return self.end_game(), False
         elif input == 't':
-            self = lens(self).player.set(Vector.random())
+            self = lens.player.set(Vector.random())(self)
             return self, True
         else:
             return self, False
@@ -111,11 +111,11 @@ class GameState:
         one another too.'''
 
         # move the robots towards the player
-        self = lens(self).robots.each_().call_step_towards(self.player)
+        self = lens.robots.each_().call_step_towards(self.player)(self)
         # robots in the same place are crashes
-        self = lens(self).crashes.call_union(duplicates(self.robots))
+        self = lens.crashes.call_union(duplicates(self.robots))(self)
         # remove crashed robots
-        self = lens(self).robots.modify(lambda r: list(set(r) - self.crashes))
+        self = lens.robots.modify(lambda r: list(set(r) - self.crashes))(self)
 
         return self
 
@@ -136,8 +136,7 @@ class GameState:
         '''Returns a completed game state object, setting an optional
         message to display after the game is over.'''
 
-        self = lens(self).message.set(message)
-        return lens(self).running.set(False)
+        return lens.running.set(False)(lens.message.set(message)(self))
 
     def __str__(self):
         rows = []

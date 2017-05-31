@@ -144,10 +144,10 @@ class ZoomAttrTraversal(Traversal):
 class ZoomTraversal(Traversal):
     '''Follows its state as if it were a bound `Lens` object.
 
-        >>> from lenses import lens
+        >>> from lenses import bind
         >>> ZoomTraversal()
         ZoomTraversal()
-        >>> state = lens([1, 2])[1]
+        >>> state = bind([1, 2])[1]
         >>> ZoomTraversal().view(state)
         2
         >>> ZoomTraversal().set(state, 3)

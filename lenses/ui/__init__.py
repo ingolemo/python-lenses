@@ -22,10 +22,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         '''Get the first value focused by the lens.
 
             >>> from lenses import lens
-            >>> getter = lens().get()
+            >>> getter = lens.get()
             >>> getter([1, 2, 3])
             [1, 2, 3]
-            >>> zero_item_getter = lens()[0].get()
+            >>> zero_item_getter = lens[0].get()
             >>> zero_item_getter([1, 2, 3])
             1
         '''
@@ -39,10 +39,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         a list.
 
             >>> from lenses import lens
-            >>> get_all_item_zero = lens()[0].get_all()
+            >>> get_all_item_zero = lens[0].get_all()
             >>> get_all_item_zero([1, 2, 3])
             [1]
-            >>> get_both = lens().both_().get_all()
+            >>> get_both = lens.both_().get_all()
             >>> get_both([1, 2, 3])
             [1, 2]
         '''
@@ -56,7 +56,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
             >>> from lenses import lens
-            >>> get_each_monoidally = lens().each_().get_monoid()
+            >>> get_each_monoidally = lens.each_().get_monoid()
             >>> get_each_monoidally([[], [1], [2, 3]])
             [1, 2, 3]
         '''
@@ -69,7 +69,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         '''Set the focus to `newvalue`.
 
             >>> from lenses import lens
-            >>> set_item_one_to_four = lens()[1].set(4)
+            >>> set_item_one_to_four = lens[1].set(4)
             >>> set_item_one_to_four([1, 2, 3])
             [1, 4, 3]
         '''
@@ -82,10 +82,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         '''Apply a function to the focus.
 
             >>> from lenses import lens
-            >>> convert_item_one_to_string = lens()[1].modify(str)
+            >>> convert_item_one_to_string = lens[1].modify(str)
             >>> convert_item_one_to_string([1, 2, 3])
             [1, '2', 3]
-            >>> add_ten_to_item_one = lens()[1].modify(lambda n: n + 10)
+            >>> add_ten_to_item_one = lens[1].modify(lambda n: n + 10)
             >>> add_ten_to_item_one([1, 2, 3])
             [1, 12, 3]
         '''
@@ -105,7 +105,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         and all the underlying operations must be isomorphisms.
 
             >>> from lenses import lens
-            >>> json_encoder = lens().decode_().json_().flip()
+            >>> json_encoder = lens.decode_().json_().flip()
             >>> json_encode = json_encoder.get()
             >>> json_encode(['hello', 'world'])  # doctest: +SKIP
             b'["hello", "world"]'
@@ -118,8 +118,8 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         another lens object. The other lens must be unbound.
 
             >>> from lenses import lens
-            >>> first = lens()[0]
-            >>> second = lens()[1]
+            >>> first = lens[0]
+            >>> second = lens[1]
             >>> second_first = second & first
             >>> get_second_then_first = second_first.get()
             >>> get_second_then_first([[0, 1], [2, 3]])
@@ -161,10 +161,10 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         # type: () -> B
         '''Get the first value focused by the lens.
 
-            >>> from lenses import lens
-            >>> lens([1, 2, 3]).get()
+            >>> from lenses import bind
+            >>> bind([1, 2, 3]).get()
             [1, 2, 3]
-            >>> lens([1, 2, 3])[0].get()
+            >>> bind([1, 2, 3])[0].get()
             1
         '''
         return self._optic.to_list_of(self._state)[0]
@@ -174,10 +174,10 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''Get multiple values focused by the lens. Returns them as
         a list.
 
-            >>> from lenses import lens
-            >>> lens([1, 2, 3])[0].get_all()
+            >>> from lenses import bind
+            >>> bind([1, 2, 3])[0].get_all()
             [1]
-            >>> lens([1, 2, 3]).both_().get_all()
+            >>> bind([1, 2, 3]).both_().get_all()
             [1, 2]
         '''
         return self._optic.to_list_of(self._state)
@@ -187,8 +187,8 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''Get the values focused by the lens, merging them together by
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
-            >>> from lenses import lens
-            >>> lens([[], [1], [2, 3]]).each_().get_monoid()
+            >>> from lenses import bind
+            >>> bind([[], [1], [2, 3]]).each_().get_monoid()
             [1, 2, 3]
         '''
         return self._optic.view(self._state)
@@ -197,8 +197,8 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         # type: (B) -> T
         '''Set the focus to `newvalue`.
 
-            >>> from lenses import lens
-            >>> lens([1, 2, 3])[1].set(4)
+            >>> from lenses import bind
+            >>> bind([1, 2, 3])[1].set(4)
             [1, 4, 3]
         '''
         return self._optic.set(self._state, newvalue)
@@ -207,10 +207,10 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         # type: (Callable[[A], B]) -> T
         '''Apply a function to the focus.
 
-            >>> from lenses import lens
-            >>> lens([1, 2, 3])[1].modify(str)
+            >>> from lenses import bind
+            >>> bind([1, 2, 3])[1].modify(str)
             [1, '2', 3]
-            >>> lens([1, 2, 3])[1].modify(lambda n: n + 10)
+            >>> bind([1, 2, 3])[1].modify(lambda n: n + 10)
             [1, 12, 3]
         '''
         return self._optic.over(self._state, func)
@@ -220,9 +220,9 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''Refine the current focus of this lens by composing it with
         another lens object. The other lens must be unbound.
 
-            >>> from lenses import lens
-            >>> first = lens()[0]
-            >>> second = lens([[0, 1], [2, 3]])[1]
+            >>> from lenses import lens, bind
+            >>> first = lens[0]
+            >>> second = bind([[0, 1], [2, 3]])[1]
             >>> (second & first).get()
             2
         '''
