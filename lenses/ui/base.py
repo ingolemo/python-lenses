@@ -314,7 +314,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.GetitemLens(key))
 
-    def getter_setter_(self, getter, setter):
+    def lens_(self, getter, setter):
         # type: (Callable[[A], X], Callable[[A, Y], B]) -> BaseUiLens[S, T, X, Y]
         '''An optic that wraps a pair of getter and setter functions. A
         getter function is one that takes a state and returns a value
@@ -332,7 +332,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             ...     prefix = old_state[:-1]
             ...     return prefix + [target_sum - sum(prefix)]
             ...
-            >>> average_lens = lens.getter_setter_(getter, setter)
+            >>> average_lens = lens.lens_(getter, setter)
             >>> average_lens
             UnboundLens(Lens(<function getter...>, <function setter...>))
             >>> average_lens.get()([1, 2, 4, 5])
