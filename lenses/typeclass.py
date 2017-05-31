@@ -52,7 +52,18 @@ def _mempty_list(lst):
 @mempty.register(tuple)
 def _mempty_tuple(tup):
     # type: (tuple) -> tuple
-    return ()
+    return tuple(mempty(item) for item in tup)
+
+
+@mappend.register(tuple)
+def _mappend_tuple(tup, other):
+    # type (tuple, tuple) -> tuple
+    if len(tup) != len(other):
+        raise ValueError('Cannot mappend tuples of differing lengths')
+    result = ()
+    for x, y in zip(tup, other):
+        result += (mappend(x, y),)
+    return result
 
 
 @mempty.register(dict)

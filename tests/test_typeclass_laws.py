@@ -44,7 +44,8 @@ def monoids():
     base = many_one_of(
         strat.integers(),
         strat.lists(strat.integers()),
-        strat.lists(strat.integers()).map(tuple),
+        strat.tuples(strat.integers()),
+        strat.tuples(strat.integers(), strat.integers()),
         strat.text(),
         strat.integers().map(MonoidProduct),
         strat.dictionaries(strat.integers(), strat.integers()),
