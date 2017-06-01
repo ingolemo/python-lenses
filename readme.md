@@ -32,7 +32,8 @@ then you should check out the `lenses.hooks` module. Most of the fancy
 lens code is in the `lenses.optics` module for those who are curious
 how everything works.
 
-An example is given in the `examples` folder.
+Some examples are given in the [`examples`](examples) folder and a tutorial
+is available in the [`tutorial`](tutorial/index.md) folder.
 
 Here's a simple example:
 
