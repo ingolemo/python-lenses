@@ -11,8 +11,8 @@ def test_lens_get():
     assert lens[1].get()([1, 2, 3]) == 2
 
 
-def test_lens_get_all():
-    assert lens.both_()[1].get_all()([[1, 2], [3, 4]]) == [2, 4]
+def test_lens_collect():
+    assert lens.both_()[1].collect()([[1, 2], [3, 4]]) == [2, 4]
 
 
 def test_lens_get_monoid():
@@ -260,7 +260,7 @@ def test_lens_getattr_direct():
 
 
 def test_lens_both():
-    assert bind([1, 2]).both_().get_all() == [1, 2]
+    assert bind([1, 2]).both_().collect() == [1, 2]
 
 
 def test_lens_nonexistant_sublens():

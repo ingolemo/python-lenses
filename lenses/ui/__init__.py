@@ -33,16 +33,16 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             return self._optic.to_list_of(state)[0]
         return getter
 
-    def get_all(self):
+    def collect(self):
         # type: () -> Callable[[S], List[B]]
         '''Get multiple values focused by the lens. Returns them as
         a list.
 
             >>> from lenses import lens
-            >>> get_all_item_zero = lens[0].get_all()
-            >>> get_all_item_zero([1, 2, 3])
+            >>> collect_item_zero = lens[0].collect()
+            >>> collect_item_zero([1, 2, 3])
             [1]
-            >>> get_both = lens.both_().get_all()
+            >>> get_both = lens.both_().collect()
             >>> get_both([1, 2, 3])
             [1, 2]
         '''
@@ -169,15 +169,15 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''
         return self._optic.to_list_of(self._state)[0]
 
-    def get_all(self):
+    def collect(self):
         # type: () -> List[B]
         '''Get multiple values focused by the lens. Returns them as
         a list.
 
             >>> from lenses import bind
-            >>> bind([1, 2, 3])[0].get_all()
+            >>> bind([1, 2, 3])[0].collect()
             [1]
-            >>> bind([1, 2, 3]).both_().get_all()
+            >>> bind([1, 2, 3]).both_().collect()
             [1, 2]
         '''
         return self._optic.to_list_of(self._state)

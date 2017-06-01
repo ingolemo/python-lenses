@@ -83,7 +83,7 @@ class Board:
             result.append(letter + '  ' + (' │ '.join(row)))
         return '   1   2   3\n' + ('\n  ───┼───┼───\n'.join(result))
 
-    _all_cells = lens.board.each_().each_().get_all()
+    _all_cells = lens.board.each_().each_().collect()
 
 
 def player_move(board):

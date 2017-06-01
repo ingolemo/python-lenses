@@ -120,7 +120,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> lens.both_()
             UnboundLens(BothTraversal())
-            >>> lens.both_().get_all()([1, 2, 3])
+            >>> lens.both_().collect()([1, 2, 3])
             [1, 2]
             >>> lens.both_().set(4)([1, 2, 3])
             [4, 4, 3]
@@ -155,7 +155,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> data = [1, 2, 3]
             >>> lens.each_()
             UnboundLens(EachTraversal())
-            >>> lens.each_().get_all()(data)
+            >>> lens.each_().collect()(data)
             [1, 2, 3]
             >>> (lens.each_() + 1)(data)
             [2, 3, 4]
@@ -164,7 +164,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         their items and not just their keys.
 
             >>> data = {'one': 1}
-            >>> lens.each_().get_all()(data)
+            >>> lens.each_().collect()(data)
             [('one', 1)]
             >>> (lens.each_()[1] + 1)(data)
             {'one': 2}
@@ -211,7 +211,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             UnboundLens(Getter(<built-in function abs>))
             >>> lens.f_(abs).get()(-1)
             1
-            >>> lens.each_().f_(abs).get_all()([-1, 2, -3])
+            >>> lens.each_().f_(abs).collect()([-1, 2, -3])
             [1, 2, 3]
 
         This optic cannot be used to set or modify values.
@@ -230,7 +230,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens.filter_(all)
             UnboundLens(FilteringPrism(<built-in function all>))
             >>> data = [[1, 2], [0], ['a'], ['', 'b']]
-            >>> lens.each_().filter_(all).get_all()(data)
+            >>> lens.each_().filter_(all).collect()(data)
             [[1, 2], ['a']]
             >>> lens.each_().filter_(all).set(2)(data)
             [2, [0], 2, ['', 'b']]
@@ -378,9 +378,9 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> lens.instance_(int)
             UnboundLens(InstancePrism(...))
-            >>> lens.instance_(int).get_all()(1)
+            >>> lens.instance_(int).collect()(1)
             [1]
-            >>> lens.instance_(float).get_all()(1)
+            >>> lens.instance_(float).collect()(1)
             []
             >>> lens.instance_(int).set(2)(1)
             2
@@ -485,7 +485,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens.items_()
             UnboundLens(ItemsTraversal())
-            >>> lens.items_().get_all()(data)
+            >>> lens.items_().collect()(data)
             [(1, 10), (2, 20)]
             >>> lens.items_()[1].modify(lambda n: n + 1)(data)
             OrderedDict([(1, 11), (2, 21)])
@@ -500,16 +500,16 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> lens.iter_()
             UnboundLens(IterableFold())
-            >>> lens.iter_().get_all()({2, 1, 3})
+            >>> lens.iter_().collect()({2, 1, 3})
             [1, 2, 3]
             >>> def numbers():
             ...     yield 1
             ...     yield 2
             ...     yield 3
             ...
-            >>> lens.iter_().get_all()(numbers())
+            >>> lens.iter_().collect()(numbers())
             [1, 2, 3]
-            >>> lens.iter_().get_all()([])
+            >>> lens.iter_().collect()([])
             []
 
         If you want to be able to set values as you iterate then look
@@ -542,9 +542,9 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses.maybe import Just, Nothing
             >>> lens.just_()
             UnboundLens(JustPrism())
-            >>> lens.just_().get_all()(Just(1))
+            >>> lens.just_().collect()(Just(1))
             [1]
-            >>> lens.just_().get_all()(Nothing())
+            >>> lens.just_().collect()(Nothing())
             []
             >>> lens.just_().set(2)(Just(1))
             Just(2)
@@ -563,7 +563,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens.keys_()
             UnboundLens(ItemsTraversal() & GetitemLens(0))
-            >>> lens.keys_().get_all()(data)
+            >>> lens.keys_().collect()(data)
             [1, 2]
             >>> lens.keys_().modify(lambda n: n + 1)(data)
             OrderedDict([(2, 10), (3, 20)])
@@ -585,7 +585,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens.listwrap_().set([1])(0)
             1
             >>> l = lens.tuple_(lens[0], lens[1].listwrap_())
-            >>> l.each_().each_().get_all()([[1, 3], 4])
+            >>> l.each_().each_().collect()([[1, 3], 4])
             [1, 3, 4]
 
         Also serves as an example that lenses do not always have to
@@ -656,9 +656,9 @@ class BaseUiLens(Generic[S, T, A, B]):
             ...
             >>> lens.prism_(unpack, pack)
             UnboundLens(Prism(<function unpack ...>, <function pack ...>))
-            >>> lens.prism_(unpack, pack).get_all()('42')
+            >>> lens.prism_(unpack, pack).collect()('42')
             [42]
-            >>> lens.prism_(unpack, pack).get_all()('fourty two')
+            >>> lens.prism_(unpack, pack).collect()('fourty two')
             []
 
         All prisms are also traversals that have exactly zero or one foci.
@@ -687,7 +687,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         from disparate locations within the state.
 
             >>> state = ([1, 2, 3], 4, [5, 6])
-            >>> tl.each_().each_().get_all()(state)
+            >>> tl.each_().each_().collect()(state)
             [1, 2, 3, 5, 6]
             >>> (tl.each_().each_() + 10)(state)
             ([11, 12, 13], 4, [15, 16])
@@ -705,7 +705,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> data = OrderedDict([(1, 10), (2, 20)])
             >>> lens.values_()
             UnboundLens(ItemsTraversal() & GetitemLens(1))
-            >>> lens.values_().get_all()(data)
+            >>> lens.values_().collect()(data)
             [10, 20]
             >>> lens.values_().modify(lambda n: n + 1)(data)
             OrderedDict([(1, 11), (2, 21)])
