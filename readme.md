@@ -40,25 +40,26 @@ Here's a simple example:
 ```python
 >>> from pprint import pprint
 >>> from lenses import lens
->>> 
+>>>
 >>> data = [{'name': 'Jane', 'scores': ['a', 'a', 'b', 'a']},
-...         {'name': 'Richard', 'scores': ['c', 'a', 'd', 'c']},
-...         {'name': 'Zoe', 'scores': ['f', 'f', 'f']}]
+...         {'name': 'Richard', 'scores': ['c', None, 'd', 'c']},
+...         {'name': 'Zoe', 'scores': ['f', 'f', None, 'f']}]
 ... 
->>> format_scores = lens.each_()['scores'].each_().call_upper()
+>>> format_scores = lens.each_()['scores'].each_().instance_(str).call_upper()
 >>> cheat = lens[2]['scores'].each_().set('a')
 >>>
 >>> corrected = format_scores(data)
 >>> pprint(corrected)
 [{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
- {'name': 'Richard', 'scores': ['C', 'A', 'D', 'C']},
- {'name': 'Zoe', 'scores': ['F', 'F', 'F']}]
->>> 
+ {'name': 'Richard', 'scores': ['C', None, 'D', 'C']},
+ {'name': 'Zoe', 'scores': ['F', 'F', None, 'F']}]
+>>>
 >>> cheated = format_scores(cheat(data))
 >>> pprint(cheated)
 [{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
- {'name': 'Richard', 'scores': ['C', 'A', 'D', 'C']},
- {'name': 'Zoe', 'scores': ['A', 'A', 'A']}]
+ {'name': 'Richard', 'scores': ['C', None, 'D', 'C']},
+ {'name': 'Zoe', 'scores': ['A', 'A', 'A', 'A']}]
+
 ```
 
 
