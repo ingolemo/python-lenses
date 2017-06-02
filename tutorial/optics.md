@@ -10,14 +10,21 @@ The heirarchy of optics looks like this:
 An arrow pointing from A to B here means that all B are also A. For
 example, all Lenses are also Getters, and all Getters are also Folds.
 
+When we compose two optics together, the result is the most-recent
+common ancestor of the two. For example, if we compose a Getter and a
+Traversal then the optic we get back would be a Fold because Getters and
+Traversals are both kinds of Fold. We cannot compose two optics that do
+not share a common ancestor; e.g. we cannot compose a Fold with a Setter.
+
+
 ## Traversals
 
-All the lenses so far have focused a single object inside a state, but
-it is possible for an optic to have more than one focus. An optic with
-multiple foci is usually referred to as a traversal. A simple traversal
-can be made with the `_both` method. `lens.both_()` focuses the two
-objects at indices `0` and `1` within the state. It is intended to be
-used with tuples of length 2, but will work on any indexable object.
+All the optics that we have seen so far have been lenses, so they always
+focused a single object inside a state. But it is possible for an optic
+to have more than one focus. One such optic is the traversal. A simple
+traversal can be made with the `_both` method. `lens.both_()` focuses
+the two objects at indices `0` and `1` within the state. It is intended
+to be used with tuples of length 2, but will work on any indexable object.
 
 One issue with multi-focus optics is that the `get` method only ever
 returns a single focus. It will return the _first_ item focused by the
@@ -122,3 +129,56 @@ Or we could do the same thing to every enemy in the entire game
 	...                          .levels.values_()
 	...                          .enemies.values_().x + 1)
 	>>> new_data = all_enemies_right(data)
+
+
+## Getter
+
+A Getter is an optic that knows how to retrieve a single focus from a
+state. You can think of a Getter as a Lens that does not have a setter
+function. Because it does not have a setter function, we cannot use
+a Getter to `set` values. You also cannot use `modify`, `call`, or
+`call_mut` because these all make use of the setting machinery. The
+only method we can meaningly perform on a Getter is `get`. We can call
+`collect`, but it will always give us a list containing a single focus.
+
+The simplest way to make a Getter is with the `f_` method. This method
+takes a function and returns a Getter that just calls that function on
+the state in order and whatever that function returns is the focus.
+
+	>>> data = 1
+	>>> def get_negative(state):
+	...     return -state
+	>>> neg_getter = lens.f_(get_negative)
+	>>> neg_getter.get()(data)
+	-1
+
+If we try to call `set` or any other invalid method on a Getter then
+we will get an exception:
+
+	>>> neg_getter.set(2)(data)
+	Traceback (most recent call last):
+	  File "<stdin>", line 1, in ?
+	TypeError: Must be an instance of Setter to .set()
+
+You might notice that `lens.f_(some_function).get()` is exactly equivalent
+to using `some_function` by itself. For this reason Getters on their
+own are not particularly useful. The utility of Getters comes when we
+compose them with other optics.
+
+	>>> data = [1, 2, 3]
+	>>> each_neg = lens.each_().f_(get_negative)
+	>>> each_neg.collect()(data)
+	[-1, -2, -3]
+
+Getters allow you to _inject_ arbitrary behaviour into the middle of an
+optic at the cost of not being able to set anything:
+
+	>>> def log(focus):
+	...     print('logged:', focus)
+	...     return focus
+	>>> data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+	>>> lens.each_().f_(log).each_().collect()(data)
+	logged: [1, 2, 3]
+	logged: [4, 5, 6]
+	logged: [7, 8, 9]
+	[1, 2, 3, 4, 5, 6, 7, 8, 9]
