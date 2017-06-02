@@ -1,4 +1,4 @@
-from typing import (Any, Callable, Generic, Optional, Type, cast)
+from typing import (Any, Callable, Generic, Iterable, Optional, Type, cast)
 
 import copy
 import operator
@@ -243,6 +243,20 @@ class BaseUiLens(Generic[S, T, A, B]):
             ['', None, '']
         '''
         return self._compose_optic(optics.FilteringPrism(predicate))
+
+    def fold_(self, func):
+        # type: (Callable[[A], Iterable[X]]) -> BaseUiLens[S, T, X, Y]
+        '''A fold that takes a function that returns an iterable and
+        focuses all the values in that iterable.
+
+            >>> from lenses import lens
+            >>> def ends(state):
+            ...     yield state[0]
+            ...     yield state[-1]
+            >>> lens.fold_(ends).collect()([1, 2, 3])
+            [1, 3]
+        '''
+        return self._compose_optic(optics.Fold(func))
 
     def fork_(self, *lenses):
         # type: (*BaseUiLens[A, B, X, Y])-> BaseUiLens[S, T, X, Y]
