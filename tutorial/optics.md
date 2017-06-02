@@ -21,7 +21,7 @@ used with tuples of length 2, but will work on any indexable object.
 
 One issue with multi-focus optics is that the `get` method only ever
 returns a single focus. It will return the _first_ item focused by the
-optic. If you want to get all the items focused by that optic then you
+optic. If we want to get all the items focused by that optic then we
 can use the `collect` method which will return those objects in a list:
 
 	>>> from lenses import lens
@@ -38,10 +38,10 @@ object.
 	>>> both.set(4)(data)
 	[4, 4, 2, 3]
 
-Modifying is the most useful operation you can perform. The modification
+Modifying is the most useful operation we can perform. The modification
 will be applied to all the foci independently. All the foci must be of
 the same type (or at least be of a type that supports the modification
-that you want to make).
+that we want to make).
 
 	>>> both.modify(lambda a: a + 10)(data)
 	[10, 11, 2, 3]
@@ -78,8 +78,8 @@ preserved.
 A slightly more useful traversal method is `each_`. `each_` will focus
 all of the items in a data-structure analogous to iterating over it
 using python's `iter` and `next`. It supports most of the built-in
-iterables out of the box, but if you want to use it on your own objects
-then you will need to add a hook yourself.
+iterables out of the box, but if we want to use it on our own objects
+then we will need to add a hook explicitly.
 
 	>>> data = [1, 2, 3]
 	>>> (lens.each_() + 10)(data)
@@ -114,7 +114,7 @@ over to the right in one line of code:
 	...                            .enemies.values_().x + 1)
 	>>> new_data = level_enemies_right(data)
 
-Or you could do the same thing to every enemy in the entire game
+Or we could do the same thing to every enemy in the entire game
 (assuming that there were other enemies on other levels in the
 `GameState`):
 
