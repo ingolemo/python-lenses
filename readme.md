@@ -37,28 +37,29 @@ is available in the [`tutorial`](tutorial/index.md) folder.
 
 Here's a simple example:
 
-	>>> from pprint import pprint
-	>>> from lenses import lens
-	>>> 
-	>>> data = [{'name': 'Jane', 'scores': ['a', 'a', 'b', 'a']},
-	...         {'name': 'Richard', 'scores': ['c', 'a', 'd', 'c']},
-	...         {'name': 'Zoe', 'scores': ['f', 'f', 'f']}]
-	... 
-	>>> format_scores = lens.each_()['scores'].each_().call_upper()
-	>>> cheat = lens[2]['scores'].each_().set('a')
-	>>>
-	>>> corrected = format_scores(data)
-	>>> pprint(corrected)
-	[{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
-	 {'name': 'Richard', 'scores': ['C', 'A', 'D', 'C']},
-	 {'name': 'Zoe', 'scores': ['F', 'F', 'F']}]
-	>>> 
-	>>> cheated = format_scores(cheat(data))
-	>>> pprint(cheated)
-	[{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
-	 {'name': 'Richard', 'scores': ['C', 'A', 'D', 'C']},
-	 {'name': 'Zoe', 'scores': ['A', 'A', 'A']}]
-
+```python
+>>> from pprint import pprint
+>>> from lenses import lens
+>>> 
+>>> data = [{'name': 'Jane', 'scores': ['a', 'a', 'b', 'a']},
+...         {'name': 'Richard', 'scores': ['c', 'a', 'd', 'c']},
+...         {'name': 'Zoe', 'scores': ['f', 'f', 'f']}]
+... 
+>>> format_scores = lens.each_()['scores'].each_().call_upper()
+>>> cheat = lens[2]['scores'].each_().set('a')
+>>>
+>>> corrected = format_scores(data)
+>>> pprint(corrected)
+[{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
+ {'name': 'Richard', 'scores': ['C', 'A', 'D', 'C']},
+ {'name': 'Zoe', 'scores': ['F', 'F', 'F']}]
+>>> 
+>>> cheated = format_scores(cheat(data))
+>>> pprint(cheated)
+[{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
+ {'name': 'Richard', 'scores': ['C', 'A', 'D', 'C']},
+ {'name': 'Zoe', 'scores': ['A', 'A', 'A']}]
+```
 
 
 ## License
