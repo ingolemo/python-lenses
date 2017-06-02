@@ -182,3 +182,35 @@ optic at the cost of not being able to set anything:
 	logged: [4, 5, 6]
 	logged: [7, 8, 9]
 	[1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+## Folds
+
+A Fold is to a Getter what a Traversal is to a Lens. That is, a Fold is
+a Getter that can get multiple foci. Just like Getters, you cannot set
+anything with a Fold. Just like Traversals, when using a Fold, you will
+want to prefer the `collect` method over `get`.
+
+A Fold can be constructed from any function that returns an iterator
+using the `fold_` method. Generator functions are particularly useful
+for making Folds.
+
+	>>> def ends(state):
+	...     yield state[0]
+	...     yield state[-1]
+	>>> data = [1, 2, 3]
+	>>> lens.fold_(ends).collect()(data)
+	[1, 3]
+
+A useful Fold is `iter_`. This Fold just iterates over the state directly.
+It's very similar to the `each_` Traversal, but while `each_` has the
+ability set foci as well as get them, `iter_` does not need any special
+support; it will work on any iterable python object. `lens.iter_()`
+is equivalent to `lens.fold_(iter)`
+
+Just as with Getters, Folds don't do much on their own; you will want
+to compose them:
+
+	>>> data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+	>>> lens.iter_().fold_(ends).f_(get_negative).collect()(data)
+	[-1, -3, -4, -6, -7, -9]
