@@ -208,16 +208,6 @@ class LensLike(object):
         '''
         return ComposedLens([self]).compose(other)
 
-    def from_(self):
-        # type: () -> LensLike
-        '''Flips an isomorphism so that it works in the opposite
-        direction. Only works if the optic is actually an isomorphism.
-
-        Requires kind Isomorphism. Raises TypeError for non-isomorphic
-        optics.
-        '''
-        raise TypeError('Must be an instance of Isomorphism to .from_()')
-
     def re(self):
         # type: () -> LensLike
         raise TypeError('Must be an instance of Review to .re()')
@@ -292,7 +282,7 @@ class Getter(Fold):
         self.getter = getter
 
     def func(self, f, state):
-        return Const(typeclass.fmap(f(state).unwrap(), self.getter))
+        return f(self.getter(state))
 
     def folder(self, state):
         yield self.getter(state)
@@ -508,7 +498,7 @@ class Isomorphism(Lens, Prism):
     Due to their symmetry, isomorphisms can be flipped, thereby swapping
     thier forwards and backwards functions:
 
-        >>> flipped = Isomorphism(chr, ord).from_()
+        >>> flipped = Isomorphism(chr, ord).re()
         >>> flipped
         Isomorphism(<built-in function ord>, <built-in function chr>)
         >>> flipped.view('A')
@@ -533,9 +523,6 @@ class Isomorphism(Lens, Prism):
         return self.backwards(focus)
 
     def re(self):
-        return Isomorphism(self.backwards, self.forwards)
-
-    def from_(self):
         return Isomorphism(self.backwards, self.forwards)
 
     def func(self, f, state):
@@ -590,11 +577,8 @@ class ComposedLens(LensLike):
 
         return res(state)
 
-    def from_(self):
-        return ComposedLens([l.from_() for l in reversed(self.lenses)])
-
     def re(self):
-        return ComposedLens([l.re() for l in self.lenses])
+        return ComposedLens([l.re() for l in reversed(self.lenses)])
 
     def compose(self, other):
         result = ComposedLens(self.lenses + [other])

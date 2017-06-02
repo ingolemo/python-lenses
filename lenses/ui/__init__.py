@@ -110,7 +110,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> json_encode(['hello', 'world'])  # doctest: +SKIP
             b'["hello", "world"]'
         '''
-        return UnboundLens(self._optic.from_())
+        return UnboundLens(self._optic.re())
 
     def __and__(self, other):
         # type: (UnboundLens[A, B, X, Y]) -> UnboundLens[S, T, X, Y]

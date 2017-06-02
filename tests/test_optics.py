@@ -118,6 +118,17 @@ def test_prism_folder_failure():
     assert list(b.JustPrism().folder(Nothing())) == []
 
 
+def test_Getter_composes_correctly():
+    visited = []
+    def visit(item):
+        visited.append(item)
+        return item
+
+    my_lens = b.EachTraversal() & b.Getter(visit) & b.EachTraversal()
+    my_lens.to_list_of(([1, 2, 3], [4, 5, 6], [7, 8, 9]))
+    assert visited == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+
 def test_BothTraversal_view():
     assert b.BothTraversal().view(['1', '2']) == '12'
 
@@ -314,12 +325,12 @@ def test_IsomorphismLens_pack():
     assert b.Isomorphism(int, str).pack(1) == '1'
 
 
-def test_IsomorphismLens_view_from_():
-    assert b.Isomorphism(int, str).from_().view(1) == '1'
+def test_IsomorphismLens_view_re():
+    assert b.Isomorphism(int, str).re().view(1) == '1'
 
 
-def test_IsomorphismLens_set_from_():
-    assert b.Isomorphism(int, str).from_().set(1, '2') == 2
+def test_IsomorphismLens_set_re():
+    assert b.Isomorphism(int, str).re().set(1, '2') == 2
 
 
 def test_ItemLens_view():
