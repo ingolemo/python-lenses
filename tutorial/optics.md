@@ -174,7 +174,7 @@ Getters allow you to _inject_ arbitrary behaviour into the middle of an
 optic at the cost of not being able to set anything:
 
 	>>> def log(focus):
-	...     print('logged:', focus)
+	...     print('logged: {!r}'.format(focus))
 	...     return focus
 	>>> data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 	>>> lens.each_().f_(log).each_().collect()(data)
