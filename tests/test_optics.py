@@ -8,6 +8,20 @@ from lenses import lens, bind, optics as b
 from lenses.maybe import Just, Nothing
 
 
+class Pair:
+
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    east = lens.left
+    west = lens.right
+
+    def __eq__(self, other):
+        return self.left == other.left and self.right == other.right
+
+    def __repr__(self):
+        return 'Pair({!r}, {!r})'.format(self.left, self.right)
 
 
 def test_LensLike():
@@ -190,35 +204,28 @@ def test_GetattrLens_set():
     assert b.GetattrLens('attr').set(Tup(1), 2) == Tup(2)
 
 
-class C(object):
-
-    def __init__(self, attr):
-        self.attr = attr
-
-    def __eq__(self, other):
-        return self.attr == other.attr
-
-    sublens = lens.attr
-
-
 def test_GetZoomAttrTraversal_view_attr():
-    state = C('c')
-    b.GetZoomAttrTraversal('attr').view(state) == 'c'
+    obj = object()
+    state = Pair(obj, 'red herring')
+    b.GetZoomAttrTraversal('left').view(state) is obj
 
 
 def test_GetZoomAttrTraversal_set_attr():
-    state = C('c')
-    b.GetZoomAttrTraversal('attr').set(state, 'b') == C('b')
+    obj = object()
+    state = Pair('initial value', 'red herring')
+    b.GetZoomAttrTraversal('left').set(state, obj) == Pair(obj, 'red herring')
 
 
 def test_GetZoomAttrTraversal_view_zoom():
-    state = C('c')
-    b.GetZoomAttrTraversal('sublens').view(state) == 'c'
+    obj = object()
+    state = Pair(obj, 'red herring')
+    b.GetZoomAttrTraversal('east').view(state) is obj
 
 
 def test_GetZoomAttrTraversal_set_zoom():
-    state = C('c')
-    b.GetZoomAttrTraversal('sublens').set(state, 'b') == C('b')
+    obj = object()
+    state = Pair('initial value', 'red herring')
+    b.GetZoomAttrTraversal('east').set(state, obj) == Pair(obj, 'red herring')
 
 
 def test_GetitemLens_view():
