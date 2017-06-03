@@ -679,6 +679,41 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.Prism(unpack, pack))
 
+    def recur_(self, cls):
+        '''A traversal that recurses through an object focusing everything it
+        can find of a particular type. This traversal will probe arbitrarily
+        deep into the contents of the state looking for sub-objects. It
+        uses some naughty tricks to do this including looking at an object's
+        `__dict__` attribute.
+
+        It is somewhat analogous to haskell's uniplate optic.
+
+            >>> from lenses import lens
+            >>> lens.recur_(int)
+            UnboundLens(RecurTraversal(<... 'int'>))
+            >>> data = [[1, 2, 100.0], [3, 'hello', [{}, 4], 5]]
+            >>> lens.recur_(int).collect()(data)
+            [1, 2, 3, 4, 5]
+            >>> (lens.recur_(int) + 1)(data)
+            [[2, 3, 100.0], [4, 'hello', [{}, 5], 6]]
+
+        It also works on custom classes:
+
+            >>> class Container():
+            ...     def __init__(self, contents):
+            ...         self.contents = contents
+            ...     def __repr__(self):
+            ...         return 'Container({!r})'.format(self.contents)
+            >>> data = [Container(1), 2, Container(Container(3)), [4, 5]]
+            >>> (lens.recur_(int) + 1)(data)
+            [Container(2), 3, Container(Container(4)), [5, 6]]
+            >>> lens.recur_(Container).collect()(data)
+            [Container(1), Container(Container(3))]
+
+        Be careful with this; it can focus things you might not expect.
+        '''
+        return self._compose_optic(optics.RecurTraversal(cls))
+
     def tuple_(self, *lenses):
         # type: (*BaseUiLens[A, B, X, Y]) -> BaseUiLens[S, T, X, Y]
         '''A lens that combines the focuses of other lenses into a

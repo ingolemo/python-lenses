@@ -102,7 +102,7 @@ def test_from_iter_custom_class():
 
 
 def test_from_iter_bytes():
-    assert s.from_iter(b'', [49, 50, 51]) == b'123'
+    assert s.from_iter(b'', s.to_iter(b'123')) == b'123'
 
 
 def test_from_iter_list():

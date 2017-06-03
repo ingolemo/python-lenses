@@ -1,3 +1,5 @@
+import copy
+
 from .. import hooks
 from .. import typeclass
 
@@ -121,6 +123,96 @@ class ItemsTraversal(Traversal):
 
     def __repr__(self):
         return 'ItemsTraversal()'
+
+
+class RecurTraversal(Traversal):
+    '''A traversal that recurses through an object focusing everything it
+    can find of a particular type. This traversal will probe arbitrarily
+    deep into the contents of the state looking for sub-objects. It
+    uses some naughty tricks to do this including looking at an object's
+    `__dict__` attribute.
+
+    It is somewhat analogous to haskell's uniplate optic.
+
+        >>> RecurTraversal(int)
+        RecurTraversal(<... 'int'>)
+        >>> data = [[1, 2, 100.0], [3, 'hello', [{}, 4], 5]]
+        >>> RecurTraversal(int).to_list_of(data)
+        [1, 2, 3, 4, 5]
+        >>> class Container():
+        ...     def __init__(self, contents):
+        ...         self.contents = contents
+        ...     def __repr__(self):
+        ...         return 'Container({!r})'.format(self.contents)
+        >>> data = [Container(1), 2, Container(Container(3)), [4, 5]]
+        >>> RecurTraversal(int).over(data, lambda n: n+1)
+        [Container(2), 3, Container(Container(4)), [5, 6]]
+        >>> RecurTraversal(Container).to_list_of(data)
+        [Container(1), Container(Container(3))]
+
+    Be careful with this; it can focus things you might not expect.
+    '''
+
+    def __init__(self, cls):
+        self.cls = cls
+
+    def folder(self, state):
+        if isinstance(state, self.cls):
+            yield state
+        elif self.can_iter(state):
+            for substate in hooks.to_iter(state):
+                for focus in self.folder(substate):
+                    yield focus
+        elif hasattr(state, '__dict__'):
+            for attr in state.__dict__:
+                substate = getattr(state, attr)
+                for focus in self.folder(substate):
+                    yield focus
+
+    def builder(self, state, values):
+        state, leftovers = self.build_object(state, values)
+        assert list(leftovers) == [], 'Did not consume all the values'
+        return state
+
+    def build_object(self, state, values):
+        if isinstance(state, self.cls):
+            return values[0], values[1:]
+        elif self.can_iter(state):
+            return self.build_from_iter(state, values)
+        elif hasattr(state, '__dict__'):
+            return self.build_dunder_dict(state, values)
+        return state, values
+
+    def build_from_iter(self, state, values):
+        new_substates = []
+        for substate in hooks.to_iter(state):
+            new_substate, values = self.build_object(substate, values)
+            new_substates.append(new_substate)
+        new_state = hooks.from_iter(state, new_substates)
+        return new_state, values
+
+    def build_dunder_dict(self, state, values):
+        state = copy.copy(state)
+        for attr in state.__dict__:
+            substate = getattr(state, attr)
+            new_substate, values = self.build_object(substate, values)
+            setattr(state, attr, new_substate)
+        return state, values
+
+    @staticmethod
+    def can_iter(state):
+        # characters appear iterable because they are just strings,
+        # but if we actually try to iterate over them then we enter
+        # infinite recursion
+        if isinstance(state, str) and len(state) == 1:
+            return False
+
+        from_types = set(hooks.from_iter.registry.keys()) - {object}
+        can_from = any(isinstance(state, type_) for type_ in from_types)
+        return can_from
+
+    def __repr__(self):
+        return 'RecurTraversal({!r})'.format(self.cls)
 
 
 class ZoomAttrTraversal(Traversal):

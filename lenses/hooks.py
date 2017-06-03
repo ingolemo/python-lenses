@@ -218,12 +218,12 @@ else:
     @from_iter.register(str)
     def _bytes_from_iter(self, iterable):
         # type: (str, Iterable[str]) -> str
-        return ''.join(map(chr, iterable))
+        return ''.join(iterable)
 
     @from_iter.register(unicode)
     def _str_from_iter(self, iterable):
         # type: (unicode, Iterable[unicode]) -> unicode
-        return ''.join(iterable)
+        return u''.join(iterable)
 
 
 @from_iter.register(dict)

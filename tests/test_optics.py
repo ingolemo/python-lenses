@@ -8,7 +8,7 @@ from lenses import lens, bind, optics as b
 from lenses.maybe import Just, Nothing
 
 
-class Pair:
+class Pair(object):
 
     def __init__(self, left, right):
         self.left = left
@@ -366,6 +366,34 @@ def test_JsonIso_set():
     l = b.JsonIso()
     data = '{"numbers":[1, 2, 3]}'
     assert l.set(data, {'numbers': []}) == '{"numbers": []}'
+
+
+def test_RecurTraversal_to_list_of():
+    data = [1, [2], [3, 4], [[5], 6, [7, [8, 9]]]]
+    result = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    assert b.RecurTraversal(int).to_list_of(data) == result
+
+
+def test_RecurTraversal_over():
+    data = [
+        1,
+        [],
+        [2],
+        Pair(3, 4),
+        Pair('one', 'two'),
+        Pair([Pair(5, [6, 7]), 256.0], 8),
+        Pair(['three', Pair(9, 'four')], 'five'),
+    ]
+    result = [
+        2,
+        [],
+        [3],
+        Pair(4, 5),
+        Pair('one', 'two'),
+        Pair([Pair(6, [7, 8]), 256.0], 9),
+        Pair(['three', Pair(10, 'four')], 'five'),
+    ]
+    assert b.RecurTraversal(int).over(data, lambda n: n + 1) == result
 
 
 def test_TrivialIso_view():
