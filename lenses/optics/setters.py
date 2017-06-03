@@ -4,6 +4,7 @@ from .base import LensLike, Setter
 
 __all__ = ['ForkedSetter']
 
+
 class ForkedSetter(Setter):
     '''A setter representing the parallel composition of several sub-lenses.
 

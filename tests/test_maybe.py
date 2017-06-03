@@ -91,6 +91,7 @@ def test_Just_maybe():
     obj = object()
     assert Just(obj).maybe() is obj
 
+
 def test_Just_unwrap():
     obj = object()
     assert Just(obj).unwrap() is obj

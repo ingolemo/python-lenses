@@ -1,6 +1,7 @@
 from ..const import Const
 from .base import Fold, collect_args, multiap
 
+
 class IterableFold(Fold):
     '''A fold that can get values from any iterable object in python by
     iterating over it. Like any fold, you cannot set values.
@@ -22,6 +23,7 @@ class IterableFold(Fold):
     If you want to be able to set values as you iterate then look into
     the EachTraversal.
     '''
+
     def __init__(self):
         pass
 

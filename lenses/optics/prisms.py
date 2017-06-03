@@ -64,7 +64,7 @@ class InstancePrism(FilteringPrism):
         self.type = type_
 
     def predicate(self, value):
-         return isinstance(value, self.type)
+        return isinstance(value, self.type)
 
     def __repr__(self):
         return 'InstancePrism({!r})'.format(self.type)

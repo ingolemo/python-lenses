@@ -1,5 +1,6 @@
 from .typeclass import fmap
 
+
 class Functorisor(object):
     '''A Functorisor is a wrapper around an ordinary function that carries
     information about the return type of that function. Specifically

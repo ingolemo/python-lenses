@@ -16,6 +16,7 @@ class BothTraversal(Traversal):
         >>> BothTraversal().set([1, 2, 3], 4)
         [4, 4, 3]
     '''
+
     def __init__(self):
         pass
 
@@ -92,7 +93,6 @@ class GetZoomAttrTraversal(Traversal):
 
     def __repr__(self):
         return 'GetZoomAttrTraversal({!r})'.format(self.name)
-
 
 
 class ItemsTraversal(Traversal):
@@ -245,6 +245,7 @@ class ZoomTraversal(Traversal):
         >>> ZoomTraversal().set(state, 3)
         [1, 3]
     '''
+
     def __init__(self):
         pass
 

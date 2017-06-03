@@ -5,6 +5,7 @@ from ..typevars import S, T, A, B, X, Y
 
 from .base import BaseUiLens
 
+
 class UnboundLens(BaseUiLens[S, T, A, B]):
     'An unbound lens is a lens that has not been bound to any state.'
 
@@ -97,7 +98,6 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         # type: (A) -> S
         '''Construct a state given a focus.'''
         return self._optic.re().view(focus)
-
 
     def flip(self):
         # type: () -> UnboundLens[A, B, S, T]

@@ -3,6 +3,7 @@ from typing import Callable, Generic
 from .typeclass import mempty, mappend
 from .typevars import A, B, C, D
 
+
 class Const(Generic[C, A]):
     '''An applicative functor that doesn't care about the data it's
     supposed to be a functor over, caring only about the data it was passed
