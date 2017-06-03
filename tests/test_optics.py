@@ -8,51 +8,6 @@ from lenses import lens, bind, optics as b
 from lenses.maybe import Just, Nothing
 
 
-# def build_lens_strat():
-#     recursive_lens = strat.one_of(
-#         strat.tuples(strat.just(b.GetitemLens),
-#                      strat.integers(min_value=0, max_value=10)),
-#     )
-#     recursive_lenses = strat.lists(recursive_lens, max_size=5)
-
-#     def nonrecursive_lens(lcons):
-#         lst = strat.just(b.TrivialIso())
-#         dst = strat.just(1)
-#         for a_lens, data in lcons:
-#             if a_lens is b.GetitemLens:
-#                 lst = lst.map(a_lens(data).compose)
-#                 dst = strat.lists(dst, min_size=data + 1)
-#         return strat.tuples(lst, dst)
-#     return recursive_lenses.flatmap(nonrecursive_lens)
-
-# lens_strat = build_lens_strat()
-
-
-# # Tests for lens rules and other invariants
-# @hypothesis.given(lens_strat)
-# def test_get_then_set(lns):
-#     '''if we get from a state and then immediately set it again we
-#     should get back the same state'''
-#     ls, state = lns
-#     assert ls.set(state, ls.get(state)) == state
-
-
-# @hypothesis.given(lens_strat)
-# def test_set_then_get(lns):
-#     '''if we set a state and immediately get it we should get back what
-#     we set'''
-#     ls, state = lns
-#     obj = object()
-#     assert ls.get(ls.set(state, obj)) == obj
-
-
-# @hypothesis.given(lens_strat)
-# def test_set_then_set(lns):
-#     '''if we set a state using a lens and then immediately set it again,
-#     it should be as though we only set it once.'''
-#     ls, state = lns
-#     obj = object()
-#     assert ls.set(ls.set(state, obj), obj) == ls.set(state, obj)
 
 
 def test_LensLike():
