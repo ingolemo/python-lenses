@@ -223,6 +223,14 @@ def test_lens_add():
     assert bind([[1, 2], 3])[0] + [4] == [[1, 2, 4], 3]
 
 
+def test_lens_add_different_types():
+    assert bind(2) + 1.0 == 3.0
+
+
+def test_lens_radd():
+    assert 1 + bind(2) == 3
+
+
 def test_lens_subtract():
     assert bind(2) - 1 == 1
 
@@ -234,6 +242,10 @@ def test_lens_multiply():
 
 def test_lens_divide():
     assert bind(10) / 2 == 5
+
+
+def test_lens_neg():
+    assert -bind(1) == -1
 
 
 # Testing that you can use sublenses through Lens properly

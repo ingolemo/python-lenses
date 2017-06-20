@@ -7,39 +7,54 @@ from .. import optics
 from ..maybe import Just
 from ..typevars import S, T, A, B, X, Y
 
-# we skip all the augmented artithmetic methods because the point of the
-# lenses library is not to mutate anything
-# skip __and__ because it is used for composition
-transparent_dunders = ('''
-    __lt__ __le__ __eq__ __ne__ __gt__ __ge__
 
-    __add__ __sub__ __mul__ __matmul__ __truediv__
-    __floordiv__ __div__ __mod__ __divmod__ __pow__
-    __lshift__ __rshift__ __xor__ __or__
+def _carry_binary_op(name):
+    def operation(self, other):
+        def modifier(focus):
+            return getattr(operator, name)(focus, other)
+        return self.modify(modifier)
 
-    __radd__ __rsub__ __rmul__ __rmatmul__ __rtruediv__
-    __rfloordiv__ __rdiv__ __rmod__ __rdivmod__ __rpow__
-    __rlshift__ __rrshift__ __rxor__ __ror__
-
-    __neg__ __pos__ __invert__
-''').split()
+    return operation, 'self.modify(operator.{}, other)'.format(name)
 
 
-def _carry_op(name):
-    # type: (str) -> Any
-    def operation(self, *args, **kwargs):
-        return self.modify(lambda a: getattr(a, name)(*args, **kwargs))
+def _carry_reverse_op(name):
+    opname = name.replace('__r', '__')
+    def operation(self, other):
+        def modifier(focus):
+            return getattr(operator, opname)(other, focus)
+        return self.modify(modifier)
 
-    doc = 'Equivalent to `self.call({!r}, *args, **kwargs))`'
-    operation.__name__ = name
-    operation.__doc__ = doc.format(name)
-    return operation
+    doc = 'self.modify(lambda s, o: operator.{}(o, s), other)'.format(opname)
+    return operation, doc
+
+
+def _carry_unary_op(name):
+    def operation(self):
+        def modifier(focus):
+            return getattr(operator, name)(focus)
+        return self.modify(modifier)
+
+    return operation, 'self.modify(operator.{})'.format(name)
 
 
 def _add_extra_methods(cls):
     # type: (Type[BaseUiLens]) -> Type[BaseUiLens]
-    for dunder in transparent_dunders:
-        setattr(cls, dunder, _carry_op(dunder))
+    binary = '''__lt__ __le__ __eq__ __ne__ __gt__ __ge__
+                __add__ __sub__ __mul__ __matmul__ __truediv__
+                __floordiv__ __div__ __mod__ __divmod__ __pow__
+                __lshift__ __rshift__ __xor__ __or__'''.split()
+    reverse = '''__radd__ __rsub__ __rmul__ __rmatmul__ __rtruediv__
+                 __rfloordiv__ __rdiv__ __rmod__ __rdivmod__ __rpow__
+                 __rlshift__ __rrshift__ __rxor__ __ror__'''.split()
+    unary = '__neg__ __pos__ __invert__'.split()
+
+    funcs = [_carry_binary_op, _carry_reverse_op, _carry_unary_op]
+    for func, dunders in zip(funcs, [binary, reverse, unary]):
+        for dunder in dunders:
+            operation, doc = func(dunder)
+            operation.__name__ = dunder
+            operation.__doc__ = doc
+            setattr(cls, dunder, operation)
 
     return cls
 
