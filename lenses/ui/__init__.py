@@ -140,6 +140,11 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         # type: (optics.LensLike) -> UnboundLens[S, T, X, Y]
         return UnboundLens(self._optic.compose(optic))
 
+    def kind(self):
+        # type: () -> str
+        'Returns the "kind" of the lens.'
+        return self._optic.kind().__name__
+
     add_lens = __and__
 
 
@@ -234,6 +239,11 @@ class BoundLens(BaseUiLens[S, T, A, B]):
     def _compose_optic(self, optic):
         # type: (optics.LensLike) -> BoundLens[S, T, X, Y]
         return BoundLens(self._state, self._optic.compose(optic))
+
+    def kind(self):
+        # type: () -> str
+        'Returns the "kind" of the lens.'
+        return self._optic.kind().__name__
 
     add_lens = __and__
 

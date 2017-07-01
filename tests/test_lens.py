@@ -359,6 +359,40 @@ def test_type_unsupported_no_setattr():
         bind(object()).attr.set(None)
 
 
+# test various kinds
+def test_trivial_kind():
+    assert lens.kind() == 'Isomorphism'
+
+
+def test_compose_iso_and_lens_kind():
+    assert (lens & lens[0]).kind() == 'Lens'
+
+
+def test_compose_iso_and_fold_kind():
+    assert (lens & lens.iter_()).kind() == 'Fold'
+
+
+def test_compose_lens_and_fold_kind():
+    assert (lens[0] & lens.iter_()).kind() == 'Fold'
+
+
+def test_compose_iso_and_setter_kind():
+    assert (lens & lens.fork_(lens, lens)) == 'Setter'
+
+
+def test_compose_lens_and_setter_kind():
+    assert (lens[0] & lens.fork_(lens, lens)) == 'Setter'
+
+
+def test_compose_fold_and_setter_kind_errors():
+    with pytest.raises(RuntimeError):
+        lens.iter_() & lens.fork_(lens, lens)
+
+
+def test_bound_iso_kind():
+    assert bind(True).kind() == 'Isomorphism'
+
+
 # misc Lens tests
 def test_lens_informative_repr():
     obj = object()

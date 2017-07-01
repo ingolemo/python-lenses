@@ -16,6 +16,19 @@ Traversal then the optic we get back would be a Fold because Getters and
 Traversals are both kinds of Fold. We cannot compose two optics that do
 not share a common ancestor; e.g. we cannot compose a Fold with a Setter.
 
+You can find out the kind of a lens using the `kind` method:
+
+	>>> from lenses import lens
+	>>> my_lens = lens[0]
+	>>> my_lens.kind()
+	'Lens'
+	>>> my_prism = lens.instance_(str)
+	>>> my_prism.kind()
+	'Prism'
+	>>> my_traversal = my_lens & my_prism
+	>>> my_traversal.kind()
+	'Traversal'
+
 
 ## Traversals
 
@@ -31,7 +44,6 @@ returns a single focus. It will return the _first_ item focused by the
 optic. If we want to get all the items focused by that optic then we
 can use the `collect` method which will return those objects in a list:
 
-	>>> from lenses import lens
 	>>> data = [0, 1, 2, 3]
 	>>> both = lens.both_()
 	>>> both.get()(data)
