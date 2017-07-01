@@ -88,8 +88,9 @@ attributes.
 	Vector(3, 2)
 
 Here `Vector.x` and `Vector.y` are unbound lenses, but `my_vector.x` and
-`my_vector.y` are both bound lenses that are bound to `my_vector`. This
-should remind you of the way that python's methods and properties work.
+`my_vector.y` are both bound lenses that are bound to `my_vector`. A
+lens used in this way is similar to python's `property` decorator,
+except that the api is more powerful and the setter acts immutably.
 
 If you ever end up focusing an object with a sublens as one of its
 attributes, lenses are smart enough to follow that sublens to its focus.

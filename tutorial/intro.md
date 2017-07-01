@@ -5,8 +5,8 @@ about; a `lens` object:
 
 	>>> from lenses import lens
 
-The `lens` object is an `UnboundLens` object. An unbound lens
-represents a computation that you want to perform in order to access
+The `lens` object is an instance of `lenses.UnboundLens`. An unbound
+lens represents a computation that you want to perform in order to access
 your data from within some data-structure.
 
 Here's some simple data:
@@ -42,7 +42,7 @@ structured:
 Now that we have a representation of our data access we can use it to
 actually access our focus. We do this by calling the `get` method on the
 lens. The `get` method returns a function that that does the equivalent
-of indexing `1`. The returned fuction takes one argument — the state.
+of indexing `1`. The returned function takes one argument — the state.
 
 	>>> getitem_one_getter = getitem_one.get()
 	>>> getitem_one_getter(data)
@@ -202,7 +202,7 @@ calling anything on it.
 
 If you can be sure that the method you want to call will only mutate
 the focus itself and not any of its sub-data then you can pass a
-`shallow=True` keywork argument to `call_mut` and it will only make a
+`shallow=True` keyword argument to `call_mut` and it will only make a
 shallow copy.
 
 	>>> data = [1, [3, 4, 2], 5]
@@ -227,6 +227,7 @@ can make using lenses in your code much more readable:
 
 The only operator that you can't use in this way is `&` (the _bitwise and_
 operator, magic method `__and__`). Lenses reserve this for something else.
+If you wish to `&` your focus, you can use the `bitwise_and` method instead.
 
 Lenses work best when you have to manipulate highly nested data
 structures that hold a great deal of state, such as when programming
