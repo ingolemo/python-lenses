@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 '''
 robots.py
 
@@ -42,7 +41,6 @@ def duplicates(items):
 
 
 class Vector(tuple):
-
     @classmethod
     def random(cls):
         'produces a random vector inside the play area.'
@@ -61,14 +59,15 @@ class Vector(tuple):
         '''returns the vector moved one step in the direction of the
         other, potentially diagonally.'''
 
-        return self + Vector((
-            (self[0] < other[0]) - (self[0] > other[0]),
-            (self[1] < other[1]) - (self[1] > other[1]),
-        ))
+        return self + Vector(
+            (
+                (self[0] < other[0]) - (self[0] > other[0]),
+                (self[1] < other[1]) - (self[1] > other[1]),
+            )
+        )
 
 
 class GameState:
-
     def __init__(self):
         self.robots = list()
         self.crashes = set()
@@ -86,8 +85,14 @@ class GameState:
         whether the input had an effect on the state.'''
 
         dirs = {
-            'h': (-1, 0), 'j': (0, 1), 'k': (0, -1), 'l': (1, 0),
-            'y': (-1, -1), 'u': (1, -1), 'n': (1, 1), 'b': (-1, 1),
+            'h': (-1, 0),
+            'j': (0, 1),
+            'k': (0, -1),
+            'l': (1, 0),
+            'y': (-1, -1),
+            'u': (1, -1),
+            'n': (1, 1),
+            'b': (-1, 1),
         }
 
         if input in dirs:

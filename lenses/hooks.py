@@ -49,7 +49,9 @@ def setitem_immutable(self, key, value):
     else:
         return self._lens_setitem(key, value)
 
+
 if sys.version_info[0] > 2:
+
     @setitem_immutable.register(bytes)
     def _bytes_setitem_immutable(self, key, value):
         # type: (bytes, int, int) -> bytes
@@ -64,6 +66,7 @@ if sys.version_info[0] > 2:
         data[key] = value
         return ''.join(data)
 else:
+
     @setitem_immutable.register(str)
     def _bytes_setitem_immutable(self, key, value):
         # type: (str, int, int) -> str
@@ -82,8 +85,7 @@ else:
 @setitem_immutable.register(tuple)
 def _tuple_setitem_immutable(self, key, value):
     # type: (Tuple[A, ...], int, A) -> Tuple[A, ...]
-    return tuple(value if i == key else item
-                 for i, item in enumerate(self))
+    return tuple(value if i == key else item for i, item in enumerate(self))
 
 
 @singledispatch
@@ -132,8 +134,10 @@ def _tuple_setattr_immutable(self, name, value):
     # type: (Any, str, A) -> Any
     # setting attributes on a tuple probably means we really have a
     # namedtuple so we can use self._fields to understand the names
-    data = (value if field == name else item
-            for field, item in zip(self._fields, self))
+    data = (
+        value if field == name else item
+        for field, item in zip(self._fields, self)
+    )
     return type(self)(*data)
 
 
@@ -205,6 +209,7 @@ def from_iter(self, iterable):
 
 
 if sys.version_info[0] > 2:
+
     @from_iter.register(bytes)
     def _bytes_from_iter(self, iterable):
         # type: (bytes, Iterable[int]) -> bytes
@@ -215,6 +220,7 @@ if sys.version_info[0] > 2:
         # type: (str, Iterable[str]) -> str
         return ''.join(iterable)
 else:
+
     @from_iter.register(str)
     def _bytes_from_iter(self, iterable):
         # type: (str, Iterable[str]) -> str

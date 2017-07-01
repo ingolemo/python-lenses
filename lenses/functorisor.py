@@ -27,6 +27,7 @@ class Functorisor(object):
     def map(self, f):
         def new_f(a):
             return fmap(self.func(a), f)
+
         return Functorisor(self.pure, new_f)
 
     def update(self, fn):

@@ -7,7 +7,6 @@ import lenses.hooks as s
 
 def test_setitem_imm_custom_class():
     class C(object):
-
         def __init__(self, item):
             self.item = item
 
@@ -38,7 +37,6 @@ def test_setitem_imm_tuple():
 
 def test_setattr_imm_custom_class():
     class C(object):
-
         def __init__(self, attr):
             self.attr = attr
 
@@ -56,7 +54,6 @@ def test_setattr_imm_custom_class():
 
 def test_setattr_imm_custom_class_raw():
     class C(object):
-
         def __init__(self, attr):
             self.attr = attr
 
@@ -73,7 +70,6 @@ def test_setattr_imm_namedtuple():
 
 def test_to_iter_custom_class():
     class C(object):
-
         def __init__(self, attr):
             self.attr = attr
 
@@ -88,7 +84,6 @@ def test_to_iter_custom_class():
 
 def test_from_iter_custom_class():
     class C(object):
-
         def __init__(self, attr):
             self.attr = attr
 

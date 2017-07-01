@@ -12,6 +12,7 @@ def _carry_binary_op(name):
     def operation(self, other):
         def modifier(focus):
             return getattr(operator, name)(focus, other)
+
         return self.modify(modifier)
 
     return operation, 'self.modify(operator.{}, other)'.format(name)
@@ -19,9 +20,11 @@ def _carry_binary_op(name):
 
 def _carry_reverse_op(name):
     opname = name.replace('__r', '__')
+
     def operation(self, other):
         def modifier(focus):
             return getattr(operator, opname)(other, focus)
+
         return self.modify(modifier)
 
     doc = 'self.modify(lambda s, o: operator.{}(o, s), other)'.format(opname)
@@ -32,6 +35,7 @@ def _carry_unary_op(name):
     def operation(self):
         def modifier(focus):
             return getattr(operator, name)(focus)
+
         return self.modify(modifier)
 
     return operation, 'self.modify(operator.{})'.format(name)
@@ -123,9 +127,11 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens.each_().bitwise_and(5)([1, 2, 3, 4])
             [1, 0, 1, 4]
         '''
+
         def func(a):
             # type: (A) -> B
             return a & other
+
         return self.modify(func)
 
     def both_(self):
@@ -598,7 +604,8 @@ class BaseUiLens(Generic[S, T, A, B]):
             OrderedDict([(2, 10), (3, 20)])
         '''
         return self._compose_optic(
-            optics.ItemsTraversal() & optics.GetitemLens(0))
+            optics.ItemsTraversal() & optics.GetitemLens(0)
+        )
 
     def listwrap_(self):
         # type: () -> BaseUiLens[S, T, X, Y]
@@ -775,7 +782,8 @@ class BaseUiLens(Generic[S, T, A, B]):
             OrderedDict([(1, 11), (2, 21)])
         '''
         return self._compose_optic(
-            optics.ItemsTraversal() & optics.GetitemLens(1))
+            optics.ItemsTraversal() & optics.GetitemLens(1)
+        )
 
     def zoom_(self):
         # type: () -> BaseUiLens[S, T, X, Y]
@@ -822,15 +830,19 @@ class BaseUiLens(Generic[S, T, A, B]):
             raise AttributeError('Not a valid lens constructor')
 
         if name.startswith('call_mut_'):
+
             def caller(*args, **kwargs):
                 # type: (*Any, **Any) -> T
                 return self.call_mut(name[9:], *args, **kwargs)
+
             return caller
 
         if name.startswith('call_'):
+
             def caller(*args, **kwargs):
                 # type: (*Any, **Any) -> T
                 return self.call(name[5:], *args, **kwargs)
+
             return caller
 
         return self.getzoomattr_(name)

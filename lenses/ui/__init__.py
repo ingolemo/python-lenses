@@ -30,8 +30,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> zero_item_getter([1, 2, 3])
             1
         '''
+
         def getter(state):
             return self._optic.to_list_of(state)[0]
+
         return getter
 
     def collect(self):
@@ -47,8 +49,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> get_both([1, 2, 3])
             [1, 2]
         '''
+
         def getter(state):
             return self._optic.to_list_of(state)
+
         return getter
 
     def get_monoid(self):
@@ -61,8 +65,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> get_each_monoidally([[], [1], [2, 3]])
             [1, 2, 3]
         '''
+
         def getter(state):
             return self._optic.view(state)
+
         return getter
 
     def set(self, newvalue):
@@ -74,8 +80,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> set_item_one_to_four([1, 2, 3])
             [1, 4, 3]
         '''
+
         def setter(state):
             return self._optic.set(state, newvalue)
+
         return setter
 
     def modify(self, func):
@@ -90,8 +98,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> add_ten_to_item_one([1, 2, 3])
             [1, 12, 3]
         '''
+
         def modifier(state):
             return self._optic.over(state, func)
+
         return modifier
 
     def construct(self, focus):
@@ -246,5 +256,6 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         return self._optic.kind().__name__
 
     add_lens = __and__
+
 
 __all__ = ['UnboundLens', 'BoundLens']

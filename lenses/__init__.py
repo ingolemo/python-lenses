@@ -31,6 +31,7 @@ def bind(state):
     'Returns a simple BoundLens object bound to `state`.'
     return ui.BoundLens(state, optics.TrivialIso())
 
+
 lens = ui.UnboundLens(optics.TrivialIso())  # type: ui.UnboundLens
 
 __all__ = ['lens', 'bind', 'optics']

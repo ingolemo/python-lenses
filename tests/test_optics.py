@@ -9,7 +9,6 @@ from lenses.maybe import Just, Nothing
 
 
 class Pair(object):
-
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -89,6 +88,7 @@ def test_prism_folder_failure():
 
 def test_Getter_composes_correctly():
     visited = []
+
     def visit(item):
         visited.append(item)
         return item
@@ -168,6 +168,7 @@ def test_EachTraversal_set_empty():
 def test_ErrorLens_view():
     class CustomException(Exception):
         pass
+
     with pytest.raises(CustomException):
         b.ErrorIso(CustomException('a message')).view(object())
 
@@ -175,6 +176,7 @@ def test_ErrorLens_view():
 def test_ErrorLens_set():
     class CustomException(Exception):
         pass
+
     with pytest.raises(CustomException):
         b.ErrorIso(CustomException('a message')).set(object(), object())
 
@@ -251,8 +253,7 @@ def test_Lens_set():
 def test_Lens_over():
     my_lens = b.Lens(lambda a: a[:-1], lambda s, a: a + '!')
     state = 'hello!'
-    assert my_lens.over(
-        state, lambda a: a.replace('lo', 'p')) == 'help!'
+    assert my_lens.over(state, lambda a: a.replace('lo', 'p')) == 'help!'
 
 
 def test_Lens_meaningful_repr():
@@ -323,14 +324,15 @@ def test_ItemByValueLens_view_nonexistent():
 
 def test_ItemByValueLens_set():
     data = {'hello': 0, 'world': 1}
-    assert b.ItemByValueLens(1).set(data, ('everyone', 2)) == {
-        'hello': 0, 'everyone': 2}
+    assert b.ItemByValueLens(1).set(data, ('everyone',
+                                           2)) == {'hello': 0, 'everyone': 2}
 
 
 def test_ItemByValueLens_set_nonexistent():
     data = {'hello': 0, 'world': 1}
     assert b.ItemByValueLens(2).set(data, ('test', 2)) == {
-        'hello': 0, 'world': 1, 'test': 2}
+        'hello': 0, 'world': 1, 'test': 2
+    }
 
 
 def test_ItemsTraversal_to_list_of():
@@ -347,8 +349,7 @@ def test_ItemsTraversal_to_list_of_empty():
 def test_ItemsTraversal_over():
     data = {0: 'zero', 1: 'one'}
     my_lens = b.ItemsTraversal() & b.GetitemLens(0)
-    assert my_lens.over(data, lambda a: a + 1) == {
-        1: 'zero', 2: 'one'}
+    assert my_lens.over(data, lambda a: a + 1) == {1: 'zero', 2: 'one'}
 
 
 def test_ItemsTraversal_over_empty():

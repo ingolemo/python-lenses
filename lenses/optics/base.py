@@ -133,8 +133,9 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError('Must be an instance of Fold to .preview()')
 
-        const = Functorisor(lambda a: Const(Nothing()),
-                            lambda a: Const(Just(a)))
+        const = Functorisor(
+            lambda a: Const(Nothing()), lambda a: Const(Just(a))
+        )
         return self.func(const, state).unwrap()
 
     def view(self, state):
@@ -169,8 +170,7 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError('Must be an instance of Fold to .to_list_of()')
 
-        consttup = Functorisor(lambda a: Const([]),
-                               lambda a: Const([a]))
+        consttup = Functorisor(lambda a: Const([]), lambda a: Const([a]))
         return self.func(consttup, state).unwrap()
 
     def over(self, state, fn):
@@ -183,8 +183,9 @@ class LensLike(object):
         if not self._is_kind(Setter):
             raise TypeError('Must be an instance of Setter to .over()')
 
-        identfn = Functorisor(lambda a: Identity(a),
-                              lambda a: Identity(fn(a)))
+        identfn = Functorisor(
+            lambda a: Identity(a), lambda a: Identity(fn(a))
+        )
         return self.func(identfn, state).unwrap()
 
     def set(self, state, value):
@@ -197,8 +198,7 @@ class LensLike(object):
         if not self._is_kind(Setter):
             raise TypeError('Must be an instance of Setter to .set()')
 
-        ident = Functorisor(lambda a: Identity(a),
-                            lambda a: Identity(value))
+        ident = Functorisor(lambda a: Identity(a), lambda a: Identity(value))
         return self.func(ident, state).unwrap()
 
     def compose(self, other):
@@ -214,9 +214,10 @@ class LensLike(object):
 
     def kind(self):
         '''Returns a class representing the 'kind' of optic.'''
-        optics = [Equality, Isomorphism, Prism, Review,
-                  Lens, Traversal,
-                  Getter, Setter, Fold]
+        optics = [
+            Equality, Isomorphism, Prism, Review, Lens, Traversal, Getter,
+            Setter, Fold
+        ]
         for optic in optics:
             if self._is_kind(optic):
                 return optic
@@ -464,8 +465,7 @@ class Prism(Traversal, Review):
         return not self.unpack(state).is_nothing()
 
     def __repr__(self):
-        return 'Prism({!r}, {!r})'.format(self.unpack,
-                                          self.pack)
+        return 'Prism({!r}, {!r})'.format(self.unpack, self.pack)
 
 
 class Isomorphism(Lens, Prism):
@@ -529,8 +529,7 @@ class Isomorphism(Lens, Prism):
         return typeclass.fmap(f(self.forwards(state)), self.backwards)
 
     def __repr__(self):
-        return 'Isomorphism({!r}, {!r})'.format(self.forwards,
-                                                self.backwards)
+        return 'Isomorphism({!r}, {!r})'.format(self.forwards, self.backwards)
 
 
 class Equality(Isomorphism):
@@ -665,8 +664,19 @@ class TrivialIso(Isomorphism):
     def __repr__(self):
         return 'TrivialIso()'
 
+
 __all__ = [
-    'LensLike', 'Fold', 'Setter', 'Getter', 'Traversal', 'Lens',
-    'Review', 'Prism', 'Isomorphism', 'Equality', 'ComposedLens',
-    'TrivialIso', 'ErrorIso',
+    'LensLike',
+    'Fold',
+    'Setter',
+    'Getter',
+    'Traversal',
+    'Lens',
+    'Review',
+    'Prism',
+    'Isomorphism',
+    'Equality',
+    'ComposedLens',
+    'TrivialIso',
+    'ErrorIso',
 ]

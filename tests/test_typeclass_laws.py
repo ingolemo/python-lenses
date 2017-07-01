@@ -7,7 +7,6 @@ import lenses.typeclass as tc
 
 
 class MonoidProduct(object):
-
     def __init__(self, n):
         self.n = n
 
@@ -34,10 +33,12 @@ def stream_apply_strat(funcstrat, substrat):
 
 
 def maybes():
-    return strat.sampled_from([
-        lambda a: lenses.maybe.Nothing(),
-        lenses.maybe.Just,
-    ])
+    return strat.sampled_from(
+        [
+            lambda a: lenses.maybe.Nothing(),
+            lenses.maybe.Just,
+        ]
+    )
 
 
 def monoids():
@@ -67,25 +68,38 @@ def applicatives(substrat):
 
 
 def functors(substrat):
-    return one_of(applicatives(substrat), )
+    return one_of(
+        applicatives(substrat),
+    )
 
 
 def data_funcs(wrapper):
-    intfuncs = streaming(sampled_from([lambda a: a * 2, lambda a: a + 1, ]))
-    floatfuncs = streaming(sampled_from([
-        lambda a: a / 2,
-        lambda a: a + 1.5,
+    intfuncs = streaming(sampled_from([
+        lambda a: a * 2,
+        lambda a: a + 1,
     ]))
-    stringfuncs = streaming(sampled_from([
-        lambda a: a + '!',
-        lambda a: (a + '#')[0],
-    ]))
-    unistringfuncs = streaming(sampled_from([
-        lambda a: a + u'!',
-        lambda a: (a + u'#')[0],
-    ]))
+    floatfuncs = streaming(
+        sampled_from([
+            lambda a: a / 2,
+            lambda a: a + 1.5,
+        ])
+    )
+    stringfuncs = streaming(
+        sampled_from([
+            lambda a: a + '!',
+            lambda a: (a + '#')[0],
+        ])
+    )
+    unistringfuncs = streaming(
+        sampled_from([
+            lambda a: a + u'!',
+            lambda a: (a + u'#')[0],
+        ])
+    )
+
     def make_option(strategy, funcs):
         return strat.tuples(strategy, wrapper(strategy), funcs)
+
     return one_of(
         make_option(strat.integers(), intfuncs),
         make_option(strat.floats(allow_nan=False), floatfuncs),

@@ -168,7 +168,6 @@ def test_lens_flip_not_isomorphism():
 
 def test_lens_descriptor():
     class MyClass(object):
-
         def __init__(self, items):
             self._private_items = items
 
@@ -176,12 +175,12 @@ def test_lens_descriptor():
             return self._private_items == other._private_items
 
         first = lens._private_items[0]
+
     assert MyClass([1, 2, 3]).first.set(4) == MyClass([4, 2, 3])
 
 
 def test_lens_descriptor_doesnt_bind_from_class():
     class MyClass(object):
-
         def __init__(self, items):
             self._private_items = items
 
@@ -196,7 +195,6 @@ def test_lens_descriptor_doesnt_bind_from_class():
 
 def test_lens_descriptor_zoom():
     class MyClass(object):
-
         def __init__(self, items):
             self._private_items = items
 
@@ -204,7 +202,7 @@ def test_lens_descriptor_zoom():
             return self._private_items == other._private_items
 
         def __repr__(self):
-            return'M({!r})'.format(self._private_items)
+            return 'M({!r})'.format(self._private_items)
 
         first = lens._private_items[0]
 
@@ -304,7 +302,6 @@ def test_type_dict():
 
 def test_type_custom_class_copy_and_mutate():
     class C(object):
-
         def __init__(self, a, b):
             self.a = a
             self.b = b
@@ -317,7 +314,6 @@ def test_type_custom_class_copy_and_mutate():
 
 def test_type_custom_class_lens_setattr():
     class C(object):
-
         def __init__(self, a):
             self._a = a
 
@@ -337,7 +333,6 @@ def test_type_custom_class_lens_setattr():
 
 def test_type_custom_class_immutable():
     class C(object):
-
         def __init__(self, a):
             self._a = a
 

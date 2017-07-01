@@ -26,6 +26,7 @@ def _mempty_int(self):
 
 
 if sys.version_info[0] < 3:
+
     @mempty.register(long)
     def _mempty_long(self):
         # type: (long) -> long

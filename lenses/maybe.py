@@ -67,7 +67,6 @@ class Just(Generic[A]):
 
 
 class Nothing(Just[A]):
-
     def __init__(self):
         # type: () -> None
         pass

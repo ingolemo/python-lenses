@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 '''
 naughts_and_crosses.py
 
@@ -109,6 +108,7 @@ def play():
         board = board.make_move(x, y)
     print(board, end='\n\n')
     print(board.winner)
+
 
 if __name__ == '__main__':
     play()
