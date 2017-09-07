@@ -13,7 +13,7 @@ for python.
 
 You can install the latest github version using pip like so:
 
-	pip install git+git://github.com/ingolemo/python-lenses.git
+	pip install lenses
 
 You can uninstall similarly:
 
