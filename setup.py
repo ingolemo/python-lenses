@@ -14,7 +14,7 @@ except IOError:
 
 setuptools.setup(
     name='lenses',
-    version='0.2.0',
+    version='0.2.1',
     description='A lens library for python',
     long_description=long_desc,
     url='https://github.com/ingolemo/python-lenses',
