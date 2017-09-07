@@ -1,136 +1,60 @@
 import hypothesis
 import hypothesis.strategies as strat
-from hypothesis.strategies import just, one_of, sampled_from, streaming
 
 import lenses
 import lenses.typeclass as tc
 
 
-class MonoidProduct(object):
-    def __init__(self, n):
-        self.n = n
-
-    def __add__(self, other):
-        return MonoidProduct(self.n * other.n)
-
-    def __eq__(self, other):
-        return self.n == other.n
-
-    def mempty(self):
-        return MonoidProduct(1)
+def objects():
+    return strat.just(object())
 
 
-def many_one_of(*strategies):
-    return one_of(*(streaming(s) for s in strategies))
-
-
-def apply_strat(funcstrat, substrat):
-    return substrat.flatmap(lambda a: funcstrat.map(lambda f: f(a)))
-
-
-def stream_apply_strat(funcstrat, substrat):
-    return funcstrat.flatmap(lambda fn: substrat.map(lambda s: s.map(fn)))
-
-
-def maybes():
-    return strat.sampled_from(
-        [
-            lambda a: lenses.maybe.Nothing(),
-            lenses.maybe.Just,
-        ]
+def maybes(substrat):
+    return substrat.flatmap(
+        lambda a: strat.sampled_from([
+            lenses.maybe.Nothing(),
+            lenses.maybe.Just(a),
+        ])
     )
 
 
-def monoids():
-    base = many_one_of(
-        strat.integers(),
-        strat.lists(strat.integers()),
-        strat.tuples(strat.integers()),
-        strat.tuples(strat.integers(), strat.integers()),
-        strat.text(),
-        strat.integers().map(MonoidProduct),
-        strat.dictionaries(strat.integers(), strat.integers()),
-    )
-
-    def recurse(substrat):
-        return stream_apply_strat(maybes(), substrat)
-
-    return strat.recursive(base, recurse)
+# the free monoid should be good enough
+monoids = strat.text
 
 
 def applicatives(substrat):
-    return one_of(
+    return strat.one_of(
         strat.lists(substrat),
         strat.lists(substrat).map(tuple),
         substrat.map(lenses.identity.Identity),
-        apply_strat(maybes(), substrat),
+        maybes(substrat),
     )
 
 
 def functors(substrat):
-    return one_of(
-        applicatives(substrat),
-    )
+    return applicatives(substrat)
 
 
-def data_funcs(wrapper):
-    intfuncs = streaming(sampled_from([
-        lambda a: a * 2,
-        lambda a: a + 1,
-    ]))
-    floatfuncs = streaming(
-        sampled_from([
-            lambda a: a / 2,
-            lambda a: a + 1.5,
-        ])
-    )
-    stringfuncs = streaming(
-        sampled_from([
-            lambda a: a + '!',
-            lambda a: (a + '#')[0],
-        ])
-    )
-    unistringfuncs = streaming(
-        sampled_from([
-            lambda a: a + u'!',
-            lambda a: (a + u'#')[0],
-        ])
-    )
-
-    def make_option(strategy, funcs):
-        return strat.tuples(strategy, wrapper(strategy), funcs)
-
-    return one_of(
-        make_option(strat.integers(), intfuncs),
-        make_option(strat.floats(allow_nan=False), floatfuncs),
-        make_option(strat.text(), stringfuncs),
-        make_option(strat.characters(), unistringfuncs),
-    )
-
-
-@hypothesis.given(monoids())
-def test_monoid_law_associativity(monoids):
+@hypothesis.given(monoids(), monoids(), monoids())
+def test_monoid_law_associativity(m1, m2, m3):
     # (a + b) + c = a + (b + c)
-    m1, m2, m3 = monoids[0], monoids[1], monoids[2]
     add = tc.mappend
     assert add(add(m1, m2), m3) == add(m1, add(m2, m3))
 
 
 @hypothesis.given(monoids())
-def test_monoid_law_left_identity(monoids):
+def test_monoid_law_left_identity(m):
     # mempty + a = a
-    monoid = monoids[0]
-    assert tc.mappend(tc.mempty(monoid), monoid) == monoid
+    assert tc.mappend(tc.mempty(m), m) == m
 
 
 @hypothesis.given(monoids())
-def test_monoid_law_right_identity(monoids):
+def test_monoid_law_right_identity(m):
     # a + mempty = a
-    monoid = monoids[0]
-    assert tc.mappend(monoid, tc.mempty(monoid)) == monoid
+    assert tc.mappend(m, tc.mempty(m)) == m
 
 
-@hypothesis.given(functors(just(object())))
+@hypothesis.given(functors(objects()))
 def test_functor_law_identity(data):
     # fmap id = id
     def identity(a):
@@ -139,12 +63,11 @@ def test_functor_law_identity(data):
     assert tc.fmap(data, identity) == identity(data)
 
 
-@hypothesis.given(data_funcs(functors))
-def test_functor_law_distributive(f):
+@hypothesis.given(functors(objects()))
+def test_functor_law_distributive(functor):
     # fmap (g . f) = fmap g . fmap f
-    _, functor, funcs = f
-    f1 = funcs[0]
-    f2 = funcs[1]
+    f1 = lambda a: [a]
+    f2 = str
 
     def composed(a):
         return f1(f2(a))
@@ -152,7 +75,7 @@ def test_functor_law_distributive(f):
     assert tc.fmap(functor, composed) == tc.fmap(tc.fmap(functor, f2), f1)
 
 
-@hypothesis.given(applicatives(strat.integers()))
+@hypothesis.given(applicatives(objects()))
 def test_applicative_law_identity(data):
     # pure id <*> v = v
     def identity(a):
@@ -161,34 +84,33 @@ def test_applicative_law_identity(data):
     assert tc.apply(data, tc.pure(data, identity)) == data
 
 
-@hypothesis.given(data_funcs(applicatives))
-def test_applicative_law_homomorphism(datas):
+@hypothesis.given(applicatives(objects()))
+def test_applicative_law_homomorphism(appl):
     # pure f <*> pure x = pure (f x)
-    x, appl, funcs = datas
-    f = funcs[0]
+    x = object()
+    f = id
 
     left = tc.apply(tc.pure(appl, x), tc.pure(appl, f))
     right = tc.pure(appl, f(x))
     assert left == right
 
 
-@hypothesis.given(data_funcs(applicatives))
-def test_applicative_law_interchange(datas):
+@hypothesis.given(applicatives(objects()))
+def test_applicative_law_interchange(appl):
     # u <*> pure y = pure ($ y) <*> u
-    y, appl, funcs = datas
-    u = tc.pure(appl, funcs[0])
+    y = object()
+    u = tc.pure(appl, str)
 
     left = tc.apply(tc.pure(appl, y), u)
     right = tc.apply(u, tc.pure(appl, lambda a: a(y)))
     assert left == right
 
 
-@hypothesis.given(data_funcs(applicatives))
-def test_applicative_law_composition(datas):
+@hypothesis.given(applicatives(objects()))
+def test_applicative_law_composition(appl):
     # pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
-    _, appl, funcs = datas
-    u = tc.pure(appl, funcs[0])
-    v = tc.pure(appl, funcs[1])
+    u = tc.pure(appl, lambda a: [a])
+    v = tc.pure(appl, str)
     w = appl
 
     def compose(f1):
