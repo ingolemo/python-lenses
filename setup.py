@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_desc,
     url='https://github.com/ingolemo/python-lenses',
     author='Adrian Room',
-    author_email='<ingolemo@gmail.com>',
+    author_email='ingolemo@gmail.com',
     license='GPLv3+',
     classifiers=[
         'Development Status :: 3 - Alpha',
