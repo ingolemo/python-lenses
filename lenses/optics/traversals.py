@@ -164,7 +164,7 @@ class RecurTraversal(Traversal):
                 for focus in self.folder(substate):
                     yield focus
         elif hasattr(state, '__dict__'):
-            for attr in state.__dict__:
+            for attr in sorted(state.__dict__):
                 substate = getattr(state, attr)
                 for focus in self.folder(substate):
                     yield focus
@@ -193,7 +193,7 @@ class RecurTraversal(Traversal):
 
     def build_dunder_dict(self, state, values):
         state = copy.copy(state)
-        for attr in state.__dict__:
+        for attr in sorted(state.__dict__):
             substate = getattr(state, attr)
             new_substate, values = self.build_object(substate, values)
             setattr(state, attr, new_substate)
