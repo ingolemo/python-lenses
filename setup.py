@@ -3,8 +3,14 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(here, 'readme.md')) as handle:
-    long_desc = handle.read()
+try:
+    with open(os.path.join(here, 'readme.md')) as handle:
+        long_desc = handle.read()
+except IOError:
+    # the readme should get included in source tarballs, but it shouldn't
+    # be in the wheel. I can't find a way to do both, so we'll just ignore
+    # the long_description when installing from the source tarball.
+    long_desc = None
 
 setuptools.setup(
     name='lenses',
