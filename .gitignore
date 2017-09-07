@@ -5,4 +5,6 @@
 .mypy_cache/
 lenses.egg-info/
 venv/
+build/
+dist/
 *.pyc
