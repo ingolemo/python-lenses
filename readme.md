@@ -13,11 +13,11 @@ for python.
 
 You can install the latest github version using pip like so:
 
-	pip install lenses
+    pip install lenses
 
 You can uninstall similarly:
 
-	pip uninstall lenses
+    pip uninstall lenses
 
 
 ## Documentation
@@ -59,6 +59,29 @@ Here's a simple example:
 [{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
  {'name': 'Richard', 'scores': ['C', None, 'D', 'C']},
  {'name': 'Zoe', 'scores': ['A', 'A', 'A', 'A']}]
+
+```
+
+The definition of `format_scores` means _for each item in the data take
+the value with the key of `'scores'` and then for each item in that list
+that is an instance of `str`, call its `upper` method on it._ That one
+line is the equivalent of this code:
+
+```python
+def format_scores(data):
+    result = {}
+    for key, value in data.items():
+        if key == 'scores':
+            new_value = []
+            for letter in value:
+                if is_instance(maybe_letter, str):
+                    new_value.append(maybe_letter.upper())
+                else:
+                    new_value.append(maybe_letter)
+            result[key] = new_value
+        else:
+            result[key] = value
+    return result
 
 ```
 
