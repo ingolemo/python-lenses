@@ -116,7 +116,7 @@ class GameState:
         one another too.'''
 
         # move the robots towards the player
-        self = lens.robots.each_().call_step_towards(self.player)(self)
+        self = lens.robots.Each().call_step_towards(self.player)(self)
         # robots in the same place are crashes
         self = lens.crashes.call_union(duplicates(self.robots))(self)
         # remove crashed robots
