@@ -4,7 +4,7 @@ import copy
 import operator
 
 from .. import optics
-from ..maybe import Just
+from ..maybe import Just as mJust
 from ..typevars import S, T, A, B, X, Y
 
 
@@ -124,7 +124,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         method since lenses use __and__ for doing composition.
 
             >>> from lenses import lens
-            >>> lens.each_().bitwise_and(5)([1, 2, 3, 4])
+            >>> lens.Each().bitwise_and(5)([1, 2, 3, 4])
             [1, 0, 1, 4]
         '''
 
@@ -134,21 +134,21 @@ class BaseUiLens(Generic[S, T, A, B]):
 
         return self.modify(func)
 
-    def both_(self):
+    def Both(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''A traversal that focuses both items [0] and [1].
 
             >>> from lenses import lens
-            >>> lens.both_()
+            >>> lens.Both()
             UnboundLens(BothTraversal())
-            >>> lens.both_().collect()([1, 2, 3])
+            >>> lens.Both().collect()([1, 2, 3])
             [1, 2]
-            >>> lens.both_().set(4)([1, 2, 3])
+            >>> lens.Both().set(4)([1, 2, 3])
             [4, 4, 3]
         '''
         return self._compose_optic(optics.BothTraversal())
 
-    def decode_(self, encoding='utf-8', errors='strict'):
+    def Decode(self, encoding='utf-8', errors='strict'):
         # type: (str, str) -> BaseUiLens[S, T, X, Y]
         '''An isomorphism that decodes and encodes its focus on the
         fly. Lets you focus a byte string as a unicode string. The
@@ -156,16 +156,16 @@ class BaseUiLens(Generic[S, T, A, B]):
         `bytes.decode`.
 
             >>> from lenses import lens
-            >>> lens.decode_(encoding='utf8')
+            >>> lens.Decode(encoding='utf8')
             UnboundLens(DecodeIso('utf8', 'strict'))
-            >>> lens.decode_().get()(b'hello')  # doctest: +SKIP
+            >>> lens.Decode().get()(b'hello')  # doctest: +SKIP
             'hello'
-            >>> lens.decode_().set('world')(b'hello')  # doctest: +SKIP
+            >>> lens.Decode().set('world')(b'hello')  # doctest: +SKIP
             b'world'
         '''
         return self._compose_optic(optics.DecodeIso(encoding, errors))
 
-    def each_(self):
+    def Each(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''A traversal that iterates over its state, focusing everything
         it iterates over. It uses `lenses.hooks.fromiter` to reform
@@ -174,25 +174,25 @@ class BaseUiLens(Generic[S, T, A, B]):
 
             >>> from lenses import lens
             >>> data = [1, 2, 3]
-            >>> lens.each_()
+            >>> lens.Each()
             UnboundLens(EachTraversal())
-            >>> lens.each_().collect()(data)
+            >>> lens.Each().collect()(data)
             [1, 2, 3]
-            >>> (lens.each_() + 1)(data)
+            >>> (lens.Each() + 1)(data)
             [2, 3, 4]
 
         For technical reasons, this lens iterates over dictionaries by
         their items and not just their keys.
 
             >>> data = {'one': 1}
-            >>> lens.each_().collect()(data)
+            >>> lens.Each().collect()(data)
             [('one', 1)]
-            >>> (lens.each_()[1] + 1)(data)
+            >>> (lens.Each()[1] + 1)(data)
             {'one': 2}
         '''
         return self._compose_optic(optics.EachTraversal())
 
-    def error_(self, exception, message=None):
+    def Error(self, exception, message=None):
         # type: (Exception, Optional[str]) -> BaseUiLens[S, T, X, Y]
         '''An optic that raises an exception whenever it tries to focus
         something. If `message is None` then the exception will be
@@ -202,44 +202,44 @@ class BaseUiLens(Generic[S, T, A, B]):
         message as it's only argument. Useful for debugging.
 
             >>> from lenses import lens
-            >>> lens.error_(Exception())
+            >>> lens.Error(Exception())
             UnboundLens(ErrorIso(Exception()))
-            >>> lens.error_(Exception, '{}')
+            >>> lens.Error(Exception, '{}')
             UnboundLens(ErrorIso(<...Exception...>, '{}'))
-            >>> lens.error_(Exception).get()(True)
+            >>> lens.Error(Exception).get()(True)
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             Exception
-            >>> lens.error_(Exception('An error occurred')).set(False)(True)
+            >>> lens.Error(Exception('An error occurred')).set(False)(True)
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             Exception: An error occurred
-            >>> lens.error_(ValueError, 'applied to {}').get()(True)
+            >>> lens.Error(ValueError, 'applied to {}').get()(True)
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             ValueError: applied to True
         '''
         return self._compose_optic(optics.ErrorIso(exception, message))
 
-    def f_(self, getter):
+    def F(self, getter):
         # type: (Callable[[A], X]) -> BaseUiLens[S, T, X, Y]
         '''An optic that wraps a getter function. A getter function is
         one that takes a state and returns a value derived from that
         state. The function is called on the focus before it is returned.
 
             >>> from lenses import lens
-            >>> lens.f_(abs)
+            >>> lens.F(abs)
             UnboundLens(Getter(<built-in function abs>))
-            >>> lens.f_(abs).get()(-1)
+            >>> lens.F(abs).get()(-1)
             1
-            >>> lens.each_().f_(abs).collect()([-1, 2, -3])
+            >>> lens.Each().F(abs).collect()([-1, 2, -3])
             [1, 2, 3]
 
         This optic cannot be used to set or modify values.
         '''
         return self._compose_optic(optics.Getter(getter))
 
-    def filter_(self, predicate):
+    def Filter(self, predicate):
         # type: (Callable[[A], bool]) -> BaseUiLens[S, T, X, Y]
         '''A prism that only focuses a value if the predicate returns
         `True` when called with that value as an argument. Best used
@@ -248,24 +248,24 @@ class BaseUiLens(Generic[S, T, A, B]):
         python's regular `filter` function does.
 
             >>> from lenses import lens
-            >>> lens.filter_(all)
+            >>> lens.Filter(all)
             UnboundLens(FilteringPrism(<built-in function all>))
             >>> data = [[1, 2], [0], ['a'], ['', 'b']]
-            >>> lens.each_().filter_(all).collect()(data)
+            >>> lens.Each().Filter(all).collect()(data)
             [[1, 2], ['a']]
-            >>> lens.each_().filter_(all).set(2)(data)
+            >>> lens.Each().Filter(all).set(2)(data)
             [2, [0], 2, ['', 'b']]
 
         The filtering is done to foci before the lens' manipulation is
         applied. This means that the resulting foci can still violate
         the predicate if the manipulating function doesn't respect it:
 
-            >>> lens.each_().filter_(bool).set(None)(['', 2, ''])
+            >>> lens.Each().Filter(bool).set(None)(['', 2, ''])
             ['', None, '']
         '''
         return self._compose_optic(optics.FilteringPrism(predicate))
 
-    def fold_(self, func):
+    def Fold(self, func):
         # type: (Callable[[A], Iterable[X]]) -> BaseUiLens[S, T, X, Y]
         '''A fold that takes a function that returns an iterable and
         focuses all the values in that iterable.
@@ -274,44 +274,44 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> def ends(state):
             ...     yield state[0]
             ...     yield state[-1]
-            >>> lens.fold_(ends).collect()([1, 2, 3])
+            >>> lens.Fold(ends).collect()([1, 2, 3])
             [1, 3]
         '''
         return self._compose_optic(optics.Fold(func))
 
-    def fork_(self, *lenses):
+    def Fork(self, *lenses):
         # type: (*BaseUiLens[A, B, X, Y])-> BaseUiLens[S, T, X, Y]
         '''A setter representing the parallel composition of several
         sub-lenses.
 
             >>> from lenses import lens
-            >>> lens.fork_(lens[0], lens[2])
+            >>> lens.Fork(lens[0], lens[2])
             UnboundLens(ForkedSetter(GetitemLens(0), GetitemLens(2)))
-            >>> lens.fork_(lens[0][1], lens[2]).set(1)([[0, 0], 0, 0])
+            >>> lens.Fork(lens[0][1], lens[2]).set(1)([[0, 0], 0, 0])
             [[0, 1], 0, 1]
         '''
         true_lenses = [l._optic for l in lenses]
         return self._compose_optic(optics.ForkedSetter(*true_lenses))
 
-    def get_(self, key, default=None):
+    def Get(self, key, default=None):
         # type: (Any, Optional[Y]) -> BaseUiLens[S, T, X, Y]
         '''A lens that focuses an item inside a container by calling
         its `get` method, allowing you to specify a default value for
         missing keys.  Analogous to `dict.get`.
 
             >>> from lenses import lens
-            >>> lens.get_('foo')
+            >>> lens.Get('foo')
             UnboundLens(GetitemOrElseLens('foo', default=None))
-            >>> lens.get_('baz').get()({'foo': 'bar'})
-            >>> lens.get_('baz', []).get()({'foo': 'bar'})
+            >>> lens.Get('baz').get()({'foo': 'bar'})
+            >>> lens.Get('baz', []).get()({'foo': 'bar'})
             []
             >>> from collections import OrderedDict
-            >>> lens.get_('baz').set('qux')(OrderedDict({'foo': 'bar'}))
+            >>> lens.Get('baz').set('qux')(OrderedDict({'foo': 'bar'}))
             OrderedDict([('foo', 'bar'), ('baz', 'qux')])
         '''
         return self._compose_optic(optics.GetitemOrElseLens(key, default))
 
-    def getattr_(self, name):
+    def GetAttr(self, name):
         # type: (str) -> BaseUiLens[S, T, X, Y]
         '''A lens that focuses an attribute of an object. Analogous to
         `getattr`.
@@ -319,16 +319,16 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> from collections import namedtuple
             >>> Pair = namedtuple('Pair', 'left right')
-            >>> lens.getattr_('left')
+            >>> lens.GetAttr('left')
             UnboundLens(GetattrLens('left'))
-            >>> lens.getattr_('left').get()(Pair(1, 2))
+            >>> lens.GetAttr('left').get()(Pair(1, 2))
             1
-            >>> lens.getattr_('right').set(3)(Pair(1, 2))
+            >>> lens.GetAttr('right').set(3)(Pair(1, 2))
             Pair(left=1, right=3)
         '''
         return self._compose_optic(optics.GetattrLens(name))
 
-    def getitem_(self, key):
+    def GetItem(self, key):
         # type: (Any) -> BaseUiLens[S, T, X, Y]
         '''A lens that focuses an item inside a container. Analogous to
         `operator.itemgetter`.
@@ -336,7 +336,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> lens[0]
             UnboundLens(GetitemLens(0))
-            >>> lens.getitem_(0)
+            >>> lens.GetItem(0)
             UnboundLens(GetitemLens(0))
             >>> lens[0].get()([1, 2, 3])
             1
@@ -349,7 +349,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.GetitemLens(key))
 
-    def lens_(self, getter, setter):
+    def Lens(self, getter, setter):
         # type: (Callable[[A], X], Callable[[A, Y], B]) -> BaseUiLens[S, T, X, Y]
         '''An optic that wraps a pair of getter and setter functions. A
         getter function is one that takes a state and returns a value
@@ -367,7 +367,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             ...     prefix = old_state[:-1]
             ...     return prefix + [target_sum - sum(prefix)]
             ...
-            >>> average_lens = lens.lens_(getter, setter)
+            >>> average_lens = lens.Lens(getter, setter)
             >>> average_lens
             UnboundLens(Lens(<function getter...>, <function setter...>))
             >>> average_lens.get()([1, 2, 4, 5])
@@ -379,7 +379,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.Lens(getter, setter))
 
-    def getzoomattr_(self, name):
+    def GetZoomAttr(self, name):
         # type: (str) -> BaseUiLens[S, T, X, Y]
         '''A traversal that focuses an attribute of an object, though if
         that attribute happens to be a lens it will zoom the lens. This
@@ -405,26 +405,26 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.GetZoomAttrTraversal(name))
 
-    def instance_(self, type_):
+    def Instance(self, type_):
         # type: (Type) -> BaseUiLens[S, T, X, Y]
         '''A prism that focuses a value only when that value is an
         instance of `type_`.
 
             >>> from lenses import lens
-            >>> lens.instance_(int)
+            >>> lens.Instance(int)
             UnboundLens(InstancePrism(...))
-            >>> lens.instance_(int).collect()(1)
+            >>> lens.Instance(int).collect()(1)
             [1]
-            >>> lens.instance_(float).collect()(1)
+            >>> lens.Instance(float).collect()(1)
             []
-            >>> lens.instance_(int).set(2)(1)
+            >>> lens.Instance(int).set(2)(1)
             2
-            >>> lens.instance_(float).set(2)(1)
+            >>> lens.Instance(float).set(2)(1)
             1
         '''
         return self._compose_optic(optics.InstancePrism(type_))
 
-    def iso_(self, forwards, backwards):
+    def Iso(self, forwards, backwards):
         # type: (Callable[[A], X], Callable[[Y], B]) -> BaseUiLens[S, T, X, Y]
         '''A lens based on an isomorphism. An isomorphism can be
         formed by two functions that mirror each other; they can convert
@@ -446,17 +446,17 @@ class BaseUiLens(Generic[S, T, A, B]):
         but interact with it in a more convenient form.
 
             >>> from lenses import lens
-            >>> lens.iso_(chr, ord)
+            >>> lens.Iso(chr, ord)
             UnboundLens(Isomorphism(<... chr>, <... ord>))
-            >>> lens.iso_(chr, ord).get()(65)
+            >>> lens.Iso(chr, ord).get()(65)
             'A'
-            >>> lens.iso_(chr, ord).set('B')(65)
+            >>> lens.Iso(chr, ord).set('B')(65)
             66
 
         Due to their symmetry, isomorphisms can be flipped, thereby
         swapping thier forwards and backwards functions:
 
-            >>> flipped = lens.iso_(chr, ord).flip()
+            >>> flipped = lens.Iso(chr, ord).flip()
             >>> flipped
             UnboundLens(Isomorphism(<... ord>, <... chr>))
             >>> flipped.get()('A')
@@ -464,7 +464,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.Isomorphism(forwards, backwards))
 
-    def item_(self, key):
+    def Item(self, key):
         # type: (Any) -> BaseUiLens[S, T, X, Y]
         '''A lens that focuses a single item (key-value pair) in a
         dictionary by its key. Set an item to `None` to remove it from
@@ -473,20 +473,20 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
-            >>> lens.item_(1)
+            >>> lens.Item(1)
             UnboundLens(ItemLens(1))
-            >>> lens.item_(1).get()(data)
+            >>> lens.Item(1).get()(data)
             (1, 10)
-            >>> lens.item_(3).get()(data) is None
+            >>> lens.Item(3).get()(data) is None
             True
-            >>> lens.item_(1).set((1, 11))(data)
+            >>> lens.Item(1).set((1, 11))(data)
             OrderedDict([(1, 11), (2, 20)])
-            >>> lens.item_(1).set(None)(data)
+            >>> lens.Item(1).set(None)(data)
             OrderedDict([(2, 20)])
         '''
         return self._compose_optic(optics.ItemLens(key))
 
-    def item_by_value_(self, value):
+    def ItemByValue(self, value):
         # type: (Any) -> BaseUiLens[S, T, X, Y]
         '''A lens that focuses a single item (key-value pair) in a
         dictionary by its value. Set an item to `None` to remove it
@@ -497,20 +497,20 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
-            >>> lens.item_by_value_(10)
+            >>> lens.ItemByValue(10)
             UnboundLens(ItemByValueLens(10))
-            >>> lens.item_by_value_(10).get()(data)
+            >>> lens.ItemByValue(10).get()(data)
             (1, 10)
-            >>> lens.item_by_value_(30).get()(data) is None
+            >>> lens.ItemByValue(30).get()(data) is None
             True
-            >>> lens.item_by_value_(10).set((3, 10))(data)
+            >>> lens.ItemByValue(10).set((3, 10))(data)
             OrderedDict([(2, 20), (3, 10)])
-            >>> lens.item_by_value_(10).set(None)(data)
+            >>> lens.ItemByValue(10).set(None)(data)
             OrderedDict([(2, 20)])
         '''
         return self._compose_optic(optics.ItemByValueLens(value))
 
-    def items_(self):
+    def Items(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''A traversal focusing key-value tuples that are the items of
         a dictionary. Analogous to `dict.items`.
@@ -518,33 +518,33 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
-            >>> lens.items_()
+            >>> lens.Items()
             UnboundLens(ItemsTraversal())
-            >>> lens.items_().collect()(data)
+            >>> lens.Items().collect()(data)
             [(1, 10), (2, 20)]
-            >>> lens.items_()[1].modify(lambda n: n + 1)(data)
+            >>> lens.Items()[1].modify(lambda n: n + 1)(data)
             OrderedDict([(1, 11), (2, 21)])
         '''
         return self._compose_optic(optics.ItemsTraversal())
 
-    def iter_(self):
+    def Iter(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''A fold that can get values from any iterable object in python
         by iterating over it. Like any fold, you cannot set values.
 
             >>> from lenses import lens
-            >>> lens.iter_()
+            >>> lens.Iter()
             UnboundLens(IterableFold())
-            >>> lens.iter_().collect()({2, 1, 3})
+            >>> lens.Iter().collect()({2, 1, 3})
             [1, 2, 3]
             >>> def numbers():
             ...     yield 1
             ...     yield 2
             ...     yield 3
             ...
-            >>> lens.iter_().collect()(numbers())
+            >>> lens.Iter().collect()(numbers())
             [1, 2, 3]
-            >>> lens.iter_().collect()([])
+            >>> lens.Iter().collect()([])
             []
 
         If you want to be able to set values as you iterate then look
@@ -552,43 +552,43 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.IterableFold())
 
-    def json_(self):
+    def Json(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''An isomorphism that focuses a string containing json data as
         its parsed equivalent. Analogous to `json.loads`.
 
             >>> from lenses import lens
             >>> data = '[{"points": [4, 7]}]'
-            >>> lens.json_()
+            >>> lens.Json()
             UnboundLens(JsonIso())
-            >>> lens.json_()[0]['points'][1].get()(data)
+            >>> lens.Json()[0]['points'][1].get()(data)
             7
-            >>> lens.json_()[0]['points'][0].set(8)(data)
+            >>> lens.Json()[0]['points'][0].set(8)(data)
             '[{"points": [8, 7]}]'
         '''
         return self._compose_optic(optics.JsonIso())
 
-    def just_(self):
+    def Just(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''A prism that focuses the value inside a `lenses.maybe.Just`
         object.
 
             >>> from lenses import lens
             >>> from lenses.maybe import Just, Nothing
-            >>> lens.just_()
+            >>> lens.Just()
             UnboundLens(JustPrism())
-            >>> lens.just_().collect()(Just(1))
+            >>> lens.Just().collect()(Just(1))
             [1]
-            >>> lens.just_().collect()(Nothing())
+            >>> lens.Just().collect()(Nothing())
             []
-            >>> lens.just_().set(2)(Just(1))
+            >>> lens.Just().set(2)(Just(1))
             Just(2)
-            >>> lens.just_().set(2)(Nothing())
+            >>> lens.Just().set(2)(Nothing())
             Nothing()
         '''
         return self._compose_optic(optics.JustPrism())
 
-    def keys_(self):
+    def Keys(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''A traversal focusing the keys of a dictionary. Analogous to
         `dict.keys`.
@@ -596,32 +596,32 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
-            >>> lens.keys_()
+            >>> lens.Keys()
             UnboundLens(ItemsTraversal() & GetitemLens(0))
-            >>> lens.keys_().collect()(data)
+            >>> lens.Keys().collect()(data)
             [1, 2]
-            >>> lens.keys_().modify(lambda n: n + 1)(data)
+            >>> lens.Keys().modify(lambda n: n + 1)(data)
             OrderedDict([(2, 10), (3, 20)])
         '''
         return self._compose_optic(
             optics.ItemsTraversal() & optics.GetitemLens(0)
         )
 
-    def listwrap_(self):
+    def ListWrap(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''An isomorphism that wraps its state up in a list. This is
         occasionally useful when you need to make hetrogenous data more
         uniform. Analogous to `lambda state: [state]`.
 
             >>> from lenses import lens
-            >>> lens.listwrap_()
+            >>> lens.ListWrap()
             UnboundLens(ListWrapIso())
-            >>> lens.listwrap_().get()(0)
+            >>> lens.ListWrap().get()(0)
             [0]
-            >>> lens.listwrap_().set([1])(0)
+            >>> lens.ListWrap().set([1])(0)
             1
-            >>> l = lens.tuple_(lens[0], lens[1].listwrap_())
-            >>> l.each_().each_().collect()([[1, 3], 4])
+            >>> l = lens.Tuple(lens[0], lens[1].ListWrap())
+            >>> l.Each().Each().collect()([[1, 3], 4])
             [1, 3, 4]
 
         Also serves as an example that lenses do not always have to
@@ -629,7 +629,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.ListWrapIso())
 
-    def norm_(self, setter):
+    def Norm(self, setter):
         # type: (Callable[[A], X]) -> BaseUiLens[S, T, X, Y]
         '''An isomorphism that applies a function as it sets a new
         focus without regard to the old state. It will get foci without
@@ -649,25 +649,25 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> def real_only(num):
             ...     return num.real
             ...
-            >>> lens.norm_(real_only)
+            >>> lens.Norm(real_only)
             UnboundLens(NormalisingIso(<function real_only at ...>))
-            >>> lens[0].norm_(real_only).get()([1.0, 2.0, 3.0])
+            >>> lens[0].Norm(real_only).get()([1.0, 2.0, 3.0])
             1.0
-            >>> lens[0].norm_(real_only).set(4+7j)([1.0, 2.0, 3.0])
+            >>> lens[0].Norm(real_only).set(4+7j)([1.0, 2.0, 3.0])
             [4.0, 2.0, 3.0]
 
         Types with constructors that do conversion are often good targets
         for this lens:
 
-            >>> lens[0].norm_(int).set(4.0)([1, 2, 3])
+            >>> lens[0].Norm(int).set(4.0)([1, 2, 3])
             [4, 2, 3]
-            >>> lens[1].norm_(int).set('5')([1, 2, 3])
+            >>> lens[1].Norm(int).set('5')([1, 2, 3])
             [1, 5, 3]
         '''
         return self._compose_optic(optics.NormalisingIso(setter))
 
-    def prism_(self, unpack, pack):
-        # type: (Callable[[A], Just[X]], Callable[[Y], B]) -> BaseUiLens[S, T, X, Y]
+    def Prism(self, unpack, pack):
+        # type: (Callable[[A], mJust[X]], Callable[[Y], B]) -> BaseUiLens[S, T, X, Y]
         '''A prism is an optic made from a pair of functions that pack and
         unpack a state where the unpacking process can potentially fail.
 
@@ -690,18 +690,18 @@ class BaseUiLens(Generic[S, T, A, B]):
             ...     except ValueError:
             ...         return Nothing()
             ...
-            >>> lens.prism_(unpack, pack)
+            >>> lens.Prism(unpack, pack)
             UnboundLens(Prism(<function unpack ...>, <function pack ...>))
-            >>> lens.prism_(unpack, pack).collect()('42')
+            >>> lens.Prism(unpack, pack).collect()('42')
             [42]
-            >>> lens.prism_(unpack, pack).collect()('fourty two')
+            >>> lens.Prism(unpack, pack).collect()('fourty two')
             []
 
         All prisms are also traversals that have exactly zero or one foci.
         '''
         return self._compose_optic(optics.Prism(unpack, pack))
 
-    def recur_(self, cls):
+    def Recur(self, cls):
         '''A traversal that recurses through an object focusing everything it
         can find of a particular type. This traversal will probe arbitrarily
         deep into the contents of the state looking for sub-objects. It
@@ -711,12 +711,12 @@ class BaseUiLens(Generic[S, T, A, B]):
         It is somewhat analogous to haskell's uniplate optic.
 
             >>> from lenses import lens
-            >>> lens.recur_(int)
+            >>> lens.Recur(int)
             UnboundLens(RecurTraversal(<... 'int'>))
             >>> data = [[1, 2, 100.0], [3, 'hello', [{}, 4], 5]]
-            >>> lens.recur_(int).collect()(data)
+            >>> lens.Recur(int).collect()(data)
             [1, 2, 3, 4, 5]
-            >>> (lens.recur_(int) + 1)(data)
+            >>> (lens.Recur(int) + 1)(data)
             [[2, 3, 100.0], [4, 'hello', [{}, 5], 6]]
 
         It also works on custom classes:
@@ -727,25 +727,25 @@ class BaseUiLens(Generic[S, T, A, B]):
             ...     def __repr__(self):
             ...         return 'Container({!r})'.format(self.contents)
             >>> data = [Container(1), 2, Container(Container(3)), [4, 5]]
-            >>> (lens.recur_(int) + 1)(data)
+            >>> (lens.Recur(int) + 1)(data)
             [Container(2), 3, Container(Container(4)), [5, 6]]
-            >>> lens.recur_(Container).collect()(data)
+            >>> lens.Recur(Container).collect()(data)
             [Container(1), Container(Container(3))]
 
         Be careful with this; it can focus things you might not expect.
         '''
         return self._compose_optic(optics.RecurTraversal(cls))
 
-    def tuple_(self, *lenses):
+    def Tuple(self, *lenses):
         # type: (*BaseUiLens[A, B, X, Y]) -> BaseUiLens[S, T, X, Y]
         '''A lens that combines the focuses of other lenses into a
         single tuple. The sublenses must be optics of kind Lens; this
         means no Traversals.
 
             >>> from lenses import lens
-            >>> lens.tuple_()
+            >>> lens.Tuple()
             UnboundLens(TupleLens())
-            >>> tl = lens.tuple_(lens[0], lens[2])
+            >>> tl = lens.Tuple(lens[0], lens[2])
             >>> tl
             UnboundLens(TupleLens(GetitemLens(0), GetitemLens(2)))
             >>> tl.get()([1, 2, 3, 4])
@@ -758,15 +758,15 @@ class BaseUiLens(Generic[S, T, A, B]):
         from disparate locations within the state.
 
             >>> state = ([1, 2, 3], 4, [5, 6])
-            >>> tl.each_().each_().collect()(state)
+            >>> tl.Each().Each().collect()(state)
             [1, 2, 3, 5, 6]
-            >>> (tl.each_().each_() + 10)(state)
+            >>> (tl.Each().Each() + 10)(state)
             ([11, 12, 13], 4, [15, 16])
         '''
         true_lenses = [l._optic for l in lenses]
         return self._compose_optic(optics.TupleLens(*true_lenses))
 
-    def values_(self):
+    def Values(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''A traversal focusing the values of a dictionary. Analogous to
         `dict.values`.
@@ -774,33 +774,33 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> from collections import OrderedDict
             >>> data = OrderedDict([(1, 10), (2, 20)])
-            >>> lens.values_()
+            >>> lens.Values()
             UnboundLens(ItemsTraversal() & GetitemLens(1))
-            >>> lens.values_().collect()(data)
+            >>> lens.Values().collect()(data)
             [10, 20]
-            >>> lens.values_().modify(lambda n: n + 1)(data)
+            >>> lens.Values().modify(lambda n: n + 1)(data)
             OrderedDict([(1, 11), (2, 21)])
         '''
         return self._compose_optic(
             optics.ItemsTraversal() & optics.GetitemLens(1)
         )
 
-    def zoom_(self):
+    def Zoom(self):
         # type: () -> BaseUiLens[S, T, X, Y]
         '''Follows its state as if it were a `BoundLens` object.
 
             >>> from lenses import lens, bind
             >>> data = [bind([1, 2])[1], 4]
-            >>> lens.zoom_()
+            >>> lens.Zoom()
             UnboundLens(ZoomTraversal())
-            >>> lens[0].zoom_().get()(data)
+            >>> lens[0].Zoom().get()(data)
             2
-            >>> lens[0].zoom_().set(3)(data)
+            >>> lens[0].Zoom().set(3)(data)
             [[1, 3], 4]
         '''
         return self._compose_optic(optics.ZoomTraversal())
 
-    def zoomattr_(self, name):
+    def ZoomAttr(self, name):
         # type: (str) -> BaseUiLens[S, T, X, Y]
         '''A lens that looks up an attribute on its target and follows
         it as if were a `BoundLens` object. Ignores the state, if any,
@@ -815,19 +815,19 @@ class BaseUiLens(Generic[S, T, A, B]):
             ...     first = lens._private_items[0]
             ...
             >>> data = (ClassWithLens([1, 2, 3]), 4)
-            >>> lens.zoomattr_('first')
+            >>> lens.ZoomAttr('first')
             UnboundLens(ZoomAttrTraversal('first'))
-            >>> lens[0].zoomattr_('first').get()(data)
+            >>> lens[0].ZoomAttr('first').get()(data)
             1
-            >>> lens[0].zoomattr_('first').set(5)(data)
+            >>> lens[0].ZoomAttr('first').set(5)(data)
             (ClassWithLens([5, 2, 3]), 4)
         '''
         return self._compose_optic(optics.ZoomAttrTraversal(name))
 
     def __getattr__(self, name):
         # type: (str) -> Any
-        if name.endswith('_'):
-            raise AttributeError('Not a valid lens constructor')
+        if name.startswith('__') and name.endswith('__'):
+            raise AttributeError('no attribute {}'.format(name))
 
         if name.startswith('call_mut_'):
 
@@ -845,8 +845,39 @@ class BaseUiLens(Generic[S, T, A, B]):
 
             return caller
 
-        return self.getzoomattr_(name)
+        return self.GetZoomAttr(name)
 
     def __getitem__(self, name):
         # type: (Any) -> BaseUiLens[S, T, X, Y]
-        return self.getitem_(name)
+        return self.GetItem(name)
+
+    both_ = Both
+    decode_ = Decode
+    each_ = Each
+    error_ = Error
+    f_ = F
+    filter_ = Filter
+    fold_ = Fold
+    fork_ = Fork
+    get_ = Get
+    getattr_ = GetAttr
+    getitem_ = GetItem
+    getzoomattr_ = GetZoomAttr
+    instance_ = Instance
+    iso_ = Iso
+    item_ = Item
+    item_by_value_ = ItemByValue
+    items_ = Items
+    iter_ = Iter
+    json_ = Json
+    just_ = Just
+    keys_ = Keys
+    lens_ = Lens
+    listwrap_ = ListWrap
+    norm_ = Norm
+    prism_ = Prism
+    recur_ = Recur
+    tuple_ = Tuple
+    values_ = Values
+    zoom_ = Zoom
+    zoomattr_ = ZoomAttr

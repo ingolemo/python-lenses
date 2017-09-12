@@ -22,7 +22,7 @@ You can find out the kind of a lens using the `kind` method:
 	>>> my_lens = lens[0]
 	>>> my_lens.kind()
 	'Lens'
-	>>> my_prism = lens.instance_(str)
+	>>> my_prism = lens.Instance(str)
 	>>> my_prism.kind()
 	'Prism'
 	>>> my_traversal = my_lens & my_prism
@@ -35,7 +35,7 @@ You can find out the kind of a lens using the `kind` method:
 All the optics that we have seen so far have been lenses, so they always
 focused a single object inside a state. But it is possible for an optic
 to have more than one focus. One such optic is the traversal. A simple
-traversal can be made with the `_both` method. `lens.both_()` focuses
+traversal can be made with the `Both` method. `lens.Both()` focuses
 the two objects at indices `0` and `1` within the state. It is intended
 to be used with tuples of length 2, but will work on any indexable object.
 
@@ -45,7 +45,7 @@ optic. If we want to get all the items focused by that optic then we
 can use the `collect` method which will return those objects in a list:
 
 	>>> data = [0, 1, 2, 3]
-	>>> both = lens.both_()
+	>>> both = lens.Both()
 	>>> both.get()(data)
 	0
 	>>> both.collect()(data)
@@ -77,7 +77,7 @@ Traversals can be composed with normal lenses. The result is a traversal
 with the lens applied to each of its original foci:
 
 	>>> data = [[0, 1], [2, 3]]
-	>>> both_then_zero = lens.both_()[0]
+	>>> both_then_zero = lens.Both()[0]
 	>>> both_then_zero.collect()(data)
 	[0, 2]
 	>>> (both_then_zero + 10)(data)
@@ -88,25 +88,25 @@ will simply increase the number of foci targeted. Note that `collect`
 returns a flat list of foci; none of the structure of the state is
 preserved.
 
-	>>> both_twice = lens.both_().both_()
+	>>> both_twice = lens.Both().Both()
 	>>> both_twice.collect()(data)
 	[0, 1, 2, 3]
 	>>> (both_twice + 10)(data)
 	[[10, 11], [12, 13]]
 
-A slightly more useful traversal method is `each_`. `each_` will focus
+A slightly more useful traversal method is `Each`. `Each` will focus
 all of the items in a data-structure analogous to iterating over it
 using python's `iter` and `next`. It supports most of the built-in
 iterables out of the box, but if we want to use it on our own objects
 then we will need to add a hook explicitly.
 
 	>>> data = [1, 2, 3]
-	>>> (lens.each_() + 10)(data)
+	>>> (lens.Each() + 10)(data)
 	[11, 12, 13]
 
-The `values_` method returns a traversal that focuses all of the values
+The `Values` method returns a traversal that focuses all of the values
 in a dictionary. If we return to our `GameState` example from earlier,
-we can use `values_` to move _every_ enemy in the same level 1 pixel
+we can use `Values` to move _every_ enemy in the same level 1 pixel
 over to the right in one line of code:
 
 	>>> from collections import namedtuple
@@ -130,16 +130,16 @@ over to the right in one line of code:
 	>>>
 	>>> level_enemies_right = (lens.worlds[2]
 	...                            .levels[1]
-	...                            .enemies.values_().x + 1)
+	...                            .enemies.Values().x + 1)
 	>>> new_data = level_enemies_right(data)
 
 Or we could do the same thing to every enemy in the entire game
 (assuming that there were other enemies on other levels in the
 `GameState`):
 
-	>>> all_enemies_right = (lens.worlds.values_()
-	...                          .levels.values_()
-	...                          .enemies.values_().x + 1)
+	>>> all_enemies_right = (lens.worlds.Values()
+	...                          .levels.Values()
+	...                          .enemies.Values().x + 1)
 	>>> new_data = all_enemies_right(data)
 
 
@@ -153,14 +153,14 @@ a Getter to `set` values. You also cannot use `modify`, `call`, or
 only method we can meaningly perform on a Getter is `get`. We can call
 `collect`, but it will always give us a list containing a single focus.
 
-The simplest way to make a Getter is with the `f_` method. This method
+The simplest way to make a Getter is with the `F` method. This method
 takes a function and returns a Getter that just calls that function on
 the state in order and whatever that function returns is the focus.
 
 	>>> data = 1
 	>>> def get_negative(state):
 	...     return -state
-	>>> neg_getter = lens.f_(get_negative)
+	>>> neg_getter = lens.F(get_negative)
 	>>> neg_getter.get()(data)
 	-1
 
@@ -172,13 +172,13 @@ we will get an exception:
 	  File "<stdin>", line 1, in ?
 	TypeError: Must be an instance of Setter to .set()
 
-You might notice that `lens.f_(some_function).get()` is exactly equivalent
+You might notice that `lens.F(some_function).get()` is exactly equivalent
 to using `some_function` by itself. For this reason Getters on their
 own are not particularly useful. The utility of Getters comes when we
 compose them with other optics.
 
 	>>> data = [1, 2, 3]
-	>>> each_neg = lens.each_().f_(get_negative)
+	>>> each_neg = lens.Each().F(get_negative)
 	>>> each_neg.collect()(data)
 	[-1, -2, -3]
 
@@ -189,7 +189,7 @@ optic at the cost of not being able to set anything:
 	...     print('logged: {!r}'.format(focus))
 	...     return focus
 	>>> data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-	>>> lens.each_().f_(log).each_().collect()(data)
+	>>> lens.Each().F(log).Each().collect()(data)
 	logged: [1, 2, 3]
 	logged: [4, 5, 6]
 	logged: [7, 8, 9]
@@ -204,25 +204,25 @@ anything with a Fold. Just like Traversals, when using a Fold, you will
 want to prefer the `collect` method over `get`.
 
 A Fold can be constructed from any function that returns an iterator
-using the `fold_` method. Generator functions are particularly useful
+using the `Fold` method. Generator functions are particularly useful
 for making Folds.
 
 	>>> def ends(state):
 	...     yield state[0]
 	...     yield state[-1]
 	>>> data = [1, 2, 3]
-	>>> lens.fold_(ends).collect()(data)
+	>>> lens.Fold(ends).collect()(data)
 	[1, 3]
 
-A useful Fold is `iter_`. This Fold just iterates over the state directly.
-It's very similar to the `each_` Traversal, but while `each_` has the
-ability set foci as well as get them, `iter_` does not need any special
-support; it will work on any iterable python object. `lens.iter_()`
-is equivalent to `lens.fold_(iter)`
+A useful Fold is `Iter`. This Fold just iterates over the state directly.
+It's very similar to the `Each` Traversal, but while `Each` has the
+ability set foci as well as get them, `Iter` does not need any special
+support; it will work on any iterable python object. `lens.Iter()`
+is equivalent to `lens.Fold(iter)`
 
 Just as with Getters, Folds don't do much on their own; you will want
 to compose them:
 
 	>>> data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-	>>> lens.iter_().fold_(ends).f_(get_negative).collect()(data)
+	>>> lens.Iter().Fold(ends).F(get_negative).collect()(data)
 	[-1, -3, -4, -6, -7, -9]

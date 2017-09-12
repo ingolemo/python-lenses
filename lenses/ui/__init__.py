@@ -45,7 +45,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> collect_item_zero = lens[0].collect()
             >>> collect_item_zero([1, 2, 3])
             [1]
-            >>> get_both = lens.both_().collect()
+            >>> get_both = lens.Both().collect()
             >>> get_both([1, 2, 3])
             [1, 2]
         '''
@@ -61,7 +61,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
             >>> from lenses import lens
-            >>> get_each_monoidally = lens.each_().get_monoid()
+            >>> get_each_monoidally = lens.Each().get_monoid()
             >>> get_each_monoidally([[], [1], [2, 3]])
             [1, 2, 3]
         '''
@@ -115,7 +115,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         and all the underlying operations must be isomorphisms.
 
             >>> from lenses import lens
-            >>> json_encoder = lens.decode_().json_().flip()
+            >>> json_encoder = lens.Decode().Json().flip()
             >>> json_encode = json_encoder.get()
             >>> json_encode(['hello', 'world'])  # doctest: +SKIP
             b'["hello", "world"]'
@@ -192,7 +192,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
             >>> from lenses import bind
             >>> bind([1, 2, 3])[0].collect()
             [1]
-            >>> bind([1, 2, 3]).both_().collect()
+            >>> bind([1, 2, 3]).Both().collect()
             [1, 2]
         '''
         return self._optic.to_list_of(self._state)
@@ -203,7 +203,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
             >>> from lenses import bind
-            >>> bind([[], [1], [2, 3]]).each_().get_monoid()
+            >>> bind([[], [1], [2, 3]]).Each().get_monoid()
             [1, 2, 3]
         '''
         return self._optic.view(self._state)

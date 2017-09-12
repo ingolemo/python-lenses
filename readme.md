@@ -45,8 +45,8 @@ Here's a simple example:
 ...         {'name': 'Richard', 'scores': ['c', None, 'd', 'c']},
 ...         {'name': 'Zoe', 'scores': ['f', 'f', None, 'f']}]
 ... 
->>> format_scores = lens.each_()['scores'].each_().instance_(str).call_upper()
->>> cheat = lens[2]['scores'].each_().set('a')
+>>> format_scores = lens.Each()['scores'].Each().Instance(str).call_upper()
+>>> cheat = lens[2]['scores'].Each().set('a')
 >>>
 >>> corrected = format_scores(data)
 >>> pprint(corrected)

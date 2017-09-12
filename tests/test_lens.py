@@ -12,11 +12,11 @@ def test_lens_get():
 
 
 def test_lens_collect():
-    assert lens.both_()[1].collect()([[1, 2], [3, 4]]) == [2, 4]
+    assert lens.Both()[1].collect()([[1, 2], [3, 4]]) == [2, 4]
 
 
 def test_lens_get_monoid():
-    assert lens.both_().get_monoid()([[1, 2], [3, 4]]) == [1, 2, 3, 4]
+    assert lens.Both().get_monoid()([[1, 2], [3, 4]]) == [1, 2, 3, 4]
 
 
 def test_lens_set():
@@ -93,12 +93,12 @@ def test_lens_call_mut_shallow():
 
 def test_lens_construct():
     obj = object()
-    assert lens.just_().construct(obj) == maybe.Just(obj)
+    assert lens.Just().construct(obj) == maybe.Just(obj)
 
 
 def test_lens_construct_composed():
     obj = object()
-    assert lens.just_().iso_(int, str).construct(obj) == maybe.Just(str(obj))
+    assert lens.Just().Iso(int, str).construct(obj) == maybe.Just(str(obj))
 
 
 def test_lens_add_lens_trivial_lens():
@@ -147,18 +147,18 @@ def test_lens_add_lens_bad_lens():
 
 
 def test_lens_flip():
-    l = lens.iso_(str, int).flip()
+    l = lens.Iso(str, int).flip()
     assert l.get()('1') == 1
 
 
 def test_lens_flip_composed():
-    l = lens.decode_().json_().flip()
+    l = lens.Decode().Json().flip()
     assert l.get()([1, 2, 3]) == b'[1, 2, 3]'
 
 
 def test_lens_flip_composed_not_isomorphism():
     with pytest.raises(TypeError):
-        lens.decode_()[0].flip()
+        lens.Decode()[0].flip()
 
 
 def test_lens_flip_not_isomorphism():
@@ -252,7 +252,7 @@ def test_lens_trivial():
 
 
 def test_lens_getitem():
-    assert bind([1, 2, 3]).getitem_(1).get() == 2
+    assert bind([1, 2, 3]).GetItem(1).get() == 2
 
 
 def test_lens_getitem_direct():
@@ -261,7 +261,7 @@ def test_lens_getitem_direct():
 
 def test_lens_getattr():
     nt = collections.namedtuple('nt', 'attr')
-    assert bind(nt(3)).getattr_('attr').get() == 3
+    assert bind(nt(3)).GetAttr('attr').get() == 3
 
 
 def test_lens_getattr_direct():
@@ -270,12 +270,7 @@ def test_lens_getattr_direct():
 
 
 def test_lens_both():
-    assert bind([1, 2]).both_().collect() == [1, 2]
-
-
-def test_lens_nonexistant_sublens():
-    with pytest.raises(AttributeError):
-        bind(3).flobadob_()
+    assert bind([1, 2]).Both().collect() == [1, 2]
 
 
 # Tests for ensuring lenses work on different type of objects
@@ -364,24 +359,24 @@ def test_compose_iso_and_lens_kind():
 
 
 def test_compose_iso_and_fold_kind():
-    assert (lens & lens.iter_()).kind() == 'Fold'
+    assert (lens & lens.Iter()).kind() == 'Fold'
 
 
 def test_compose_lens_and_fold_kind():
-    assert (lens[0] & lens.iter_()).kind() == 'Fold'
+    assert (lens[0] & lens.Iter()).kind() == 'Fold'
 
 
 def test_compose_iso_and_setter_kind():
-    assert (lens & lens.fork_(lens, lens)) == 'Setter'
+    assert (lens & lens.Fork(lens, lens)) == 'Setter'
 
 
 def test_compose_lens_and_setter_kind():
-    assert (lens[0] & lens.fork_(lens, lens)) == 'Setter'
+    assert (lens[0] & lens.Fork(lens, lens)) == 'Setter'
 
 
 def test_compose_fold_and_setter_kind_errors():
     with pytest.raises(RuntimeError):
-        lens.iter_() & lens.fork_(lens, lens)
+        lens.Iter() & lens.Fork(lens, lens)
 
 
 def test_bound_iso_kind():
