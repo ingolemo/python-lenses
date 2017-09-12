@@ -11,7 +11,7 @@ for python.
 
 ## Installation
 
-You can install the latest github version using pip like so:
+You can install the latest version from pypi using pip like so:
 
     pip install lenses
 
