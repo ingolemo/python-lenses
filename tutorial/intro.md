@@ -55,7 +55,7 @@ intermediate variables, if you find that more useful:
 	>>> lens[1].get()(data)
 	2
 
-Now, the above code was an aweful lot of work just to do the equivalent
+Now, the above code was an awful lot of work just to do the equivalent
 of `data[1]`. However, we can use this same lens to do other tasks. One
 thing we can do is create a function that can set our focus to some
 other value. We can do that with the `set` method. The `set` method
