@@ -69,20 +69,22 @@ line is the equivalent of this code:
 
 ```python
 def format_scores(data):
-    result = {}
-    for key, value in data.items():
-        if key == 'scores':
-            new_value = []
-            for letter in value:
-                if is_instance(maybe_letter, str):
-                    new_value.append(maybe_letter.upper())
-                else:
-                    new_value.append(maybe_letter)
-            result[key] = new_value
-        else:
-            result[key] = value
-    return result
-
+    results = []
+    for entry in data:
+        result = {}
+        for key, value in entry.items():
+            if key == 'scores':
+                new_value = []
+                for letter in value:
+                    if isinstance(letter, str):
+                        new_value.append(letter.upper())
+                    else:
+                        new_value.append(letter)
+                result[key] = new_value
+            else:
+                result[key] = value
+        results.append(result)
+    return results
 ```
 
 
