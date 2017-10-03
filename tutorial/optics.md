@@ -226,3 +226,22 @@ to compose them:
 	>>> data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 	>>> lens.Iter().Fold(ends).F(get_negative).collect()(data)
 	[-1, -3, -4, -6, -7, -9]
+
+
+## Setter
+
+If a Getter is like a Lens that lacks the ability to set, then a Setter
+is like a Lens that lacks the ability to get. You cannot call `get`
+on a setter, though you can use `set`, `modify`, `call`, and `call_mut`.
+
+The only setter available is the ForkedSetter which you can create with
+the `Fork` method. This method allows you to create a setter that can
+set at two different places at once. You pass it some optics and the
+ForkedSetter will use the set functionality from all of those optics
+at once:
+
+	>>> set_inner_ends = lens.Each().Fork(lens[0], lens[-1])
+	>>> set_inner_ends.set(0)(data)
+	[[0, 2, 0], [0, 5, 0], [0, 8, 0]]
+	>>> (set_inner_ends + 10)(data)
+	[[11, 2, 13], [14, 5, 16], [17, 8, 19]]
