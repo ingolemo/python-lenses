@@ -7,7 +7,7 @@ from singledispatch import singledispatch
 import copy
 import sys
 
-from .typevars import A, B
+from ..typevars import A, B
 
 
 @singledispatch
