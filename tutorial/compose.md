@@ -19,6 +19,21 @@ one as its state:
 When we call `a & b`, `b` must be an unbound lens and the
 resulting lens will be bound to the same object as `a`, if any.
 
+It is important to note that doing two operations on two different lenses
+and then composing them is the equivalent to doing those two operations
+on the same lens:
+
+	>>> lens[0][1]
+	UnboundLens(GetitemLens(0) & GetitemLens(1))
+	>>> lens[0] & lens[1]
+	UnboundLens(GetitemLens(0) & GetitemLens(1))
+
+The first is actually implemented in terms of the second, internally.
+
+When we need to do more than two operations on the same lens we will
+often refer to this as "composing" two lenses even though the `&` operator
+is nowhere in sight.
+
 
 ## Binding
 
