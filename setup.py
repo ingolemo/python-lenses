@@ -38,5 +38,6 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['tests']),
     install_requires=['singledispatch', 'typing;python_version<"3"'],
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'coverage', 'hypothesis', 'mypy', 'pyrsistent'],
+    tests_require=['pytest', 'coverage', 'pytest-coverage',
+        'hypothesis', 'mypy', 'pyrsistent'],
 )
