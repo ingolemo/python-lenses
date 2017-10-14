@@ -23,7 +23,7 @@ optional_dependencies = [
 
 test_dependencies = optional_dependencies + [
     'pytest', 'coverage', 'pytest-coverage', 'hypothesis',
-    'mypy;python_version>="3.3"'
+    'mypy;python_version>="3.3" and implementation_name=="cpython"'
 ]
 
 setuptools.setup(
@@ -46,6 +46,8 @@ setuptools.setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries',
     ],
     keywords='lens lenses immutable functional optics',
