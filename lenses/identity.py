@@ -12,6 +12,8 @@ class Identity(Generic[A]):
     It is needed for lenses to be able to set values.
     '''
 
+    __slots__ = ('item',)
+
     def __init__(self, item):
         # type: (A) -> None
         self.item = item

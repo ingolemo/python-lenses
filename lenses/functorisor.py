@@ -17,6 +17,8 @@ class Functorisor(object):
     The Functorisor solves this problem by carrying around a `pure`
     function. It's a hack, but it works well enough.'''
 
+    __slots__ = ('pure', 'func')
+
     def __init__(self, pure_func, func):
         self.pure = pure_func
         self.func = func

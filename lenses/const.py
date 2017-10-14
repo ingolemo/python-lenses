@@ -9,6 +9,7 @@ class Const(Generic[C, A]):
     supposed to be a functor over, caring only about the data it was passed
     during creation. This type is essential to the lens' `get` operation.
     '''
+    __slots__ = ('item',)
 
     def __init__(self, item):
         # type: (C) -> None

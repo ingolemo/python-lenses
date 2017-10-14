@@ -117,6 +117,8 @@ class LensLike(object):
     represents a bug in the library.
     '''
 
+    __slots__ = ()
+
     def func(self, f, state):
         '''Intended to be overridden by subclasses. Raises
         NotImplementedError.'''
@@ -549,6 +551,8 @@ class ComposedLens(LensLike):
 
     (The ComposedLens is represented above by the `&` symbol)
     '''
+
+    __slots__ = ('lenses',)
 
     def __init__(self, lenses=()):
         # type: (Iterable[LensLike]) -> None

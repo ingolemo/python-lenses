@@ -21,6 +21,8 @@ class Just(Generic[A]):
         1
     '''
 
+    __slots__ = ('item',)
+
     def __init__(self, item):
         # type: (A) -> None
         self.item = item
@@ -67,6 +69,8 @@ class Just(Generic[A]):
 
 
 class Nothing(Just[A]):
+    __slots__ = ()
+
     def __init__(self):
         # type: () -> None
         pass

@@ -69,6 +69,8 @@ class BaseUiLens(Generic[S, T, A, B]):
     the BoundLens and UnboundLens classes. It is not intended to be
     instantiated directly.'''
 
+    __slots__ = ()
+
     def call(self, method_name, *args, **kwargs):
         # type: (str, *Any, **Any) -> T
         '''Call a method on the focus. The method must return a new

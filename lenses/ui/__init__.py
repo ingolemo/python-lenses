@@ -9,7 +9,7 @@ from .base import BaseUiLens
 class UnboundLens(BaseUiLens[S, T, A, B]):
     'An unbound lens is a lens that has not been bound to any state.'
 
-    __slots__ = ['_optic']
+    __slots__ = ('_optic',)
 
     def __init__(self, optic):
         self._optic = optic
@@ -161,7 +161,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
 class BoundLens(BaseUiLens[S, T, A, B]):
     'A bound lens is a lens that has been bound to a specific state.'
 
-    __slots__ = ['_state', '_optic']
+    __slots__ = ('_state', '_optic')
 
     def __init__(self, state, optic):
         # type: (S, optics.LensLike) -> None
