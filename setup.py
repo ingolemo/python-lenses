@@ -52,7 +52,6 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['tests']),
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, <4',
     install_requires=dependencies,
-    setup_requires=['pytest-runner'],
     tests_require=test_dependencies,
     extras_require={
         'optional': optional_dependencies,
