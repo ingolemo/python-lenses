@@ -6,9 +6,7 @@ python:
   - "3.6"
 install:
   - pip install --upgrade pytest>=3.0.0
-  - pip install coverage pytest-coverage hypothesis codecov pyrsistent
-  - if [[ $TRAVIS_PYTHON_VERSION == 3* ]]; then pip install mypy; fi
-  - python setup.py install
+  - pip install .[tests]
 script: ./runtests.sh
 after_success:
   - codecov
