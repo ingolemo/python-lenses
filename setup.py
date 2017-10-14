@@ -36,6 +36,7 @@ setuptools.setup(
     ],
     keywords='lens lenses immutable functional optics',
     packages=setuptools.find_packages(exclude=['tests']),
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, <4',
     install_requires=['singledispatch', 'typing;python_version<"3"'],
     setup_requires=['pytest-runner'],
     tests_require=['pytest', 'coverage', 'pytest-coverage',
