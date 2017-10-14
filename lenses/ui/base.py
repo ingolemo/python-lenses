@@ -537,8 +537,9 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> lens.Iter()
             UnboundLens(IterableFold())
-            >>> lens.Iter().collect()({2, 1, 3})
-            [1, 2, 3]
+            >>> data = {2, 1, 3}
+            >>> lens.Iter().collect()(data) == list(data)
+            True
             >>> def numbers():
             ...     yield 1
             ...     yield 2

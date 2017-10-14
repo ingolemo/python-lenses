@@ -8,8 +8,9 @@ class IterableFold(Fold):
 
         >>> IterableFold()
         IterableFold()
-        >>> IterableFold().to_list_of({2, 1, 3})
-        [1, 2, 3]
+        >>> data = {2, 1, 3}
+        >>> IterableFold().to_list_of(data) == list(data)
+        True
         >>> def numbers():
         ...     yield 1
         ...     yield 2
