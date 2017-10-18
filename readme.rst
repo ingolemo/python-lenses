@@ -43,7 +43,7 @@ Some examples are given in the `examples`_ folder and a tutorial is
 available in the `tutorial`_ folder.
 
 .. _examples: examples
-.. _tutorial: tutorial/index.md
+.. _tutorial: tutorial/index.rst
 
 
 Example
