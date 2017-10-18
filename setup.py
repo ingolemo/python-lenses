@@ -4,7 +4,7 @@ import os
 here = os.path.abspath(os.path.dirname(__file__))
 
 try:
-    with open(os.path.join(here, 'readme.md')) as handle:
+    with open(os.path.join(here, 'readme.rst')) as handle:
         long_desc = handle.read()
 except IOError:
     # the readme should get included in source tarballs, but it shouldn't
