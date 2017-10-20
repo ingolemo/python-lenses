@@ -1,9 +1,9 @@
 '''A python module for manipulating deeply nested data structures
 without mutating them.
 
-A simple overview for this module is available in the file
-`docs/index.md` or at [http://github.com/ingolemo/python-lenses]
-. More detailed information for each object is available in the relevant
+A simple overview for this module is available in the readme or
+at [http://github.com/ingolemo/python-lenses] . More detailed
+information for each object is available in the relevant
 docstrings. `help(lenses.UnboundLens)` is particularly useful.
 
 The entry point to this library is the `lens` object:
