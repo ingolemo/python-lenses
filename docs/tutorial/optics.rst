@@ -6,7 +6,7 @@ Lenses are just one in a whole family of related objects called
 
 The heirarchy of optics looks like this:
 
-.. image:: optics_family.png
+.. image:: ../_static/optics_family.png
 
 An arrow pointing from A to B here means that all B are also A. For
 example, all Lenses are also Getters, and all Getters are also Folds.

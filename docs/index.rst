@@ -1,0 +1,6 @@
+Documentation
+=============
+
+.. toctree::
+	tutorial/index
+

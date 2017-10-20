@@ -4,6 +4,7 @@
 .hypothesis/
 .mypy_cache/
 .tox/
+docs/_build/
 lenses.egg-info/
 venv/
 build/

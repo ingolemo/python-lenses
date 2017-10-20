@@ -39,11 +39,11 @@ objects then you should check out the ``lenses.hooks`` module. Most of
 the fancy lens code is in the ``lenses.optics`` module for those who
 are curious how everything works.
 
-Some examples are given in the `examples`_ folder and a tutorial is
-available in the `tutorial`_ folder.
+Some examples are given in the `examples`_ folder and the `documentation`_
+is available on ReadTheDocs.
 
 .. _examples: examples
-.. _tutorial: tutorial/index.rst
+.. _documentation: https://python-lenses.readthedocs.io/en/latest/
 
 
 Example
