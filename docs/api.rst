@@ -10,7 +10,7 @@ Lenses module
 Unbound lenses
 --------------
 
-.. autoclass:: lenses.ui.UnboundLens
+.. autoclass:: lenses.UnboundLens
 	:inherited-members:
 
 Hooks
