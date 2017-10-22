@@ -14,6 +14,7 @@ The entry point to this library is the `lens` object:
 
 You can also obtain a bound lens with the `bind` function.
 
+    >>> from lenses import bind
     >>> bind([1, 2, 3])
     BoundLens([1, 2, 3], TrivialIso())
 '''
