@@ -1,10 +1,11 @@
 from typing import (Any, Callable, Generic, Iterable, Optional, Type, cast)
 
 import copy
+import functools
 import operator
 
 from .. import optics
-from ..maybe import Just as mJust
+from ..maybe import Just as mJust, Nothing as mNothing
 from ..typevars import S, T, A, B, X, Y
 
 
@@ -669,8 +670,8 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.NormalisingIso(setter))
 
-    def Prism(self, unpack, pack):
-        # type: (Callable[[A], mJust[X]], Callable[[Y], B]) -> BaseUiLens[S, T, X, Y]
+    def Prism(self, unpack, pack, ignore_none=False, ignore_errors=None):
+        # type: (Callable[[A], mJust[X]], Callable[[Y], B], bool, Optional[tuple]) -> BaseUiLens[S, T, X, Y]
         '''A prism is an optic made from a pair of functions that pack and
         unpack a state where the unpacking process can potentially fail.
 
@@ -679,6 +680,8 @@ class BaseUiLens(Generic[S, T, A, B]):
         a state and unpacks it to get a focus. The unpack function
         must return an instance of `lenses.maybe.Maybe`; `Just` if the
         unpacking succeeded and `Nothing` if the unpacking failed.
+
+        All prisms are also traversals that have exactly zero or one foci.
 
         Parsing strings is a common situation when prisms are useful:
 
@@ -700,9 +703,55 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens.Prism(unpack, pack).collect()('fourty two')
             []
 
-        All prisms are also traversals that have exactly zero or one foci.
+        If you do not want to write functions that explicitly return a
+        Maybe then you can pass one or both of the ``ignore_none=True`` or
+        ``ignore_errors=True`` keyword arguments and the prism will convert
+        ``None`` and/or a raised exception to a Nothing and anything else
+        to a Just.
+
+            >>> lens.Prism(int, str, ignore_errors=True) # doctest: +SKIP
+            UnboundLens(Prism(<function int ...>, <class str>))
+            >>> lens.Prism(int, str, ignore_errors=True).collect()('42')
+            [42]
+            >>> lens.Prism(int, str, ignore_errors=True).collect()('fourty two')
+            []
+
+        If you set ``ignore_errors`` to ``True`` then it will catch any
+        and all exceptions. A better alternative is to set it to a tuple of
+        exception types to ignore (such as you would pass to ``isinstance``).
+
+            >>> errors = (ValueError,)
+            >>> lens.Prism(int, str, ignore_errors=errors) # doctest: +SKIP
+            UnboundLens(Prism(<function int ...>, <class str>))
+            >>> lens.Prism(int, str, ignore_errors=errors).collect()('42')
+            [42]
+            >>> lens.Prism(int, str, ignore_errors=errors).collect()('fourty two')
+            []
+            >>> lens.Prism(int, str, ignore_errors=errors).collect()([1, 2, 3])
+            Traceback (most recent call last):
+              File "<stdin>", line 1 in ?
+            TypeError: int() argument must be ...
         '''
-        return self._compose_optic(optics.Prism(unpack, pack))
+
+        if ignore_errors is True:
+            ignore_errors = (Exception,)
+
+        @functools.wraps(unpack)
+        def new_unpack(state):
+            try:
+                result = unpack(state)
+            except Exception as e:
+                if ignore_errors and isinstance(e, ignore_errors):
+                    return mNothing()
+                else:
+                    raise e
+            if ignore_none:
+                return mNothing() if result is None else mJust(result)
+            if ignore_errors:
+                return mJust(result)
+            return result
+
+        return self._compose_optic(optics.Prism(new_unpack, pack))
 
     def Recur(self, cls):
         '''A traversal that recurses through an object focusing everything it
