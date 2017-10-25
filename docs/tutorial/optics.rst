@@ -146,8 +146,8 @@ Or we could do the same thing to every enemy in the entire game
 >>> new_data = all_enemies_right(data)
 
 
-Getter
-------
+Getters
+-------
 
 A Getter is an optic that knows how to retrieve a single focus from a
 state. You can think of a Getter as a Lens that does not have a setter
@@ -233,8 +233,8 @@ to compose them:
 [-1, -3, -4, -6, -7, -9]
 
 
-Setter
-------
+Setters
+-------
 
 If a Getter is like a Lens that lacks the ability to set, then a Setter
 is like a Lens that lacks the ability to get. You cannot call ``get``
