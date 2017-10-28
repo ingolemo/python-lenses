@@ -6,6 +6,45 @@ from .. import typeclass
 from .base import Lens
 
 
+class ContainsLens(Lens):
+    '''A lens that takes an item and focuses a bool based on whether
+    the state contains that item. It's most useful when used with
+    sets, but it can be used with other collections like lists and
+    dictionaries. Analogous to the ``in`` operator.
+
+        >>> ContainsLens(1)
+        ContainsLens(1)
+        >>> ContainsLens(1).view([2, 3])
+        False
+        >>> ContainsLens(1).view([1, 2, 3])
+        True
+        >>> ContainsLens(1).set([1, 2, 3], False)
+        [2, 3]
+        >>> ContainsLens(1).set([2, 3], True)
+        [2, 3, 1]
+
+    In order to use this lens on custom data-types you must implement
+    ``lenses.hooks.contains_add`` and ``lens.hooks.contains_remove``.
+    '''
+
+    def __init__(self, item):
+        self.item = item
+
+    def getter(self, state):
+        return self.item in state
+
+    def setter(self, state, focus):
+        contains = self.item in state
+        if focus and not contains:
+            return hooks.contains_add(state, self.item)
+        elif contains and not focus:
+            return hooks.contains_remove(state, self.item)
+        else:
+            return state
+
+    def __repr__(self):
+        return 'ContainsLens({!r})'.format(self.item)
+
 class GetattrLens(Lens):
     '''A lens that focuses an attribute of an object. Analogous to
     `getattr`.

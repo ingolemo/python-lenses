@@ -1,8 +1,27 @@
 import collections
 
 import pytest
+import hypothesis
+from hypothesis import strategies as strats
 
 import lenses.hooks as s
+
+
+class Box(object):
+    def __init__(self, value):
+        self.value = value
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __contains__(self, item):
+        return item in self.value
+
+    def _lens_contains_add(self, item):
+        return Box(s.contains_add(self.value, item))
+
+    def _lens_contains_remove(self, item):
+        return Box(s.contains_remove(self.value, item))
 
 
 def test_setitem_imm_custom_class():
@@ -66,6 +85,35 @@ def test_setattr_imm_custom_class_raw():
 def test_setattr_imm_namedtuple():
     Tup = collections.namedtuple('Tup', 'attr')
     assert s.setattr_immutable(Tup(1), 'attr', 2) == Tup(2)
+
+
+@hypothesis.given(
+    strats.one_of(
+        strats.lists(strats.integers()),
+        strats.iterables(strats.integers()).map(tuple),
+        strats.dictionaries(strats.text(), strats.integers()),
+        strats.iterables(strats.integers()).map(set),
+        strats.lists(strats.integers()).map(Box),
+    )
+)
+def test_contains(container):
+    item = object()
+    added = s.contains_add(container, item)
+    assert isinstance(added, type(container))
+    assert item in added
+    removed = s.contains_remove(added, item)
+    assert isinstance(removed, type(container))
+    assert item not in removed
+
+
+def test_contains_add_failure():
+    with pytest.raises(NotImplementedError):
+        s.contains_add(True, object())
+
+
+def test_contains_remove_failure():
+    with pytest.raises(NotImplementedError):
+        s.contains_remove(True, object())
 
 
 def test_to_iter_custom_class():

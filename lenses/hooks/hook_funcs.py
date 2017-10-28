@@ -142,6 +142,116 @@ def _tuple_setattr_immutable(self, name, value):
 
 
 @singledispatch
+def contains_add(self, item):
+    # type (Any, Any) -> Any
+    '''Takes a collection and an item and returns a new collection of
+    the same type that contains the item. The notion of "contains"
+    is defined by the object itself; ``item in contains_add(obj, item)``
+    must be true.
+
+    This function is used by some lenses (particularly ContainsLens) to
+    add new items to containers when necessary.
+
+    The default behaviour of this function is to call
+    ``obj._lens_contains_add(item)`` in the hope that the object knows
+    how to add items to itself. This function is also wrapped with
+    ``functools.singledispatch``, allowing you to customise the behaviour
+    of types that you did not write. Be warned that single dispatch
+    functions are registered globally across your program and that your
+    function also needs to be able to deal with subclasses of any types
+    you register (or else register separate functions for each subclass).
+    '''
+    try:
+        self._lens_contains_add
+    except AttributeError:
+        message = 'Don\'t know how to add an item to {}'
+        raise NotImplementedError(message.format(type(self)))
+    else:
+        return self._lens_contains_add(item)
+
+
+@contains_add.register(list)
+def _list_contains_add(self, item):
+    # type (List[A], A) -> List[A]
+    return self + [item]
+
+
+@contains_add.register(tuple)
+def _tuple_contains_add(self, item):
+    # type (Tuple[A, ...], A) -> Tuple[A, ...]
+    return self + (item,)
+
+
+@contains_add.register(dict)
+    # type (Dict[A, B], A) -> Dict[A, B]
+def _dict_contains_add(self, item):
+    result = self.copy()
+    result[item] = None
+    return result
+
+
+@contains_add.register(set)
+def _set_contains_add(self, item):
+    # type (Set[A], A) -> Set[A]
+    return self | {item}
+
+
+@singledispatch
+def contains_remove(self, item):
+    # type (Any, Any) -> Any
+    '''Takes a collection and an item and returns a new collection
+    of the same type with that item removed. The notion of "contains"
+    is defined by the object itself; ``item not in contains_add(obj,
+    item)`` must be true.
+
+    This function is used by some lenses (particularly ContainsLens) to
+    remove items from containers when necessary.
+
+    The default behaviour of this function is to call
+    ``obj._lens_contains_remove(item)`` in the hope that the object knows
+    how to add items to itself. This function is also wrapped with
+    ``functools.singledispatch``, allowing you to customise the behaviour
+    of types that you did not write. Be warned that single dispatch
+    functions are registered globally across your program and that your
+    function also needs to be able to deal with subclasses of any types
+    you register (or else register separate functions for each subclass).
+    '''
+    try:
+        self._lens_contains_remove
+    except AttributeError:
+        message = 'Don\'t know how to remove an item from {}'
+        raise NotImplementedError(message.format(type(self)))
+    else:
+        return self._lens_contains_remove(item)
+
+
+@contains_remove.register(list)
+def _list_contains_remove(self, item):
+    # type (List[A], A) -> List[A]
+    return [x for x in self if x != item]
+
+
+@contains_remove.register(tuple)
+def _tuple_contains_remove(self, item):
+    # type (Tuple[A, ...], A) -> Tuple[A, ...]
+    return tuple(x for x in self if x != item)
+
+
+@contains_remove.register(dict)
+def _dict_contains_remove(self, item):
+    # type (Dict[A, B], A) -> Dict[A, B]
+    result = self.copy()
+    del result[item]
+    return result
+
+
+@contains_remove.register(set)
+def _set_contains_remove(self, item):
+    # type (Set[A], A) -> Set[A]
+    return self - {item}
+
+
+@singledispatch
 def to_iter(self):
     # type: (Any) -> Any
     '''Takes an object and produces an iterable. It is

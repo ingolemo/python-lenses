@@ -151,6 +151,28 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.BothTraversal())
 
+    def Contains(self, item):
+        # type: (A) -> BaseUiLens[S, S, bool, bool]
+        '''A lens that focuses a boolean that tells you whether the
+        state contains some item.
+
+            >>> from lenses import lens
+            >>> lens.Contains(1)
+            UnboundLens(ContainsLens(1))
+            >>> lens.Contains(1).get()([2, 3])
+            False
+            >>> lens.Contains(1).get()([1, 2, 3])
+            True
+            >>> lens.Contains(1).set(False)([1, 2, 3])
+            [2, 3]
+            >>> lens.Contains(1).set(True)([2, 3])
+            [2, 3, 1]
+
+        The behaviour of this lens depends on the implementation of
+        ``lenses.hooks.contains_add`` and ``lenses.hooks.contains.remove``.
+        '''
+        return self._compose_optic(optics.ContainsLens(item))
+
     def Decode(self, encoding='utf-8', errors='strict'):
         # type: (str, str) -> BaseUiLens[S, T, X, Y]
         '''An isomorphism that decodes and encodes its focus on the
