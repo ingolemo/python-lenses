@@ -268,10 +268,11 @@ pair of functions::
 Notice the asymmetry here; the setter function requires access to the
 previous state in order to construct a new state. With an Isomorphism
 the setter function no longer takes this argument; it can construct a
-new state by looking only at the focus::
+new state by looking only at the focus (The setter has been renamed to
+"review" for reasons that will become clear later)::
 
 	def getter(state) -> focus:
-	def setter(focus) -> state:
+	def review(focus) -> state:
 
 These two functions are inverses of one another; converting back and
 forth between a state and a focus without any loss of information. A
@@ -310,3 +311,119 @@ create an isomorphism using the ``Iso`` method.
 [1, 2, 3]
 >>> (list_converter + [4])(state)
 (1, 2, 3, 4)
+
+
+Prisms
+------
+
+A Prism is an like an isomorphism with the extra benefit that it can
+choose whether or not it wants to have a focus. That is; a prism takes
+a state and only optionally returns a focus.
+
+Prisms are often used in other languages to unwrap sum-types, but since
+python does not have native sum-types their use is more limited. Because
+there are no good examples of sum-types in the python standard library
+we will have to simulate them:
+
+On your birthday you can recieve two kinds of things; Presents and
+Cards. A present is a wrapper around some other type that represents
+the actual gift, while a card is just a card.
+
+>>> class Card:
+...     def __repr__(self):
+...         return 'Card()'
+>>> class Present:
+...     def __init__(self, contents):
+...         self.contents = contents
+...     def __repr__(self):
+...         return 'Present({!r})'.format(self.contents)
+
+Say we have a list of all the things you got on your birthday:
+
+>>> state = [Present('doll'), Card(), Present('train set')]
+
+Because we are ungrateful children we want to be able to unwrap the
+presents in the list while leaving the cards untouched. A prism is exactly
+the sort of optic we need to write in this situation. We can create a
+prism using the ``Prism`` method. It takes two functions, *unwrap* and
+*wrap*, that will do the job of selecting and rebuilding the presents
+for us. The *wrap* function is easy because that is just the ``Present``
+constructor that we already have. We can write an *unwrap* like this:
+
+>>> def unwrap_present(state):
+...     if isinstance(state, Present):
+...         return state.contents
+
+This function checks if we have a present, unwraps it if we do, and
+implicitly returns ``None`` if we don't. Now we can construct our
+prism. We need to tell the prism that our function signals the lack of
+a focus by returning a none value, so we set the ``ignore_none``
+keyword argument.
+
+>>> Present_prism = lens.Prism(unwrap_present, Present, ignore_none=True)
+>>> each_present = lens.Each() & Present_prism
+
+Now we are ready to get at our presents:
+
+>>> each_present.collect()(state)
+['doll', 'train set']
+
+And break them:
+
+>>> ('broken ' + each_present)(state)
+[Present('broken doll'), Card(), Present('broken train set')]
+
+There are a couple of useful prisms available. ``Instance`` is a
+prism that only focuses something when it is of a particular type, and
+``Filter`` allows you to supply an arbitrary predicate function to select
+the focus. Technically, ``Instance`` and ``Filter`` are something called
+an *affine traversal* and not true prisms, because they don't actually
+do any wrapping and unwrapping; their wrap functions are both no-ops. But
+they act enough like prisms that the lenses library uses them as though
+they were.
+
+
+Reviews
+-------
+
+A Review is to a Prism as a Setter is to a Traversal.
+
+When we first looked at isomorphisms we saw that they have a special
+kind of setter that only takes one argument. We called that function
+"review". A Review is any optic that contains a review function, but
+doesn't necessarily have a getter.
+
+There are no supported ways to create Reviews using the lenses library.
+But since all prisms (and isomorphisms) are also reviews, it's important
+to know what they can do. Reviews have two important features.
+
+The first is that they are flippable. You can flip a Review just like an
+isomorphism, but while isos flip in a way that is reversable, Reviews
+do not. What was previously the review function becomes a getter and
+there is no previous getter function to become the review. The flipped
+version of a Review has a getter function, but no review function (and
+no setter). When you flip a Review it becomes a Getter.
+
+>>> Present_getter = Present_prism.flip()
+>>> Present_getter.kind()
+'Getter'
+>>> Present_getter.get()('lump of coal')
+Present('lump of coal')
+
+The second feature is that you can use them to construct states,
+given only a focus. Like isomorphisms, they do not require access to
+a previous state in order to construct a new one. If you have a Review
+you can construct states with the ``construct`` method; just pass the
+focus that you want to use.
+
+If we wanted to play the childrens game "pass the parcel" we would need
+a prize that has been wrapped up many times:
+
+>>> (Present_prism & Present_prism & Present_prism).construct('sweets')
+Present(Present(Present('sweets')))
+
+Obviously, making a review like this just to construct values is
+inefficient and less readable than constructing the value directly. The
+utility comes when you have many different reviews, prisms, and isos
+composed together and you use the resulting optic to do many different
+tasks, not just constructing.
