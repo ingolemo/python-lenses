@@ -699,40 +699,21 @@ class BaseUiLens(Generic[S, T, A, B]):
 
         `pack` is a function that takes a focus and returns that focus
         wrapped up in a new state. `unpack` is a function that takes
-        a state and unpacks it to get a focus. The unpack function
-        must return an instance of `lenses.maybe.Maybe`; `Just` if the
-        unpacking succeeded and `Nothing` if the unpacking failed.
+        a state and unpacks it to get a focus. The unpack function may
+        choose to fail to unpack a focus, either by returning None or
+        raising an exception (or both).
 
         All prisms are also traversals that have exactly zero or one foci.
 
-        Parsing strings is a common situation when prisms are useful:
+        You must pass one or both of the ``ignore_none=True`` or
+        ``ignore_errors=True`` keyword arguments. If you pass the former
+        then the prism will fail to focus anything when your unpacking
+        function returns ``None``. If you pass the latter then it will
+        fail to focus when your unpacking function raises an error.
 
             >>> from lenses import lens
-            >>> from lenses.maybe import Nothing, Just
-            >>> def pack(focus):
-            ...     return str(focus)
-            ...
-            >>> def unpack(state):
-            ...     try:
-            ...         return Just(int(state))
-            ...     except ValueError:
-            ...         return Nothing()
-            ...
-            >>> lens.Prism(unpack, pack)
-            UnboundLens(Prism(<function unpack ...>, <function pack ...>))
-            >>> lens.Prism(unpack, pack).collect()('42')
-            [42]
-            >>> lens.Prism(unpack, pack).collect()('fourty two')
-            []
-
-        If you do not want to write functions that explicitly return a
-        Maybe then you can pass one or both of the ``ignore_none=True`` or
-        ``ignore_errors=True`` keyword arguments and the prism will convert
-        ``None`` and/or a raised exception to a Nothing and anything else
-        to a Just.
-
-            >>> lens.Prism(int, str, ignore_errors=True) # doctest: +SKIP
-            UnboundLens(Prism(<function int ...>, <class str>))
+            >>> lens.Prism(int, str, ignore_errors=True)
+            UnboundLens(Prism(..., ...))
             >>> lens.Prism(int, str, ignore_errors=True).collect()('42')
             [42]
             >>> lens.Prism(int, str, ignore_errors=True).collect()('fourty two')
@@ -743,8 +724,8 @@ class BaseUiLens(Generic[S, T, A, B]):
         exception types to ignore (such as you would pass to ``isinstance``).
 
             >>> errors = (ValueError,)
-            >>> lens.Prism(int, str, ignore_errors=errors) # doctest: +SKIP
-            UnboundLens(Prism(<function int ...>, <class str>))
+            >>> lens.Prism(int, str, ignore_errors=errors)
+            UnboundLens(Prism(..., ...))
             >>> lens.Prism(int, str, ignore_errors=errors).collect()('42')
             [42]
             >>> lens.Prism(int, str, ignore_errors=errors).collect()('fourty two')
@@ -754,6 +735,9 @@ class BaseUiLens(Generic[S, T, A, B]):
               File "<stdin>", line 1 in ?
             TypeError: int() argument must be ...
         '''
+
+        if not (ignore_none or ignore_errors):
+            raise ValueError('Must specify what to ignore')
 
         if ignore_errors is True:
             ignore_errors = (Exception,)
@@ -769,9 +753,7 @@ class BaseUiLens(Generic[S, T, A, B]):
                     raise e
             if ignore_none:
                 return mNothing() if result is None else mJust(result)
-            if ignore_errors:
-                return mJust(result)
-            return result
+            return mJust(result)
 
         return self._compose_optic(optics.Prism(new_unpack, pack))
 
