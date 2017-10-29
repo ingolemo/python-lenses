@@ -17,6 +17,10 @@ dependencies = [
     'typing;python_version<"3"',
 ]
 
+documentation_dependencies = [
+    'sphinx',
+]
+
 optional_dependencies = [
     'pyrsistent',
 ]
@@ -56,6 +60,7 @@ setuptools.setup(
     install_requires=dependencies,
     tests_require=test_dependencies,
     extras_require={
+        'docs': documentation_dependencies,
         'optional': optional_dependencies,
         'tests': test_dependencies,
     },
