@@ -22,6 +22,8 @@ class ContainsLens(Lens):
         [2, 3]
         >>> ContainsLens(1).set([2, 3], True)
         [2, 3, 1]
+        >>> ContainsLens(1).set([1, 2, 3], True)
+        [1, 2, 3]
 
     In order to use this lens on custom data-types you must implement
     ``lenses.hooks.contains_add`` and ``lens.hooks.contains_remove``.

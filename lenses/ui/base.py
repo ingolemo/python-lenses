@@ -712,6 +712,10 @@ class BaseUiLens(Generic[S, T, A, B]):
         fail to focus when your unpacking function raises an error.
 
             >>> from lenses import lens
+            >>> lens.Prism(int, str)
+            Traceback (most recent call last):
+              File "<stdin>", line 1 in ?
+            ValueError: Must specify what to ignore
             >>> lens.Prism(int, str, ignore_errors=True)
             UnboundLens(Prism(..., ...))
             >>> lens.Prism(int, str, ignore_errors=True).collect()('42')

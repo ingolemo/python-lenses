@@ -1,6 +1,7 @@
 import pytest
 
 from lenses.maybe import Nothing, Just
+from lenses.typeclass import mempty
 import lenses
 
 
@@ -70,6 +71,12 @@ def test_Just_add_Nothing():
 
 def test_Just_add_Just():
     assert Just([1]) + Just([2]) == Just([1, 2])
+
+
+def test_Just_add_monoid_empty():
+    obj = object()
+    value = Just(obj)
+    assert value + mempty(value) == value
 
 
 def test_Just_repr_conatins_subobject():
