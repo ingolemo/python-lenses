@@ -209,25 +209,27 @@ def test_GetattrLens_set():
 def test_GetZoomAttrTraversal_view_attr():
     obj = object()
     state = Pair(obj, 'red herring')
-    b.GetZoomAttrTraversal('left').view(state) is obj
+    assert b.GetZoomAttrTraversal('left').view(state) is obj
 
 
 def test_GetZoomAttrTraversal_set_attr():
     obj = object()
     state = Pair('initial value', 'red herring')
-    b.GetZoomAttrTraversal('left').set(state, obj) == Pair(obj, 'red herring')
+    new_state = Pair(obj, 'red herring')
+    assert b.GetZoomAttrTraversal('left').set(state, obj) == new_state
 
 
 def test_GetZoomAttrTraversal_view_zoom():
     obj = object()
     state = Pair(obj, 'red herring')
-    b.GetZoomAttrTraversal('east').view(state) is obj
+    assert b.GetZoomAttrTraversal('east').view(state) is obj
 
 
 def test_GetZoomAttrTraversal_set_zoom():
     obj = object()
     state = Pair('initial value', 'red herring')
-    b.GetZoomAttrTraversal('east').set(state, obj) == Pair(obj, 'red herring')
+    new_state = Pair(obj, 'red herring')
+    assert b.GetZoomAttrTraversal('east').set(state, obj) == new_state
 
 
 def test_GetitemLens_view():
