@@ -8,6 +8,10 @@ from lenses import lens, bind, optics as b
 from lenses.maybe import Just, Nothing
 
 
+class CustomException(Exception):
+    pass
+
+
 class Pair(object):
     def __init__(self, left, right):
         self.left = left
@@ -166,17 +170,11 @@ def test_EachTraversal_set_empty():
 
 
 def test_ErrorLens_view():
-    class CustomException(Exception):
-        pass
-
     with pytest.raises(CustomException):
         b.ErrorIso(CustomException('a message')).view(object())
 
 
 def test_ErrorLens_set():
-    class CustomException(Exception):
-        pass
-
     with pytest.raises(CustomException):
         b.ErrorIso(CustomException('a message')).set(object(), object())
 
