@@ -32,7 +32,7 @@ test_dependencies = optional_dependencies + [
 
 setuptools.setup(
     name='lenses',
-    version='0.3.0',
+    version='0.4.0',
     description='A lens library for python',
     long_description=long_desc,
     url='https://github.com/ingolemo/python-lenses',
