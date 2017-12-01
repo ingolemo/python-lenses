@@ -183,8 +183,8 @@ def _tuple_contains_add(self, item):
 
 
 @contains_add.register(dict)
-    # type (Dict[A, B], A) -> Dict[A, B]
 def _dict_contains_add(self, item):
+    # type (Dict[A, B], A) -> Dict[A, B]
     result = self.copy()
     result[item] = None
     return result
