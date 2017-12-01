@@ -365,7 +365,11 @@ def _set_from_iter(self, iterable):
 
 @from_iter.register(tuple)
 def _tuple_from_iter(self, iterable):
-    # type: (Tuple, Iterable[A]) -> Tuple[A, ...]
-    # we need to use `type(self)` to handle namedtuples and perhaps
-    # other subclasses
-    return type(self)(iterable)
+    if type(self) is tuple:
+        return tuple(iterable)
+    elif hasattr(self, '_make'):
+        # this is probably a namedtuple
+        return self._make(iterable)
+    else:
+        message = 'Don\'t know how to create instance of {} from iterable'
+        raise NotImplementedError(message.format(type(self)))

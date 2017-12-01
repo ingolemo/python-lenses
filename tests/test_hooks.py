@@ -164,6 +164,13 @@ def test_from_iter_tuple():
     assert s.from_iter((), [1, 2, 3]) == (1, 2, 3)
 
 
+def test_from_iter_namedtuple():
+    Tup = collections.namedtuple('Tup', 'attr1 attr2 attr3')
+    iterTup = s.from_iter(Tup(1, 2, 3), [4, 5, 6])
+    assert iterTup == Tup(4, 5, 6)
+    assert type(iterTup) is Tup
+
+
 def test_from_iter_dict():
     data = {'jane': 5, 'jim': 6, 'joanne': 8}
     new_keys = [(k.capitalize(), v) for k, v in s.to_iter(data)]
