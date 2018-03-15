@@ -3,6 +3,7 @@
 .eggs/
 .hypothesis/
 .mypy_cache/
+.pytest_cache/
 .tox/
 docs/_build/
 lenses.egg-info/
