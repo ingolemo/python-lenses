@@ -125,6 +125,16 @@ class LensLike(object):
         message = 'Tried to use unimplemented lens {}.'
         raise NotImplementedError(message.format(type(self)))
 
+    def apply(self, f, pure, state):
+        '''Runs the lens over the `state` applying `f` to all the foci
+        collecting the results together using the applicative functor
+        functions defined in `lenses.typeclass`. `f` must return an
+        applicative functor. For the case when no focus exists you must
+        also provide a `pure` which should take a focus and return the
+        pure form of the functor returned by `f`.
+        '''
+        return self.func(Functorisor(pure, f), state)
+
     def preview(self, state):
         # type: (S) -> Just[B]
         '''Previews a potentially non-existant focus within
@@ -135,10 +145,9 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError('Must be an instance of Fold to .preview()')
 
-        const = Functorisor(
-            lambda a: Const(Nothing()), lambda a: Const(Just(a))
-        )
-        return self.func(const, state).unwrap()
+        pure = lambda a: Const(Nothing())
+        func = lambda a: Const(Just(a))
+        return self.apply(func, pure, state).unwrap()
 
     def view(self, state):
         # type: (S) -> B
@@ -172,8 +181,9 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError('Must be an instance of Fold to .to_list_of()')
 
-        consttup = Functorisor(lambda a: Const([]), lambda a: Const([a]))
-        return self.func(consttup, state).unwrap()
+        pure = lambda a: Const([])
+        func = lambda a: Const([a])
+        return self.apply(func, pure, state).unwrap()
 
     def over(self, state, fn):
         # type: (S, Callable[[A], B]) -> T
@@ -185,10 +195,9 @@ class LensLike(object):
         if not self._is_kind(Setter):
             raise TypeError('Must be an instance of Setter to .over()')
 
-        identfn = Functorisor(
-            lambda a: Identity(a), lambda a: Identity(fn(a))
-        )
-        return self.func(identfn, state).unwrap()
+        pure = lambda a: Identity(a)
+        func = lambda a: Identity(fn(a))
+        return self.apply(func, pure, state).unwrap()
 
     def set(self, state, value):
         # type: (S, B) -> T
@@ -200,8 +209,9 @@ class LensLike(object):
         if not self._is_kind(Setter):
             raise TypeError('Must be an instance of Setter to .set()')
 
-        ident = Functorisor(lambda a: Identity(a), lambda a: Identity(value))
-        return self.func(ident, state).unwrap()
+        pure = lambda a: Identity(a)
+        func = lambda a: Identity(value)
+        return self.apply(func, pure, state).unwrap()
 
     def compose(self, other):
         # type: (LensLike) -> LensLike
