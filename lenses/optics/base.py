@@ -213,6 +213,21 @@ class LensLike(object):
         func = lambda a: Identity(value)
         return self.apply(func, pure, state).unwrap()
 
+    def iterate(self, state, iterable):
+        # type: (S, Iterable[B]) -> T
+        '''Sets all the foci within `state` to values taken from `iterable`.
+
+        Requires kind Setter. This method will raise TypeError when the
+        optic has no way to set foci.
+        '''
+        if not self._is_kind(Setter):
+            raise TypeError('Must be an instance of Setter to .iterate()')
+
+        i = iter(iterable)
+        pure = lambda a: Identity(a)
+        func = lambda a: Identity(next(i))
+        return self.apply(func, pure, state).unwrap()
+
     def compose(self, other):
         # type: (LensLike) -> LensLike
         '''Composes another lens with this one. The result is a lens

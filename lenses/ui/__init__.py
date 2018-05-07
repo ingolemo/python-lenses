@@ -1,4 +1,4 @@
-from typing import (Callable, List, Optional, Type)
+from typing import (Callable, Iterable, List, Optional, Type)
 
 from .. import optics
 from ..typevars import S, T, A, B, X, Y
@@ -85,6 +85,20 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             return self._optic.set(state, newvalue)
 
         return setter
+
+    def set_many(self, new_values):
+        # type: (Iterable[B]) -> Callable[[S], T]
+        '''Set many foci to values taken by iterating over `new_values`.
+
+            >>> from lenses import lens
+            >>> lens.Each().set_many(range(4, 7))([0, 1, 2])
+            [4, 5, 6]
+        '''
+
+        def setter_many(state):
+            return self._optic.iterate(state, new_values)
+
+        return setter_many
 
     def modify(self, func):
         # type: (Callable[[A], B]) -> Callable[[S], T]
@@ -217,6 +231,17 @@ class BoundLens(BaseUiLens[S, T, A, B]):
             [1, 4, 3]
         '''
         return self._optic.set(self._state, newvalue)
+
+    def set_many(self, new_values):
+        # type: (Iterable[B]) -> T
+        '''Set many foci to values taken by iterating over `new_values`.
+
+            >>> from lenses import bind
+            >>> bind([0, 1, 2]).Each().set_many(range(4, 7))
+            [4, 5, 6]
+        '''
+
+        return self._optic.iterate(self._state, new_values)
 
     def modify(self, func):
         # type: (Callable[[A], B]) -> T
