@@ -692,20 +692,3 @@ class TrivialIso(Isomorphism):
 
     def __repr__(self):
         return 'TrivialIso()'
-
-
-__all__ = [
-    'LensLike',
-    'Fold',
-    'Setter',
-    'Getter',
-    'Traversal',
-    'Lens',
-    'Review',
-    'Prism',
-    'Isomorphism',
-    'Equality',
-    'ComposedLens',
-    'TrivialIso',
-    'ErrorIso',
-]
