@@ -910,34 +910,3 @@ class BaseUiLens(Generic[S, T, A, B]):
     def __getitem__(self, name):
         # type: (Any) -> BaseUiLens[S, T, X, Y]
         return self.GetItem(name)
-
-    both_ = Both
-    decode_ = Decode
-    each_ = Each
-    error_ = Error
-    f_ = F
-    filter_ = Filter
-    fold_ = Fold
-    fork_ = Fork
-    get_ = Get
-    getattr_ = GetAttr
-    getitem_ = GetItem
-    getzoomattr_ = GetZoomAttr
-    instance_ = Instance
-    iso_ = Iso
-    item_ = Item
-    item_by_value_ = ItemByValue
-    items_ = Items
-    iter_ = Iter
-    json_ = Json
-    just_ = Just
-    keys_ = Keys
-    lens_ = Lens
-    listwrap_ = ListWrap
-    norm_ = Norm
-    prism_ = Prism
-    recur_ = Recur
-    tuple_ = Tuple
-    values_ = Values
-    zoom_ = Zoom
-    zoomattr_ = ZoomAttr
