@@ -2,7 +2,7 @@
 various lenses to operate on your own custom data structures.
 '''
 
-from typing import Any, Dict, Iterable, Iterator, List, Set, Tuple
+from typing import Any, Dict, FrozenSet, Iterable, Iterator, List, Set, Tuple
 from singledispatch import singledispatch
 import copy
 import sys
@@ -361,6 +361,12 @@ def _list_from_iter(self, iterable):
 def _set_from_iter(self, iterable):
     # type: (Set, Iterable[A]) -> Set[A]
     return set(iterable)
+
+
+@from_iter.register(frozenset)
+def _frozenset_from_iter(self, iterable):
+    # type: (FrozenSet, Iterable[A]) -> FrozenSet[A]
+    return frozenset(iterable)
 
 
 @from_iter.register(tuple)

@@ -397,6 +397,13 @@ def test_RecurTraversal_over():
     assert b.RecurTraversal(int).over(data, lambda n: n + 1) == result
 
 
+def test_RecurTraversal_over_with_frozenset():
+    data = [1, frozenset([2, 3]), 4]
+    result = [11, frozenset([12, 13]), 14]
+    lens = b.RecurTraversal(int)
+    assert lens.over(data, lambda n: n + 10) == result
+
+
 def test_TrivialIso_view():
     obj = object()
     assert b.TrivialIso().view(obj) is obj
