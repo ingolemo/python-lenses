@@ -17,6 +17,8 @@ def setitem_immutable(self, key, value):
     that is a copy of the original but with `value` as the new value of
     `key`.
 
+    ::
+
         setitem_immutable(obj, key, obj[key]) == obj
 
     This function is used by many lenses (particularly GetitemLens) to
@@ -94,6 +96,8 @@ def setattr_immutable(self, name, value):
     '''Takes an object, a string, and a value and produces a new object
     that is a copy of the original but with the attribute called `name`
     set to `value`.
+
+    ::
 
         setattr_immutable(obj, 'attr', obj.attr) == obj
 
@@ -293,6 +297,8 @@ def from_iter(self, iterable):
     a copy of the original with data from `iterable` reincorporated. It
     is intended as the inverse of the `to_iter` function. Any state in
     `self` that is not modelled by the iterable should remain unchanged.
+
+    ::
 
         from_iter(self, to_iter(self)) == self
 

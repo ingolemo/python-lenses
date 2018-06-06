@@ -459,7 +459,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         about the original state in order to produce a new state.
 
         These equalities should hold for the functions you supply (given
-        a reasonable definition for __eq__):
+        a reasonable definition for __eq__)::
 
             backwards(forwards(state)) == state
             forwards(backwards(focus)) == focus
@@ -665,7 +665,7 @@ class BaseUiLens(Generic[S, T, A, B]):
 
         For best results, your normalisation function should be
         idempotent.  That is, applying the function twice should have
-        no effect:
+        no effect::
 
             setter(setter(value)) == setter(value)
 
