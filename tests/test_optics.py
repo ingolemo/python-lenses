@@ -324,8 +324,8 @@ def test_ItemByValueLens_view_nonexistent():
 
 def test_ItemByValueLens_set():
     data = {'hello': 0, 'world': 1}
-    assert b.ItemByValueLens(1).set(data, ('everyone',
-                                           2)) == {'hello': 0, 'everyone': 2}
+    result = {'hello': 0, 'everyone': 2}
+    assert b.ItemByValueLens(1).set(data, ('everyone', 2)) == result
 
 
 def test_ItemByValueLens_set_nonexistent():
