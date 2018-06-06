@@ -169,7 +169,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             [2, 3, 1]
 
         The behaviour of this lens depends on the implementation of
-        ``lenses.hooks.contains_add`` and ``lenses.hooks.contains.remove``.
+        ``lenses.hooks.contains_add`` and ``lenses.hooks.contains_remove``.
         '''
         return self._compose_optic(optics.ContainsLens(item))
 

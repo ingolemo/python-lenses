@@ -205,7 +205,7 @@ def contains_remove(self, item):
     # type (Any, Any) -> Any
     '''Takes a collection and an item and returns a new collection
     of the same type with that item removed. The notion of "contains"
-    is defined by the object itself; ``item not in contains_add(obj,
+    is defined by the object itself; ``item not in contains_remove(obj,
     item)`` must be true.
 
     This function is used by some lenses (particularly ContainsLens) to
