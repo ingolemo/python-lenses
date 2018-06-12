@@ -1,5 +1,23 @@
 '''This module contains functions that you can hook into to allow
 various lenses to operate on your own custom data structures.
+
+You can hook into them by defining a method that starts with
+``_lens_`` followed by the name of the hook function. So, for
+example: the hook for ``lenses.hooks.contains_add`` is a method called
+``_lens_contains_add``. This is the preferred way of hooking into this
+library because it does not require you to have the lenses library as
+a hard dependency.
+
+These functions are all decorated with ``singledispatch``, allowing
+you to customise the behaviour of types that you did not write. Be
+warned that single dispatch functions are registered globally across
+your program and that your function also needs to be able to deal with
+subclasses of any types you register (or else register separate functions
+for each subclass).
+
+Some of the functions have default behaviours that work on many
+different python data structures. Those functions without such default
+implementations will raise ``NotImplementedError``.
 '''
 
 from typing import Any, Dict, FrozenSet, Iterable, Iterator, List, Set, Tuple
@@ -22,7 +40,9 @@ def setitem(self, key, value):
     that is a copy of the original but with `value` as the new value of
     `key`.
 
-    ::
+    The following equality should hold for your definition:
+
+    .. code-block:: python
 
         setitem(obj, key, obj[key]) == obj
 
@@ -32,20 +52,13 @@ def setitem(self, key, value):
     python's built-in `setitem` except that it returns a new object that
     has the item set rather than mutating the object in place.
 
+    It's what enables the ``lens[some_key]`` functionality.
+
     The default behaviour of this function is to call
     `obj._lens_setitem(key, value)` in the hope that the object knows
     how to set items immutably on itself. If that fails then it will
     make a copy of the object using `copy.copy` and will then mutate the
-    new object by setting the item on it in the conventional way. This
-    copying approach works for the vast majority of python objects, but
-    if it doesn't work for your type then you should define the
-    `_lens_setitem` method. This function is also wrapped with
-    `functools.singledispatch`, allowing you to customise the behaviour
-    of types that you did not write. Be warned that single dispatch
-    functions are registered globally across your program and that your
-    function also needs to be able to deal with subclasses of any types
-    you register (or else register separate functions for each
-    subclass).
+    new object by setting the item on it in the conventional way.
     '''
     try:
         self._lens_setitem
@@ -102,7 +115,9 @@ def setattr(self, name, value):
     that is a copy of the original but with the attribute called `name`
     set to `value`.
 
-    ::
+    The following equality should hold for your definition:
+
+    .. code-block:: python
 
         setattr(obj, 'attr', obj.attr) == obj
 
@@ -113,20 +128,13 @@ def setattr(self, name, value):
     new object that has the attribute set rather than mutating the
     object in place.
 
+    It's what enables the ``lens.some_attribute`` functionality.
+
     The default behaviour of this function is to call
     `obj._lens_setattr(name, value)` in the hope that the object knows
     how to set attributes immutably on itself. If that fails then it
     will make a copy of the object using `copy.copy` and will then
     mutate the new object by calling the conventional `setattr` on it.
-    This copying approach works for the vast majority of python objects,
-    but if it doesn't work for your type then you should define the
-    `_lens_setattr` method. This function is also wrapped with
-    `functools.singledispatch`, allowing you to customise the behaviour
-    of types that you did not write. Be warned that single dispatch
-    functions are registered globally across your program and that your
-    function also needs to be able to deal with subclasses of any types
-    you register (or else register separate functions for each
-    subclass).
     '''
     try:
         self._lens_setattr
@@ -155,20 +163,18 @@ def contains_add(self, item):
     # type (Any, Any) -> Any
     '''Takes a collection and an item and returns a new collection of
     the same type that contains the item. The notion of "contains"
-    is defined by the object itself; ``item in contains_add(obj, item)``
-    must be true.
+    is defined by the object itself; The following must be ``True``:
+
+    .. code-block:: python
+
+        item in contains_add(obj, item)
 
     This function is used by some lenses (particularly ContainsLens) to
     add new items to containers when necessary.
 
     The default behaviour of this function is to call
     ``obj._lens_contains_add(item)`` in the hope that the object knows
-    how to add items to itself. This function is also wrapped with
-    ``functools.singledispatch``, allowing you to customise the behaviour
-    of types that you did not write. Be warned that single dispatch
-    functions are registered globally across your program and that your
-    function also needs to be able to deal with subclasses of any types
-    you register (or else register separate functions for each subclass).
+    how to add items to itself.
     '''
     try:
         self._lens_contains_add
@@ -210,20 +216,18 @@ def contains_remove(self, item):
     # type (Any, Any) -> Any
     '''Takes a collection and an item and returns a new collection
     of the same type with that item removed. The notion of "contains"
-    is defined by the object itself; ``item not in contains_remove(obj,
-    item)`` must be true.
+    is defined by the object itself; the following must be ``True``:
+
+    .. code-block:: python
+
+        item not in contains_remove(obj, item)
 
     This function is used by some lenses (particularly ContainsLens) to
     remove items from containers when necessary.
 
     The default behaviour of this function is to call
     ``obj._lens_contains_remove(item)`` in the hope that the object knows
-    how to add items to itself. This function is also wrapped with
-    ``functools.singledispatch``, allowing you to customise the behaviour
-    of types that you did not write. Be warned that single dispatch
-    functions are registered globally across your program and that your
-    function also needs to be able to deal with subclasses of any types
-    you register (or else register separate functions for each subclass).
+    how to add items to itself.
     '''
     try:
         self._lens_contains_remove
@@ -276,10 +280,7 @@ def to_iter(self):
     function iterates over dictionaries by thier items instead.
 
     This function will try to call a `_lens_to_iter()` method on its
-    argument before it calls `iter`, allowing you to have different
-    behaviours for lens iteration and regular iteration if you wish. This
-    function is also wrapped with `functools.singledispatch`, allowing
-    it to have different implementations for each type.
+    argument before it calls `iter`.
     '''
     try:
         self._lens_to_iter
@@ -303,7 +304,9 @@ def from_iter(self, iterable):
     is intended as the inverse of the `to_iter` function. Any state in
     `self` that is not modelled by the iterable should remain unchanged.
 
-    ::
+    The following equality should hold for your definition:
+
+    .. code-block:: python
 
         from_iter(self, to_iter(self)) == self
 
@@ -312,13 +315,7 @@ def from_iter(self, iterable):
 
     The default behaviour of this function is to call
     `obj._lens_from_iter(iterable)` in the hope that the object knows how
-    to create new versions of itself from an iterable. Many types can be
-    created from iterables but do not use a `_lens_fromiter` method to
-    do this. For that reason, this function is also wrapped with
-    `functools.singledispatch`, allowing it to have different
-    implementations for each type. Unlike some other functions in this
-    module, there is no widely applicable fallback behaviour. If all
-    else fails, it will raise a `NotImplementedError`.
+    to create new versions of itself from an iterable.
     '''
     try:
         self._lens_from_iter

@@ -1,4 +1,5 @@
 from .hook_funcs import (
+    __doc__,
     setitem,
     setattr,
     contains_add,
