@@ -760,6 +760,43 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.RecurTraversal(cls))
 
+    def Traversal(self, folder, builder):
+        # type: (Callable[[A], Iterable[X]], Callable[[A, Iterable[Y]], B]) -> BaseUiLens[S, T, X, Y]
+        '''An optic that wraps folder and builder functions.
+
+        The folder function is a function that takes a single argument -
+        the state - and returns an iterable containing all the foci that
+        exist in that state. Generators are a good option for writing
+        folder functions.
+
+        A builder function takes the old state and an list of values
+        and constructs a new state with the old state's values swapped
+        out. The number of values passed to builder for any given state
+        should always be the same as the number of values that the folder
+        function would have returned for that same state.
+
+            >>> from lenses import lens
+            >>> def ends_folder(state):
+            ...     'Yields the first and last elements of a list'
+            ...     yield state[0]
+            ...     yield state[-1]
+            >>> def ends_builder(state, values):
+            ...     'Sets the first and last elements of a list'
+            ...     result = list(state)
+            ...     result[0] = values[0]
+            ...     result[-1] = values[1]
+            ...     return result
+            >>> both_ends = lens.Traversal(ends_folder, ends_builder)
+            >>> both_ends
+            UnboundLens(Traversal(...ends_folder..., ...ends_builder...))
+            >>> both_ends.collect()([1, 2, 3, 4])
+            [1, 4]
+            >>> both_ends.set(5)([1, 2, 3, 4])
+            [5, 2, 3, 5]
+        '''
+
+        return self._compose_optic(optics.Traversal(folder, builder))
+
     def Tuple(self, *lenses):
         # type: (*BaseUiLens[A, B, X, Y]) -> BaseUiLens[S, T, X, Y]
         '''A lens that combines the focuses of other lenses into a
