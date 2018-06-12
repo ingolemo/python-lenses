@@ -35,23 +35,23 @@ def test_setitem_imm_custom_class():
         def _lens_setitem(self, key, value):
             return C(value)
 
-    assert s.setitem_immutable(C(1), 0, 2) == C(2)
+    assert s.setitem(C(1), 0, 2) == C(2)
 
 
 def test_setitem_imm_bytes():
-    assert s.setitem_immutable(b'hello', 0, ord(b'j')) == b'jello'
+    assert s.setitem(b'hello', 0, ord(b'j')) == b'jello'
 
 
 def test_setitem_imm_list():
-    assert s.setitem_immutable([1, 2, 3], 0, 4) == [4, 2, 3]
+    assert s.setitem([1, 2, 3], 0, 4) == [4, 2, 3]
 
 
 def test_setitem_imm_str():
-    assert s.setitem_immutable(u'hello', 0, u'j') == u'jello'
+    assert s.setitem(u'hello', 0, u'j') == u'jello'
 
 
 def test_setitem_imm_tuple():
-    assert s.setitem_immutable((1, 2, 3), 0, 4) == (4, 2, 3)
+    assert s.setitem((1, 2, 3), 0, 4) == (4, 2, 3)
 
 
 def test_setattr_imm_custom_class():
@@ -68,7 +68,7 @@ def test_setattr_imm_custom_class():
             else:
                 raise AttributeError(name)
 
-    assert s.setattr_immutable(C(1), 'fake_attr', 2) == C(2)
+    assert s.setattr(C(1), 'fake_attr', 2) == C(2)
 
 
 def test_setattr_imm_custom_class_raw():
@@ -79,12 +79,12 @@ def test_setattr_imm_custom_class_raw():
         def __eq__(self, other):
             return self.attr == other.attr
 
-    assert s.setattr_immutable(C(1), 'attr', 2) == C(2)
+    assert s.setattr(C(1), 'attr', 2) == C(2)
 
 
 def test_setattr_imm_namedtuple():
     Tup = collections.namedtuple('Tup', 'attr')
-    assert s.setattr_immutable(Tup(1), 'attr', 2) == Tup(2)
+    assert s.setattr(Tup(1), 'attr', 2) == Tup(2)
 
 
 @hypothesis.given(

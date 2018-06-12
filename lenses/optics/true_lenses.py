@@ -69,7 +69,7 @@ class GetattrLens(Lens):
         return getattr(state, self.name)
 
     def setter(self, state, focus):
-        return hooks.setattr_immutable(state, self.name, focus)
+        return hooks.setattr(state, self.name, focus)
 
     def __repr__(self):
         return 'GetattrLens({!r})'.format(self.name)
@@ -95,7 +95,7 @@ class GetitemLens(Lens):
         return state[self.key]
 
     def setter(self, state, focus):
-        return hooks.setitem_immutable(state, self.key, focus)
+        return hooks.setitem(state, self.key, focus)
 
     def __repr__(self):
         return 'GetitemLens({!r})'.format(self.key)

@@ -9,9 +9,14 @@ import sys
 
 from ..typevars import A, B
 
+if sys.version_info[0] > 2:
+    from builtins import setattr as builtin_setattr
+else:
+    builtin_setattr = setattr
+
 
 @singledispatch
-def setitem_immutable(self, key, value):
+def setitem(self, key, value):
     # type: (Any, Any, Any) -> Any
     '''Takes an object, a key, and a value and produces a new object
     that is a copy of the original but with `value` as the new value of
@@ -19,7 +24,7 @@ def setitem_immutable(self, key, value):
 
     ::
 
-        setitem_immutable(obj, key, obj[key]) == obj
+        setitem(obj, key, obj[key]) == obj
 
     This function is used by many lenses (particularly GetitemLens) to
     set items on states even when those states do not ordinarily support
@@ -54,44 +59,44 @@ def setitem_immutable(self, key, value):
 
 if sys.version_info[0] > 2:
 
-    @setitem_immutable.register(bytes)
-    def _bytes_setitem_immutable(self, key, value):
+    @setitem.register(bytes)
+    def _bytes_setitem(self, key, value):
         # type: (bytes, int, int) -> bytes
         data = bytearray(self)
         data[key] = value
         return bytes(data)
 
-    @setitem_immutable.register(str)
-    def _str_setitem_immutable(self, key, value):
+    @setitem.register(str)
+    def _str_setitem(self, key, value):
         # type: (str, int, str) -> str
         data = list(self)
         data[key] = value
         return ''.join(data)
 else:
 
-    @setitem_immutable.register(str)
-    def _bytes_setitem_immutable(self, key, value):
+    @setitem.register(str)
+    def _bytes_setitem(self, key, value):
         # type: (str, int, int) -> str
         data = bytearray(self)
         data[key] = value
         return bytes(data)
 
-    @setitem_immutable.register(unicode)
-    def _str_setitem_immutable(self, key, value):
+    @setitem.register(unicode)
+    def _str_setitem(self, key, value):
         # type: (unicode, int, int) -> unicode
         data = list(self)
         data[key] = value
         return ''.join(data)
 
 
-@setitem_immutable.register(tuple)
-def _tuple_setitem_immutable(self, key, value):
+@setitem.register(tuple)
+def _tuple_setitem(self, key, value):
     # type: (Tuple[A, ...], int, A) -> Tuple[A, ...]
     return tuple(value if i == key else item for i, item in enumerate(self))
 
 
 @singledispatch
-def setattr_immutable(self, name, value):
+def setattr(self, name, value):
     # type: (Any, Any, Any) -> Any
     '''Takes an object, a string, and a value and produces a new object
     that is a copy of the original but with the attribute called `name`
@@ -99,7 +104,7 @@ def setattr_immutable(self, name, value):
 
     ::
 
-        setattr_immutable(obj, 'attr', obj.attr) == obj
+        setattr(obj, 'attr', obj.attr) == obj
 
     This function is used by many lenses (particularly GetattrLens) to
     set attributes on states even when those states do not ordinarily
@@ -127,13 +132,13 @@ def setattr_immutable(self, name, value):
         self._lens_setattr
     except AttributeError:
         selfcopy = copy.copy(self)
-        setattr(selfcopy, name, value)
+        builtin_setattr(selfcopy, name, value)
         return selfcopy
     else:
         return self._lens_setattr(name, value)
 
 
-@setattr_immutable.register(tuple)
+@setattr.register(tuple)
 def _tuple_setattr_immutable(self, name, value):
     # type: (Any, str, A) -> Any
     # setting attributes on a tuple probably means we really have a

@@ -25,8 +25,8 @@ class BothTraversal(Traversal):
         yield state[1]
 
     def builder(self, state, values):
-        state = hooks.setitem_immutable(state, 0, values[0])
-        state = hooks.setitem_immutable(state, 1, values[1])
+        state = hooks.setitem(state, 0, values[0])
+        state = hooks.setitem(state, 1, values[1])
         return state
 
     def __repr__(self):
