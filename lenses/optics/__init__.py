@@ -17,7 +17,6 @@ from .folds import IterableFold
 from .isomorphisms import (
     DecodeIso,
     JsonIso,
-    ListWrapIso,
     NormalisingIso,
 )
 from .prisms import (

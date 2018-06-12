@@ -59,45 +59,6 @@ class JsonIso(Isomorphism):
         return 'JsonIso()'
 
 
-class ListWrapIso(Isomorphism):
-    '''An isomorphism that wraps its state up in a list. This is
-    occasionally useful when you need to make hetrogenous data more
-    uniform. Analogous to `lambda state: [state]`.
-
-        >>> ListWrapIso()
-        ListWrapIso()
-        >>> ListWrapIso().view(0)
-        [0]
-        >>> ListWrapIso().set(0, [1])
-        1
-
-        >>> import lenses
-        >>> gi = lenses.optics.GetitemLens
-        >>> tup = lenses.optics.TupleLens
-        >>> each = lenses.optics.EachTraversal()
-        >>> state = [[1, 3], 4]
-        >>> l = tup(gi(0), gi(1) & ListWrapIso()) & each & each
-        >>> l.to_list_of(state)
-        [1, 3, 4]
-
-    Also serves as an example that lenses do not always have to
-    'zoom in' on a focus; they can also 'zoom out'.
-    '''
-
-    def __init__(self):
-        # type: () -> None
-        pass
-
-    def forwards(self, state):
-        return [state]
-
-    def backwards(self, focus):
-        return focus[0]
-
-    def __repr__(self):
-        return 'ListWrapIso()'
-
-
 class NormalisingIso(Isomorphism):
     '''An isomorphism that applies a function as it sets a new focus
     without regard to the old state. It will get foci without

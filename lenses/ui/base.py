@@ -619,28 +619,6 @@ class BaseUiLens(Generic[S, T, A, B]):
             optics.ItemsTraversal() & optics.GetitemLens(0)
         )
 
-    def ListWrap(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
-        '''An isomorphism that wraps its state up in a list. This is
-        occasionally useful when you need to make hetrogenous data more
-        uniform. Analogous to `lambda state: [state]`.
-
-            >>> from lenses import lens
-            >>> lens.ListWrap()
-            UnboundLens(ListWrapIso())
-            >>> lens.ListWrap().get()(0)
-            [0]
-            >>> lens.ListWrap().set([1])(0)
-            1
-            >>> l = lens.Tuple(lens[0], lens[1].ListWrap())
-            >>> l.Each().Each().collect()([[1, 3], 4])
-            [1, 3, 4]
-
-        Also serves as an example that lenses do not always have to
-        'zoom in' on a focus; they can also 'zoom out'.
-        '''
-        return self._compose_optic(optics.ListWrapIso())
-
     def Norm(self, setter):
         # type: (Callable[[A], X]) -> BaseUiLens[S, T, X, Y]
         '''An isomorphism that applies a function as it sets a new
