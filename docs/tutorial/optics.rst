@@ -38,9 +38,11 @@ Traversals
 All the optics that we have seen so far have been lenses, so they always
 focused a single object inside a state. But it is possible for an optic
 to have more than one focus. One such optic is the traversal. A simple
-traversal can be made with the ``Both`` method. ``lens.Both()`` focuses
-the two objects at indices ``0`` and ``1`` within the state. It is intended
-to be used with tuples of length 2, but will work on any indexable object.
+traversal can be made with the ``Each`` method. ``lens.Each()`` will focus
+all of the items in a data-structure analogous to iterating over it
+using python's ``iter`` and ``next``. It supports most of the built-in
+iterables out of the box, but if we want to use it on our own objects
+then we will need to add a hook explicitly.
 
 One issue with multi-focus optics is that the ``get`` method only ever
 returns a single focus. It will return the *first* item focused by the
@@ -48,42 +50,42 @@ optic. If we want to get all the items focused by that optic then we
 can use the ``collect`` method which will return those objects in a list:
 
 >>> data = [0, 1, 2, 3]
->>> both = lens.Both()
->>> both.get()(data)
+>>> each = lens.Each()
+>>> each.get()(data)
 0
->>> both.collect()(data)
-[0, 1]
+>>> each.collect()(data)
+[0, 1, 2, 3]
 
 Setting works with a traversal, though all foci will be set to the same
 object.
 
->>> both.set(4)(data)
-[4, 4, 2, 3]
+>>> each.set(4)(data)
+[4, 4, 4, 4]
 
 Modifying is the most useful operation we can perform. The modification
 will be applied to all the foci independently. All the foci must be of
 the same type (or at least be of a type that supports the modification
 that we want to make).
 
->>> both.modify(lambda a: a + 10)(data)
-[10, 11, 2, 3]
->>> both.modify(str)([0, 1.0, 2, 3])
-['0', '1.0', 2, 3]
+>>> each.modify(lambda a: a + 10)(data)
+[10, 11, 12, 13]
+>>> each.modify(str)([0, 1.0, 2, 3])
+['0', '1.0', '2', '3']
 
 You can of course use the same shortcut for operators that single-focus
 lenses allow:
 
->>> (both + 10)(data)
-[10, 11, 2, 3]
+>>> (each + 10)(data)
+[10, 11, 12, 13]
 
 Traversals can be composed with normal lenses. The result is a traversal
 with the lens applied to each of its original foci:
 
 >>> data = [[0, 1], [2, 3]]
->>> both_then_zero = lens.Both()[0]
->>> both_then_zero.collect()(data)
+>>> each_then_zero = lens.Each()[0]
+>>> each_then_zero.collect()(data)
 [0, 2]
->>> (both_then_zero + 10)(data)
+>>> (each_then_zero + 10)(data)
 [[10, 1], [12, 3]]
 
 Traversals can also be composed with other traversals just fine. They
@@ -91,21 +93,11 @@ will simply increase the number of foci targeted. Note that ``collect``
 returns a flat list of foci; none of the structure of the state is
 preserved.
 
->>> both_twice = lens.Both().Both()
->>> both_twice.collect()(data)
+>>> each_twice = lens.Each().Each()
+>>> each_twice.collect()(data)
 [0, 1, 2, 3]
->>> (both_twice + 10)(data)
+>>> (each_twice + 10)(data)
 [[10, 11], [12, 13]]
-
-A slightly more useful traversal method is ``Each``. ``Each`` will focus
-all of the items in a data-structure analogous to iterating over it
-using python's ``iter`` and ``next``. It supports most of the built-in
-iterables out of the box, but if we want to use it on our own objects
-then we will need to add a hook explicitly.
-
->>> data = [1, 2, 3]
->>> (lens.Each() + 10)(data)
-[11, 12, 13]
 
 The ``Values`` method returns a traversal that focuses all of the values
 in a dictionary. If we return to our ``GameState`` example from earlier,

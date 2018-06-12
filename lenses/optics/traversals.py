@@ -6,33 +6,6 @@ from .. import typeclass
 from .base import Traversal, collect_args, multiap
 
 
-class BothTraversal(Traversal):
-    '''A traversal that focuses both items [0] and [1].
-
-        >>> BothTraversal()
-        BothTraversal()
-        >>> BothTraversal().to_list_of([1, 2, 3])
-        [1, 2]
-        >>> BothTraversal().set([1, 2, 3], 4)
-        [4, 4, 3]
-    '''
-
-    def __init__(self):
-        pass
-
-    def folder(self, state):
-        yield state[0]
-        yield state[1]
-
-    def builder(self, state, values):
-        state = hooks.setitem(state, 0, values[0])
-        state = hooks.setitem(state, 1, values[1])
-        return state
-
-    def __repr__(self):
-        return 'BothTraversal()'
-
-
 class EachTraversal(Traversal):
     '''A traversal that iterates over its state, focusing everything it
     iterates over. It uses `lenses.hooks.fromiter` to reform the state

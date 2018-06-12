@@ -137,20 +137,6 @@ class BaseUiLens(Generic[S, T, A, B]):
 
         return self.modify(func)
 
-    def Both(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
-        '''A traversal that focuses both items [0] and [1].
-
-            >>> from lenses import lens
-            >>> lens.Both()
-            UnboundLens(BothTraversal())
-            >>> lens.Both().collect()([1, 2, 3])
-            [1, 2]
-            >>> lens.Both().set(4)([1, 2, 3])
-            [4, 4, 3]
-        '''
-        return self._compose_optic(optics.BothTraversal())
-
     def Contains(self, item):
         # type: (A) -> BaseUiLens[S, S, bool, bool]
         '''A lens that focuses a boolean that tells you whether the

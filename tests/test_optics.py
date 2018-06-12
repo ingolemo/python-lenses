@@ -73,7 +73,7 @@ def test_composition_of_fold_and_setter_is_invalid():
 
 
 def test_lens_and():
-    my_lens = b.BothTraversal() & b.GetitemLens(1)
+    my_lens = b.EachTraversal() & b.GetitemLens(1)
     assert my_lens.set([(0, 1), (2, 3)], 4) == [(0, 4), (2, 4)]
 
 
@@ -100,14 +100,6 @@ def test_Getter_composes_correctly():
     my_lens = b.EachTraversal() & b.Getter(visit) & b.EachTraversal()
     my_lens.to_list_of(([1, 2, 3], [4, 5, 6], [7, 8, 9]))
     assert visited == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-
-def test_BothTraversal_view():
-    assert b.BothTraversal().view(['1', '2']) == '12'
-
-
-def test_BothTraversal_set():
-    assert b.BothTraversal().set(['1', '2'], 4) == [4, 4]
 
 
 def test_ComposedLens_nolenses_view():

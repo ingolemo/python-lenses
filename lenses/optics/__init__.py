@@ -36,7 +36,6 @@ from .true_lenses import (
     TupleLens,
 )
 from .traversals import (
-    BothTraversal,
     EachTraversal,
     GetZoomAttrTraversal,
     ItemsTraversal,

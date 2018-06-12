@@ -12,11 +12,11 @@ def test_lens_get():
 
 
 def test_lens_collect():
-    assert lens.Both()[1].collect()([[1, 2], [3, 4]]) == [2, 4]
+    assert lens.Each()[1].collect()([[1, 2], [3, 4]]) == [2, 4]
 
 
 def test_lens_get_monoid():
-    assert lens.Both().get_monoid()([[1, 2], [3, 4]]) == [1, 2, 3, 4]
+    assert lens.Each().get_monoid()([[1, 2], [3, 4]]) == [1, 2, 3, 4]
 
 
 def test_lens_set():
@@ -267,10 +267,6 @@ def test_lens_getattr():
 def test_lens_getattr_direct():
     nt = collections.namedtuple('nt', 'attr')
     assert bind(nt(3)).attr.get() == 3
-
-
-def test_lens_both():
-    assert bind([1, 2]).Both().collect() == [1, 2]
 
 
 # Tests for ensuring lenses work on different type of objects

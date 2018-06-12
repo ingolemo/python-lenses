@@ -42,12 +42,9 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         a list.
 
             >>> from lenses import lens
-            >>> collect_item_zero = lens[0].collect()
-            >>> collect_item_zero([1, 2, 3])
-            [1]
-            >>> get_both = lens.Both().collect()
-            >>> get_both([1, 2, 3])
-            [1, 2]
+            >>> collect_each_first = lens.Each()[0].collect()
+            >>> collect_each_first([(1, 2), (3, 4), (5, 6)])
+            [1, 3, 5]
         '''
 
         def getter(state):
@@ -204,10 +201,8 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         a list.
 
             >>> from lenses import bind
-            >>> bind([1, 2, 3])[0].collect()
-            [1]
-            >>> bind([1, 2, 3]).Both().collect()
-            [1, 2]
+            >>> bind([(1, 2), (3, 4), (5, 6)]).Each()[0].collect()
+            [1, 3, 5]
         '''
         return self._optic.to_list_of(self._state)
 
