@@ -1,5 +1,5 @@
-'''This module contains functions that you can hook into to allow
-various lenses to operate on your own custom data structures.
+'''This module contains functions that you can hook into to allow various
+lenses to operate on your own custom data structures.
 
 You can hook into them by defining a method that starts with
 ``_lens_`` followed by the name of the hook function. So, for
@@ -37,8 +37,8 @@ else:
 def setitem(self, key, value):
     # type: (Any, Any, Any) -> Any
     '''Takes an object, a key, and a value and produces a new object
-    that is a copy of the original but with `value` as the new value of
-    `key`.
+    that is a copy of the original but with ``value`` as the new value of
+    ``key``.
 
     The following equality should hold for your definition:
 
@@ -48,17 +48,17 @@ def setitem(self, key, value):
 
     This function is used by many lenses (particularly GetitemLens) to
     set items on states even when those states do not ordinarily support
-    `setitem`. This function is designed to have a similar signature as
-    python's built-in `setitem` except that it returns a new object that
-    has the item set rather than mutating the object in place.
+    ``setitem``. This function is designed to have a similar signature
+    as python's built-in ``setitem`` except that it returns a new object
+    that has the item set rather than mutating the object in place.
 
     It's what enables the ``lens[some_key]`` functionality.
 
     The default behaviour of this function is to call
-    `obj._lens_setitem(key, value)` in the hope that the object knows
+    ``obj._lens_setitem(key, value)`` in the hope that the object knows
     how to set items immutably on itself. If that fails then it will
-    make a copy of the object using `copy.copy` and will then mutate the
-    new object by setting the item on it in the conventional way.
+    make a copy of the object using ``copy.copy`` and will then mutate
+    the new object by setting the item on it in the conventional way.
     '''
     try:
         self._lens_setitem
@@ -112,8 +112,8 @@ def _tuple_setitem(self, key, value):
 def setattr(self, name, value):
     # type: (Any, Any, Any) -> Any
     '''Takes an object, a string, and a value and produces a new object
-    that is a copy of the original but with the attribute called `name`
-    set to `value`.
+    that is a copy of the original but with the attribute called ``name``
+    set to ``value``.
 
     The following equality should hold for your definition:
 
@@ -121,20 +121,19 @@ def setattr(self, name, value):
 
         setattr(obj, 'attr', obj.attr) == obj
 
-    This function is used by many lenses (particularly GetattrLens) to
-    set attributes on states even when those states do not ordinarily
-    support `setattr`. This function is designed to have a similar
-    signature as python's built-in `setattr` except that it returns a
-    new object that has the attribute set rather than mutating the
-    object in place.
+    This function is used by many lenses (particularly GetattrLens) to set
+    attributes on states even when those states do not ordinarily support
+    ``setattr``. This function is designed to have a similar signature
+    as python's built-in ``setattr`` except that it returns a new object
+    that has the attribute set rather than mutating the object in place.
 
     It's what enables the ``lens.some_attribute`` functionality.
 
     The default behaviour of this function is to call
-    `obj._lens_setattr(name, value)` in the hope that the object knows
+    ``obj._lens_setattr(name, value)`` in the hope that the object knows
     how to set attributes immutably on itself. If that fails then it
-    will make a copy of the object using `copy.copy` and will then
-    mutate the new object by calling the conventional `setattr` on it.
+    will make a copy of the object using ``copy.copy`` and will then
+    mutate the new object by calling the conventional ``setattr`` on it.
     '''
     try:
         self._lens_setattr
@@ -161,16 +160,16 @@ def _tuple_setattr_immutable(self, name, value):
 @singledispatch
 def contains_add(self, item):
     # type (Any, Any) -> Any
-    '''Takes a collection and an item and returns a new collection of
-    the same type that contains the item. The notion of "contains"
+    '''Takes a collection and an item and returns a new collection
+    of the same type that contains the item. The notion of "contains"
     is defined by the object itself; The following must be ``True``:
 
     .. code-block:: python
 
         item in contains_add(obj, item)
 
-    This function is used by some lenses (particularly ContainsLens) to
-    add new items to containers when necessary.
+    This function is used by some lenses (particularly ContainsLens)
+    to add new items to containers when necessary.
 
     The default behaviour of this function is to call
     ``obj._lens_contains_add(item)`` in the hope that the object knows
@@ -222,12 +221,12 @@ def contains_remove(self, item):
 
         item not in contains_remove(obj, item)
 
-    This function is used by some lenses (particularly ContainsLens) to
-    remove items from containers when necessary.
+    This function is used by some lenses (particularly ContainsLens)
+    to remove items from containers when necessary.
 
     The default behaviour of this function is to call
-    ``obj._lens_contains_remove(item)`` in the hope that the object knows
-    how to add items to itself.
+    ``obj._lens_contains_remove(item)`` in the hope that the object
+    knows how to add items to itself.
     '''
     try:
         self._lens_contains_remove
@@ -267,20 +266,20 @@ def _set_contains_remove(self, item):
 @singledispatch
 def to_iter(self):
     # type: (Any) -> Any
-    '''Takes an object and produces an iterable. It is
-    intended as the inverse of the `from_iter` function.
+    '''Takes an object and produces an iterable. It is intended as the
+    inverse of the ``from_iter`` function.
 
     For most types this hook is a thin wrapper around python's built-in
-    `iter` function. Its default behaviour is to call `iter` and this
-    is usually sufficient.
+    ``iter`` function. Its default behaviour is to call ``iter`` and
+    this is usually sufficient.
 
     The reason this hook exists is to customise how dictionaries are
     iterated. In order to properly reconstruct a dictionary from an
     iterable you need access to both the keys and the values. So this
     function iterates over dictionaries by thier items instead.
 
-    This function will try to call a `_lens_to_iter()` method on its
-    argument before it calls `iter`.
+    This function will try to call a ``_lens_to_iter()`` method on its
+    argument before it calls ``iter``.
     '''
     try:
         self._lens_to_iter
@@ -300,9 +299,9 @@ def _dict_to_iter(self):
 def from_iter(self, iterable):
     # type: (Any, Any) -> Any
     '''Takes an object and an iterable and produces a new object that is
-    a copy of the original with data from `iterable` reincorporated. It
-    is intended as the inverse of the `to_iter` function. Any state in
-    `self` that is not modelled by the iterable should remain unchanged.
+    a copy of the original with data from ``iterable`` reincorporated. It
+    is intended as the inverse of the ``to_iter`` function. Any state in
+    ``self`` that is not modelled by the iterable should remain unchanged.
 
     The following equality should hold for your definition:
 
@@ -310,12 +309,12 @@ def from_iter(self, iterable):
 
         from_iter(self, to_iter(self)) == self
 
-    This function is used by EachLens to synthesise states from
-    iterables, allowing it to focus every element of an iterable state.
+    This function is used by EachLens to synthesise states from iterables,
+    allowing it to focus every element of an iterable state.
 
     The default behaviour of this function is to call
-    `obj._lens_from_iter(iterable)` in the hope that the object knows how
-    to create new versions of itself from an iterable.
+    ``obj._lens_from_iter(iterable)`` in the hope that the object knows
+    how to create new versions of itself from an iterable.
     '''
     try:
         self._lens_from_iter
