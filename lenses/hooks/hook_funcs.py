@@ -15,9 +15,15 @@ your program and that your function also needs to be able to deal with
 subclasses of any types you register (or else register separate functions
 for each subclass).
 
-Some of the functions have default behaviours that work on many
-different python data structures. Those functions without such default
-implementations will raise ``NotImplementedError``.
+All of these hooks operate in the following order:
+
+* Use an implementation registered with ``singledispatch.register``
+  for the relevant type, if one exists.
+* Use the relevant ``_lens_*`` method on the first object that was passed
+  in, if it exists.
+* Use a default implementation that is likely to work for most python
+  objects, if one exists.
+* Raise ``NotImplementedError``.
 '''
 
 from typing import Any, Dict, FrozenSet, Iterable, Iterator, List, Set, Tuple
@@ -54,11 +60,12 @@ def setitem(self, key, value):
 
     It's what enables the ``lens[some_key]`` functionality.
 
-    The default behaviour of this function is to call
-    ``obj._lens_setitem(key, value)`` in the hope that the object knows
-    how to set items immutably on itself. If that fails then it will
-    make a copy of the object using ``copy.copy`` and will then mutate
-    the new object by setting the item on it in the conventional way.
+    The corresponding method call for this hook is
+    ``obj._lens_setitem(key, value)``.
+
+    The default implementation makes a copy of the object using
+    ``copy.copy`` and then mutates the new object by setting the item
+    on it in the conventional way.
     '''
     try:
         self._lens_setitem
@@ -129,11 +136,12 @@ def setattr(self, name, value):
 
     It's what enables the ``lens.some_attribute`` functionality.
 
-    The default behaviour of this function is to call
-    ``obj._lens_setattr(name, value)`` in the hope that the object knows
-    how to set attributes immutably on itself. If that fails then it
-    will make a copy of the object using ``copy.copy`` and will then
-    mutate the new object by calling the conventional ``setattr`` on it.
+    The corresponding method call for this hook is
+    ``obj._lens_setattr(name, value)``.
+
+    The default implementation makes a copy of the object using
+    ``copy.copy`` and then mutates the new object by calling python's
+    built in ``setattr`` on it.
     '''
     try:
         self._lens_setattr
@@ -171,9 +179,10 @@ def contains_add(self, item):
     This function is used by some lenses (particularly ContainsLens)
     to add new items to containers when necessary.
 
-    The default behaviour of this function is to call
-    ``obj._lens_contains_add(item)`` in the hope that the object knows
-    how to add items to itself.
+    The corresponding method call for this hook is
+    ``obj._lens_contains_add(item)``.
+
+    There is no default implementation.
     '''
     try:
         self._lens_contains_add
@@ -224,9 +233,10 @@ def contains_remove(self, item):
     This function is used by some lenses (particularly ContainsLens)
     to remove items from containers when necessary.
 
-    The default behaviour of this function is to call
-    ``obj._lens_contains_remove(item)`` in the hope that the object
-    knows how to add items to itself.
+    The corresponding method call for this hook is
+    ``obj._lens_contains_remove(item)``.
+
+    There is no default implementation.
     '''
     try:
         self._lens_contains_remove
@@ -269,17 +279,16 @@ def to_iter(self):
     '''Takes an object and produces an iterable. It is intended as the
     inverse of the ``from_iter`` function.
 
-    For most types this hook is a thin wrapper around python's built-in
-    ``iter`` function. Its default behaviour is to call ``iter`` and
-    this is usually sufficient.
-
     The reason this hook exists is to customise how dictionaries are
     iterated. In order to properly reconstruct a dictionary from an
     iterable you need access to both the keys and the values. So this
     function iterates over dictionaries by thier items instead.
 
-    This function will try to call a ``_lens_to_iter()`` method on its
-    argument before it calls ``iter``.
+    The corresponding method call for this hook is
+    ``obj._lens_to_iter()``.
+
+    The default implementation is to call python's built in ``iter``
+    function.
     '''
     try:
         self._lens_to_iter
@@ -312,9 +321,10 @@ def from_iter(self, iterable):
     This function is used by EachLens to synthesise states from iterables,
     allowing it to focus every element of an iterable state.
 
-    The default behaviour of this function is to call
-    ``obj._lens_from_iter(iterable)`` in the hope that the object knows
-    how to create new versions of itself from an iterable.
+    The corresponding method call for this hook is
+    ``obj._lens_from_iter(iterable)``.
+
+    There is no default implementation.
     '''
     try:
         self._lens_from_iter
