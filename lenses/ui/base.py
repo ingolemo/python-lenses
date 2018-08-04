@@ -745,7 +745,7 @@ class BaseUiLens(Generic[S, T, A, B]):
 
         It also works on custom classes:
 
-            >>> class Container():
+            >>> class Container(object):
             ...     def __init__(self, contents):
             ...         self.contents = contents
             ...     def __repr__(self):

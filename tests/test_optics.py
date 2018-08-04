@@ -396,6 +396,23 @@ def test_RecurTraversal_over_with_frozenset():
     assert lens.over(data, lambda n: n + 10) == result
 
 
+def test_RecurTraversal_no_change():
+    data = [
+        1,
+        [],
+        [2],
+        Pair(3, 4),
+        Pair('one', 'two'),
+        Pair([Pair(5, [6, 7]), 256.0], 8),
+        Pair(['three', Pair(9, 'four')], 'five'),
+    ]
+    lens = b.RecurTraversal(float)
+    result = lens.over(data, lambda a: 512.0)
+    assert data is not result
+    for n in (0, 1, 2, 3, 4, 6):
+        assert data[n] is result[n]
+
+
 def test_TrivialIso_view():
     obj = object()
     assert b.TrivialIso().view(obj) is obj

@@ -112,7 +112,7 @@ class RecurTraversal(Traversal):
         >>> data = [[1, 2, 100.0], [3, 'hello', [{}, 4], 5]]
         >>> RecurTraversal(int).to_list_of(data)
         [1, 2, 3, 4, 5]
-        >>> class Container():
+        >>> class Container(object):
         ...     def __init__(self, contents):
         ...         self.contents = contents
         ...     def __repr__(self):
@@ -143,34 +143,44 @@ class RecurTraversal(Traversal):
                     yield focus
 
     def builder(self, state, values):
-        state, leftovers = self.build_object(state, values)
-        assert list(leftovers) == [], 'Did not consume all the values'
-        return state
+        return self.build_object(state, values)
 
     def build_object(self, state, values):
         if isinstance(state, self.cls):
-            return values[0], values[1:]
+            assert len(values) == 1
+            return values[0]
         elif self.can_iter(state):
             return self.build_from_iter(state, values)
         elif hasattr(state, '__dict__'):
             return self.build_dunder_dict(state, values)
-        return state, values
+        else:
+            return state
 
     def build_from_iter(self, state, values):
         new_substates = []
         for substate in hooks.to_iter(state):
-            new_substate, values = self.build_object(substate, values)
+            count = len(list(self.folder(substate)))
+            new_substate = substate
+            if count:
+                subvalues, values = values[:count], values[count:]
+                new_substate = self.build_object(substate, subvalues)
             new_substates.append(new_substate)
+
+        assert len(values) == 0
         new_state = hooks.from_iter(state, new_substates)
-        return new_state, values
+        return new_state
 
     def build_dunder_dict(self, state, values):
-        state = copy.copy(state)
+        new_state = state
         for attr in sorted(state.__dict__):
             substate = getattr(state, attr)
-            new_substate, values = self.build_object(substate, values)
-            setattr(state, attr, new_substate)
-        return state, values
+            count = len(list(self.folder(substate)))
+            if count:
+                subvalues, values = values[:count], values[count:]
+                new_substate = self.build_object(substate, subvalues)
+                new_state = hooks.setattr(new_state, attr, new_substate)
+        assert len(values) == 0
+        return new_state
 
     @staticmethod
     def can_iter(state):
