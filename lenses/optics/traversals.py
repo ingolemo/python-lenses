@@ -128,6 +128,7 @@ class RecurTraversal(Traversal):
 
     def __init__(self, cls):
         self.cls = cls
+        self._builder_cache = {}
 
     def folder(self, state):
         if isinstance(state, self.cls):
@@ -143,9 +144,24 @@ class RecurTraversal(Traversal):
                     yield focus
 
     def builder(self, state, values):
-        return self.build_object(state, values)
+        assert self._builder_cache == {}
+        result = self.build_object(state, values)
+        self._builder_cache = {}
+        return result
 
     def build_object(self, state, values):
+        if not self.can_hash(state):
+            return self.build_object_no_cache(state, values)
+
+        guard = object()
+        cache = self._builder_cache.get(state, guard)
+        if cache is not guard:
+            return cache
+        result = self.build_object_no_cache(state, values)
+        self._builder_cache[state] = result
+        return result
+
+    def build_object_no_cache(self, state, values):
         if isinstance(state, self.cls):
             assert len(values) == 1
             return values[0]
@@ -193,6 +209,15 @@ class RecurTraversal(Traversal):
         from_types = set(hooks.from_iter.registry.keys()) - {object}
         can_from = any(isinstance(state, type_) for type_ in from_types)
         return can_from
+
+    @staticmethod
+    def can_hash(state):
+        try:
+            hash(state)
+        except TypeError:
+            return False
+        else:
+            return True
 
     def __repr__(self):
         return 'RecurTraversal({!r})'.format(self.cls)

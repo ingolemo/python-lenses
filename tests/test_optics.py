@@ -21,10 +21,23 @@ class Pair(object):
     west = lens.right
 
     def __eq__(self, other):
-        return self.left == other.left and self.right == other.right
+        return (type(self) is type(other)
+            and self.left == other.left
+            and self.right == other.right)
+
+    def __hash__(self):
+        return hash(self.left) ^ hash(self.right)
 
     def __repr__(self):
         return 'Pair({!r}, {!r})'.format(self.left, self.right)
+
+
+def timer(function, *args, **kwargs):
+    import time
+    start = time.time()
+    function(*args, **kwargs)
+    end = time.time()
+    return end - start
 
 
 def test_LensLike():
@@ -411,6 +424,29 @@ def test_RecurTraversal_no_change():
     assert data is not result
     for n in (0, 1, 2, 3, 4, 6):
         assert data[n] is result[n]
+
+
+@pytest.mark.slow
+@pytest.mark.performance
+def test_RecurTraversal_memoizes_hashable():
+    depth = 100
+    width = 10
+    lens = b.RecurTraversal(int)
+
+    hashable_data = frozenset([0])
+    for _ in range(depth):
+        hashable_data = hashable_data, None
+    hashable_data = [hashable_data] * width
+
+    unhashable_data = set([0])
+    for _ in range(depth):
+        unhashable_data = unhashable_data, None
+    unhashable_data = [unhashable_data] * width
+
+    hashable_time = timer(lens.over, hashable_data, lambda n: 1)
+    unhashable_time = timer(lens.over, unhashable_data, lambda n: 1)
+
+    assert hashable_time < unhashable_time
 
 
 def test_TrivialIso_view():
