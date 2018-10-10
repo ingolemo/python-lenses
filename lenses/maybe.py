@@ -4,6 +4,8 @@ from . import hooks
 from . import typeclass
 from .typevars import A, B
 
+import sys
+
 
 class Just(Generic[A]):
     '''A class that can contain a value or not. If it contains a value
@@ -21,7 +23,12 @@ class Just(Generic[A]):
         1
     '''
 
-    __slots__ = ('item',)
+    # The typing module in 3.5.2 is broken when using Generic with __slots__,
+    # see https://github.com/python/typing/issues/332 
+    # We can just skip defining __slots__ and this will work fine for that
+    # version, at a slight overhead expense.
+    if sys.version_info[:3] != (3, 5, 2):
+        __slots__ = ('item',)
 
     def __init__(self, item):
         # type: (A) -> None
