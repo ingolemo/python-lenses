@@ -47,6 +47,7 @@ class ContainsLens(Lens):
     def __repr__(self):
         return 'ContainsLens({!r})'.format(self.item)
 
+
 class GetattrLens(Lens):
     '''A lens that focuses an attribute of an object. Analogous to
     `getattr`.

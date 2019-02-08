@@ -14,16 +14,8 @@ from .base import (
     ErrorIso,
 )
 from .folds import IterableFold
-from .isomorphisms import (
-    DecodeIso,
-    JsonIso,
-    NormalisingIso,
-)
-from .prisms import (
-    FilteringPrism,
-    InstancePrism,
-    JustPrism,
-)
+from .isomorphisms import DecodeIso, JsonIso, NormalisingIso
+from .prisms import FilteringPrism, InstancePrism, JustPrism
 from .setters import ForkedSetter
 from .true_lenses import (
     ContainsLens,

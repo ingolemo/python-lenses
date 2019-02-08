@@ -92,6 +92,8 @@ if sys.version_info[0] > 2:
         data = list(self)
         data[key] = value
         return ''.join(data)
+
+
 else:
 
     @setitem.register(str)
@@ -346,6 +348,8 @@ if sys.version_info[0] > 2:
     def _str_from_iter(self, iterable):
         # type: (str, Iterable[str]) -> str
         return ''.join(iterable)
+
+
 else:
 
     @from_iter.register(str)

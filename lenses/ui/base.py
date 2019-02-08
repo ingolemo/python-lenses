@@ -1,4 +1,4 @@
-from typing import (Any, Callable, Generic, Iterable, Optional, Type, cast)
+from typing import Any, Callable, Generic, Iterable, Optional, Type, cast
 
 import copy
 import functools

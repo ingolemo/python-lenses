@@ -1,4 +1,4 @@
-from typing import (Callable, Iterable, List, Optional, Type)
+from typing import Callable, Iterable, List, Optional, Type
 
 from .. import optics
 from ..typevars import S, T, A, B, X, Y

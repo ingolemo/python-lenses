@@ -53,6 +53,7 @@ class GetZoomAttrTraversal(Traversal):
 
     def __init__(self, name):
         from lenses.optics import GetattrLens
+
         self.name = name
         self._getattr_cache = GetattrLens(name)
 

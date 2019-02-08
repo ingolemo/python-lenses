@@ -242,8 +242,15 @@ class LensLike(object):
     def kind(self):
         '''Returns a class representing the 'kind' of optic.'''
         optics = [
-            Equality, Isomorphism, Prism, Review, Lens, Traversal, Getter,
-            Setter, Fold
+            Equality,
+            Isomorphism,
+            Prism,
+            Review,
+            Lens,
+            Traversal,
+            Getter,
+            Setter,
+            Fold,
         ]
         for optic in optics:
             if self._is_kind(optic):
