@@ -49,27 +49,29 @@ is available on ReadTheDocs.
 Example
 -------
 
->>> from pprint import pprint
->>> from lenses import lens
->>>
->>> data = [{'name': 'Jane', 'scores': ['a', 'a', 'b', 'a']},
-...         {'name': 'Richard', 'scores': ['c', None, 'd', 'c']},
-...         {'name': 'Zoe', 'scores': ['f', 'f', None, 'f']}]
-... 
->>> format_scores = lens.Each()['scores'].Each().Instance(str).call_upper()
->>> cheat = lens[2]['scores'].Each().set('a')
->>>
->>> corrected = format_scores(data)
->>> pprint(corrected)
-[{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
- {'name': 'Richard', 'scores': ['C', None, 'D', 'C']},
- {'name': 'Zoe', 'scores': ['F', 'F', None, 'F']}]
->>>
->>> cheated = format_scores(cheat(data))
->>> pprint(cheated)
-[{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
- {'name': 'Richard', 'scores': ['C', None, 'D', 'C']},
- {'name': 'Zoe', 'scores': ['A', 'A', 'A', 'A']}]
+.. code:: pycon
+
+    >>> from pprint import pprint
+    >>> from lenses import lens
+    >>>
+    >>> data = [{'name': 'Jane', 'scores': ['a', 'a', 'b', 'a']},
+    ...         {'name': 'Richard', 'scores': ['c', None, 'd', 'c']},
+    ...         {'name': 'Zoe', 'scores': ['f', 'f', None, 'f']}]
+    ... 
+    >>> format_scores = lens.Each()['scores'].Each().Instance(str).call_upper()
+    >>> cheat = lens[2]['scores'].Each().set('a')
+    >>>
+    >>> corrected = format_scores(data)
+    >>> pprint(corrected)
+    [{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
+     {'name': 'Richard', 'scores': ['C', None, 'D', 'C']},
+     {'name': 'Zoe', 'scores': ['F', 'F', None, 'F']}]
+    >>>
+    >>> cheated = format_scores(cheat(data))
+    >>> pprint(cheated)
+    [{'name': 'Jane', 'scores': ['A', 'A', 'B', 'A']},
+     {'name': 'Richard', 'scores': ['C', None, 'D', 'C']},
+     {'name': 'Zoe', 'scores': ['A', 'A', 'A', 'A']}]
 
 
 The definition of ``format_scores`` means "for each item in the data take
@@ -77,7 +79,7 @@ the value with the key of ``'scores'`` and then for each item in that list
 that is an instance of ``str``, call its ``upper`` method on it". That one
 line is the equivalent of this code:
 
-::
+.. code:: python
 
     def format_scores(data):
         results = []
