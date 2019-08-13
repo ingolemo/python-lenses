@@ -1,7 +1,11 @@
 from typing import Any, Callable, Generic, List, Tuple, Dict
 
-from singledispatch import singledispatch
+
 import sys
+if sys.version_info[0] > 2:
+    from functools import singledispatch
+else:
+    from singledispatch import singledispatch
 
 from .typevars import A, B
 

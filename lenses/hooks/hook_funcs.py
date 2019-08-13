@@ -27,15 +27,16 @@ All of these hooks operate in the following order:
 '''
 
 from typing import Any, Dict, FrozenSet, Iterable, Iterator, List, Set, Tuple
-from singledispatch import singledispatch
 import copy
 import sys
 
 from ..typevars import A, B
 
 if sys.version_info[0] > 2:
+    from functools import singledispatch
     from builtins import setattr as builtin_setattr
 else:
+    from singledispatch import singledispatch
     builtin_setattr = setattr
 
 

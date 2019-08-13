@@ -13,7 +13,7 @@ except IOError:
     long_desc = None
 
 dependencies = [
-    'singledispatch',
+    'singledispatch;python_version<"3"',
     'typing;python_version<"3"',
 ]
 
