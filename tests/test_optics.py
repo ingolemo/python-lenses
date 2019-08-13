@@ -426,8 +426,6 @@ def test_RecurTraversal_no_change():
         assert data[n] is result[n]
 
 
-@pytest.mark.slow
-@pytest.mark.performance
 def test_RecurTraversal_memoizes_hashable():
     depth = 100
     width = 10
