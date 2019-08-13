@@ -5,7 +5,7 @@ from ..functorisor import Functorisor
 from ..identity import Identity
 from .. import typeclass
 from ..maybe import Just, Nothing
-from ..typevars import S, T, A, B
+from ..typevars import S, T, A, B, X, Y
 
 
 def multiap(func, *args):
@@ -145,8 +145,8 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError('Must be an instance of Fold to .preview()')
 
-        pure = lambda a: Const(Nothing())
-        func = lambda a: Const(Just(a))
+        pure = lambda a: Const(Nothing()) # type: Callable[[X], Const[Just[X], Y]]
+        func = lambda a: Const(Just(a)) # type: Callable[[X], Const[Just[X], Y]]
         return self.apply(func, pure, state).unwrap()
 
     def view(self, state):
@@ -181,8 +181,8 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError('Must be an instance of Fold to .to_list_of()')
 
-        pure = lambda a: Const([])
-        func = lambda a: Const([a])
+        pure = lambda a: Const([]) # type: Callable[[X], Const[List[X], Y]]
+        func = lambda a: Const([a]) # type: Callable[[X], Const[List[X], Y]]
         return self.apply(func, pure, state).unwrap()
 
     def over(self, state, fn):
