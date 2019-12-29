@@ -32,12 +32,8 @@ import sys
 
 from ..typevars import A, B
 
-if sys.version_info[0] > 2:
-    from functools import singledispatch
-    from builtins import setattr as builtin_setattr
-else:
-    from singledispatch import singledispatch
-    builtin_setattr = setattr
+from functools import singledispatch
+from builtins import setattr as builtin_setattr
 
 
 @singledispatch
@@ -78,38 +74,20 @@ def setitem(self, key, value):
         return self._lens_setitem(key, value)
 
 
-if sys.version_info[0] > 2:
-
-    @setitem.register(bytes)
-    def _bytes_setitem(self, key, value):
-        # type: (bytes, int, int) -> bytes
-        data = bytearray(self)
-        data[key] = value
-        return bytes(data)
-
-    @setitem.register(str)
-    def _str_setitem(self, key, value):
-        # type: (str, int, str) -> str
-        data = list(self)
-        data[key] = value
-        return ''.join(data)
+@setitem.register(bytes)
+def _bytes_setitem(self, key, value):
+    # type: (bytes, int, int) -> bytes
+    data = bytearray(self)
+    data[key] = value
+    return bytes(data)
 
 
-else:
-
-    @setitem.register(str)
-    def _bytes_setitem(self, key, value):
-        # type: (str, int, int) -> str
-        data = bytearray(self)
-        data[key] = value
-        return bytes(data)
-
-    @setitem.register(unicode)
-    def _str_setitem(self, key, value):
-        # type: (unicode, int, int) -> unicode
-        data = list(self)
-        data[key] = value
-        return ''.join(data)
+@setitem.register(str)
+def _str_setitem(self, key, value):
+    # type: (str, int, str) -> str
+    data = list(self)
+    data[key] = value
+    return ''.join(data)
 
 
 @setitem.register(tuple)
@@ -338,30 +316,16 @@ def from_iter(self, iterable):
         return self._lens_from_iter(iterable)
 
 
-if sys.version_info[0] > 2:
-
-    @from_iter.register(bytes)
-    def _bytes_from_iter(self, iterable):
-        # type: (bytes, Iterable[int]) -> bytes
-        return bytes(iterable)
-
-    @from_iter.register(str)
-    def _str_from_iter(self, iterable):
-        # type: (str, Iterable[str]) -> str
-        return ''.join(iterable)
+@from_iter.register(bytes)
+def _bytes_from_iter(self, iterable):
+    # type: (bytes, Iterable[int]) -> bytes
+    return bytes(iterable)
 
 
-else:
-
-    @from_iter.register(str)
-    def _bytes_from_iter(self, iterable):
-        # type: (str, Iterable[str]) -> str
-        return ''.join(iterable)
-
-    @from_iter.register(unicode)
-    def _str_from_iter(self, iterable):
-        # type: (unicode, Iterable[unicode]) -> unicode
-        return u''.join(iterable)
+@from_iter.register(str)
+def _str_from_iter(self, iterable):
+    # type: (str, Iterable[str]) -> str
+    return ''.join(iterable)
 
 
 @from_iter.register(dict)

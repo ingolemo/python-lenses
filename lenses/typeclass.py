@@ -2,10 +2,7 @@ from typing import Any, Callable, Generic, List, Tuple, Dict
 
 
 import sys
-if sys.version_info[0] > 2:
-    from functools import singledispatch
-else:
-    from singledispatch import singledispatch
+from functools import singledispatch
 
 from .typevars import A, B
 
@@ -27,19 +24,6 @@ def mappend(monoid, other):
 def _mempty_int(self):
     # type: (int) -> int
     return 0
-
-
-if sys.version_info[0] < 3:
-
-    @mempty.register(long)
-    def _mempty_long(self):
-        # type: (long) -> long
-        return long(0)
-
-    @mempty.register(unicode)
-    def _memty_unicode(self):
-        # type: (unicode) -> unicode
-        return u''
 
 
 @mempty.register(str)

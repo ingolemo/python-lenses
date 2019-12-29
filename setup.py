@@ -13,8 +13,8 @@ except IOError:
     long_desc = None
 
 dependencies = [
-    'singledispatch;python_version<"3"',
-    'typing;python_version<"3"',
+    'singledispatch',
+    'typing',
 ]
 
 documentation_dependencies = [
@@ -28,7 +28,7 @@ optional_dependencies = [
 
 test_dependencies = optional_dependencies + [
     'pytest', 'coverage', 'pytest-coverage', 'hypothesis',
-    'mypy;python_version>="3.3" and implementation_name=="cpython"'
+    'mypy;implementation_name=="cpython"'
 ]
 
 setuptools.setup(
@@ -45,8 +45,6 @@ setuptools.setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -58,7 +56,7 @@ setuptools.setup(
     ],
     keywords='lens lenses immutable functional optics',
     packages=setuptools.find_packages(exclude=['tests']),
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
+    python_requires='>=3.5, <4',
     install_requires=dependencies,
     tests_require=test_dependencies,
     extras_require={
