@@ -8,7 +8,7 @@ from .hook_funcs import (
     from_iter,
 )
 
-supported_modules = ['pyrsistent', 'frozendict']
+supported_modules = ['pyrsistent']
 
 for _hook in supported_modules:
     try:

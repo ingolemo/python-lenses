@@ -23,7 +23,6 @@ documentation_dependencies = [
 
 optional_dependencies = [
     'pyrsistent',
-    'frozendict',
 ]
 
 test_dependencies = optional_dependencies + [
