@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import frozendict
+import frozendict # type: ignore
 
 from . import hook_funcs
 
