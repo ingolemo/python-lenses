@@ -14,33 +14,26 @@ class Identity(Generic[A]):
 
     __slots__ = ('item',)
 
-    def __init__(self, item):
-        # type: (A) -> None
+    def __init__(self, item: A) -> None:
         self.item = item
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return '{}({!r})'.format(self.__class__.__name__, self.item)
 
-    def __eq__(self, other):
-        # type: (object) -> bool
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Identity):
             return False
         return bool(self.item == other.item)
 
-    def map(self, fn):
-        # type: (Callable[[A], B]) -> Identity[B]
+    def map(self, fn: Callable[[A], B]) -> 'Identity[B]':
         return Identity(fn(self.item))
 
     @classmethod
-    def pure(cls, item):
-        # type: (A) -> Identity[A]
+    def pure(cls, item: A) -> 'Identity[A]':
         return cls(item)
 
-    def apply(self, fn):
-        # type: (Identity[Callable[[A], B]]) -> Identity[B]
+    def apply(self, fn: 'Identity[Callable[[A], B]]') -> 'Identity[B]':
         return Identity(fn.item(self.item))
 
-    def unwrap(self):
-        # type: () -> A
+    def unwrap(self) -> A:
         return self.item

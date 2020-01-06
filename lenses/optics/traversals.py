@@ -230,8 +230,7 @@ class ZoomAttrTraversal(Traversal):
     lens that is being looked up.
     '''
 
-    def __init__(self, name):
-        # type: (str) -> None
+    def __init__(self, name: str) -> None:
         self.name = name
 
     def func(self, f, state):

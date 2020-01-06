@@ -27,8 +27,7 @@ from . import ui
 from .ui import UnboundLens
 
 
-def bind(state):
-    # type: (S) -> ui.BoundLens[S, T, S, T]
+def bind(state: S) -> ui.BoundLens[S, S, S, S]:
     'Returns a simple BoundLens object bound to `state`.'
     return ui.BoundLens(state, optics.TrivialIso())
 

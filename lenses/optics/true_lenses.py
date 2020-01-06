@@ -62,8 +62,7 @@ class GetattrLens(Lens):
         Pair(left=1, right=3)
     '''
 
-    def __init__(self, name):
-        # type: (str) -> None
+    def __init__(self, name: str) -> None:
         self.name = name
 
     def getter(self, state):
@@ -88,8 +87,7 @@ class GetitemLens(Lens):
         {'foo': 2}
     '''
 
-    def __init__(self, key):
-        # type: (Any) -> None
+    def __init__(self, key: Any) -> None:
         self.key = key
 
     def getter(self, state):
@@ -120,8 +118,7 @@ class GetitemOrElseLens(GetitemLens):
         {'baz': 10}
     '''
 
-    def __init__(self, key, default=None):
-        # type: (Any, Any) -> None
+    def __init__(self, key: Any, default: Any = None) -> None:
         self.key = key
         self.default = default
 
@@ -152,8 +149,7 @@ class ItemLens(Lens):
         OrderedDict([(2, 20)])
     '''
 
-    def __init__(self, key):
-        # type: (Any) -> None
+    def __init__(self, key: Any) -> None:
         self.key = key
 
     def getter(self, state):

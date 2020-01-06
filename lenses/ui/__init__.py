@@ -14,12 +14,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
     def __init__(self, optic):
         self._optic = optic
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'UnboundLens({!r})'.format(self._optic)
 
-    def get(self):
-        # type: () -> Callable[[S], B]
+    def get(self) -> Callable[[S], B]:
         '''Get the first value focused by the lens.
 
             >>> from lenses import lens
@@ -36,8 +34,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
 
         return getter
 
-    def collect(self):
-        # type: () -> Callable[[S], List[B]]
+    def collect(self) -> Callable[[S], List[B]]:
         '''Get multiple values focused by the lens. Returns them as
         a list.
 
@@ -52,8 +49,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
 
         return getter
 
-    def get_monoid(self):
-        # type: () -> Callable[[S], B]
+    def get_monoid(self) -> Callable[[S], B]:
         '''Get the values focused by the lens, merging them together by
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
@@ -68,8 +64,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
 
         return getter
 
-    def set(self, newvalue):
-        # type: (B) -> Callable[[S], T]
+    def set(self, newvalue: B) -> Callable[[S], T]:
         '''Set the focus to `newvalue`.
 
             >>> from lenses import lens
@@ -83,8 +78,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
 
         return setter
 
-    def set_many(self, new_values):
-        # type: (Iterable[B]) -> Callable[[S], T]
+    def set_many(self, new_values: Iterable[B]) -> Callable[[S], T]:
         '''Set many foci to values taken by iterating over `new_values`.
 
             >>> from lenses import lens
@@ -97,8 +91,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
 
         return setter_many
 
-    def modify(self, func):
-        # type: (Callable[[A], B]) -> Callable[[S], T]
+    def modify(self, func: Callable[[A], B]) -> Callable[[S], T]:
         '''Apply a function to the focus.
 
             >>> from lenses import lens
@@ -115,13 +108,11 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
 
         return modifier
 
-    def construct(self, focus):
-        # type: (A) -> S
+    def construct(self, focus: A) -> S:
         '''Construct a state given a focus.'''
         return self._optic.re().view(focus)
 
-    def flip(self):
-        # type: () -> UnboundLens[A, B, S, T]
+    def flip(self) -> 'UnboundLens[A, B, S, T]':
         '''Flips the direction of the lens. The lens must be unbound
         and all the underlying operations must be isomorphisms.
 
@@ -133,8 +124,9 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         '''
         return UnboundLens(self._optic.re())
 
-    def __and__(self, other):
-        # type: (UnboundLens[A, B, X, Y]) -> UnboundLens[S, T, X, Y]
+    def __and__(
+        self, other: 'UnboundLens[A, B, X, Y]'
+    ) -> 'UnboundLens[S, T, X, Y]':
         '''Refine the current focus of this lens by composing it with
         another lens object. The other lens must be unbound.
 
@@ -151,18 +143,19 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             raise TypeError(message.format(type(other)))
         return self._compose_optic(other._optic)
 
-    def __get__(self, instance, owner):
-        # type: (Optional[S], Type) -> BaseUiLens[S, T, A, B]
+    def __get__(
+        self, instance: Optional[S], owner: Type
+    ) -> BaseUiLens[S, T, A, B]:
         if instance is None:
             return self
         return BoundLens(instance, self._optic)
 
-    def _compose_optic(self, optic):
-        # type: (optics.LensLike) -> UnboundLens[S, T, X, Y]
+    def _compose_optic(
+        self, optic: optics.LensLike
+    ) -> 'UnboundLens[S, T, X, Y]':
         return UnboundLens(self._optic.compose(optic))
 
-    def kind(self):
-        # type: () -> str
+    def kind(self) -> str:
         'Returns the "kind" of the lens.'
         return self._optic.kind().__name__
 
@@ -174,17 +167,14 @@ class BoundLens(BaseUiLens[S, T, A, B]):
 
     __slots__ = ('_state', '_optic')
 
-    def __init__(self, state, optic):
-        # type: (S, optics.LensLike) -> None
+    def __init__(self, state: S, optic: optics.LensLike) -> None:
         self._state = state
         self._optic = optic
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'BoundLens({!r}, {!r})'.format(self._state, self._optic)
 
-    def get(self):
-        # type: () -> B
+    def get(self) -> B:
         '''Get the first value focused by the lens.
 
             >>> from lenses import bind
@@ -195,8 +185,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''
         return self._optic.to_list_of(self._state)[0]
 
-    def collect(self):
-        # type: () -> List[B]
+    def collect(self) -> List[B]:
         '''Get multiple values focused by the lens. Returns them as
         a list.
 
@@ -206,8 +195,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''
         return self._optic.to_list_of(self._state)
 
-    def get_monoid(self):
-        # type: () -> B
+    def get_monoid(self) -> B:
         '''Get the values focused by the lens, merging them together by
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
@@ -217,8 +205,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''
         return self._optic.view(self._state)
 
-    def set(self, newvalue):
-        # type: (B) -> T
+    def set(self, newvalue: B) -> T:
         '''Set the focus to `newvalue`.
 
             >>> from lenses import bind
@@ -227,8 +214,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''
         return self._optic.set(self._state, newvalue)
 
-    def set_many(self, new_values):
-        # type: (Iterable[B]) -> T
+    def set_many(self, new_values: Iterable[B]) -> T:
         '''Set many foci to values taken by iterating over `new_values`.
 
             >>> from lenses import bind
@@ -238,8 +224,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
 
         return self._optic.iterate(self._state, new_values)
 
-    def modify(self, func):
-        # type: (Callable[[A], B]) -> T
+    def modify(self, func: Callable[[A], B]) -> T:
         '''Apply a function to the focus.
 
             >>> from lenses import bind
@@ -250,8 +235,9 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         '''
         return self._optic.over(self._state, func)
 
-    def __and__(self, other):
-        # type: (UnboundLens[A, B, X, Y]) -> BoundLens[S, T, X, Y]
+    def __and__(
+        self, other: UnboundLens[A, B, X, Y]
+    ) -> 'BoundLens[S, T, X, Y]':
         '''Refine the current focus of this lens by composing it with
         another lens object. The other lens must be unbound.
 
@@ -266,12 +252,12 @@ class BoundLens(BaseUiLens[S, T, A, B]):
             raise TypeError(message.format(type(other)))
         return self._compose_optic(other._optic)
 
-    def _compose_optic(self, optic):
-        # type: (optics.LensLike) -> BoundLens[S, T, X, Y]
+    def _compose_optic(
+        self, optic: optics.LensLike
+    ) -> 'BoundLens[S, T, X, Y]':
         return BoundLens(self._state, self._optic.compose(optic))
 
-    def kind(self):
-        # type: () -> str
+    def kind(self) -> str:
         'Returns the "kind" of the lens.'
         return self._optic.kind().__name__
 

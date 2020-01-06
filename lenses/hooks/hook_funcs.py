@@ -26,7 +26,17 @@ All of these hooks operate in the following order:
 * Raise ``NotImplementedError``.
 '''
 
-from typing import Any, Dict, FrozenSet, Iterable, Iterator, List, Set, Tuple
+from typing import (
+    Any,
+    Dict,
+    FrozenSet,
+    Iterable,
+    Iterator,
+    List,
+    NamedTuple,
+    Set,
+    Tuple,
+)
 import copy
 import sys
 
@@ -37,8 +47,7 @@ from builtins import setattr as builtin_setattr
 
 
 @singledispatch
-def setitem(self, key, value):
-    # type: (Any, Any, Any) -> Any
+def setitem(self: Any, key: Any, value: Any) -> Any:
     '''Takes an object, a key, and a value and produces a new object
     that is a copy of the original but with ``value`` as the new value of
     ``key``.
@@ -75,30 +84,26 @@ def setitem(self, key, value):
 
 
 @setitem.register(bytes)
-def _bytes_setitem(self, key, value):
-    # type: (bytes, int, int) -> bytes
+def _bytes_setitem(self: bytes, key: int, value: int) -> bytes:
     data = bytearray(self)
     data[key] = value
     return bytes(data)
 
 
 @setitem.register(str)
-def _str_setitem(self, key, value):
-    # type: (str, int, str) -> str
+def _str_setitem(self: str, key: int, value: str) -> str:
     data = list(self)
     data[key] = value
     return ''.join(data)
 
 
 @setitem.register(tuple)
-def _tuple_setitem(self, key, value):
-    # type: (Tuple[A, ...], int, A) -> Tuple[A, ...]
+def _tuple_setitem(self: Tuple[A, ...], key: int, value: A) -> Tuple[A, ...]:
     return tuple(value if i == key else item for i, item in enumerate(self))
 
 
 @singledispatch
-def setattr(self, name, value):
-    # type: (Any, Any, Any) -> Any
+def setattr(self: Any, name: Any, value: Any) -> Any:
     '''Takes an object, a string, and a value and produces a new object
     that is a copy of the original but with the attribute called ``name``
     set to ``value``.
@@ -135,8 +140,9 @@ def setattr(self, name, value):
 
 
 @setattr.register(tuple)
-def _tuple_setattr_immutable(self, name, value):
-    # type: (Any, str, A) -> Any
+def _tuple_setattr_immutable(
+    self: NamedTuple, name: str, value: A
+) -> NamedTuple:
     # setting attributes on a tuple probably means we really have a
     # namedtuple so we can use self._fields to understand the names
     data = (
@@ -147,8 +153,7 @@ def _tuple_setattr_immutable(self, name, value):
 
 
 @singledispatch
-def contains_add(self, item):
-    # type (Any, Any) -> Any
+def contains_add(self: Any, item: Any) -> Any:
     '''Takes a collection and an item and returns a new collection
     of the same type that contains the item. The notion of "contains"
     is defined by the object itself; The following must be ``True``:
@@ -175,34 +180,29 @@ def contains_add(self, item):
 
 
 @contains_add.register(list)
-def _list_contains_add(self, item):
-    # type (List[A], A) -> List[A]
+def _list_contains_add(self: List[A], item: A) -> List[A]:
     return self + [item]
 
 
 @contains_add.register(tuple)
-def _tuple_contains_add(self, item):
-    # type (Tuple[A, ...], A) -> Tuple[A, ...]
+def _tuple_contains_add(self: Tuple[A, ...], item: A) -> Tuple[A, ...]:
     return self + (item,)
 
 
 @contains_add.register(dict)
-def _dict_contains_add(self, item):
-    # type (Dict[A, B], A) -> Dict[A, B]
+def _dict_contains_add(self: Dict[A, Any], item: A) -> Dict[A, Any]:
     result = self.copy()
     result[item] = None
     return result
 
 
 @contains_add.register(set)
-def _set_contains_add(self, item):
-    # type (Set[A], A) -> Set[A]
+def _set_contains_add(self: Set[A], item: A) -> Set[A]:
     return self | {item}
 
 
 @singledispatch
-def contains_remove(self, item):
-    # type (Any, Any) -> Any
+def contains_remove(self: Any, item: Any) -> Any:
     '''Takes a collection and an item and returns a new collection
     of the same type with that item removed. The notion of "contains"
     is defined by the object itself; the following must be ``True``:
@@ -229,34 +229,29 @@ def contains_remove(self, item):
 
 
 @contains_remove.register(list)
-def _list_contains_remove(self, item):
-    # type (List[A], A) -> List[A]
+def _list_contains_remove(self: List[A], item: A) -> List[A]:
     return [x for x in self if x != item]
 
 
 @contains_remove.register(tuple)
-def _tuple_contains_remove(self, item):
-    # type (Tuple[A, ...], A) -> Tuple[A, ...]
+def _tuple_contains_remove(self: Tuple[A, ...], item: A) -> Tuple[A, ...]:
     return tuple(x for x in self if x != item)
 
 
 @contains_remove.register(dict)
-def _dict_contains_remove(self, item):
-    # type (Dict[A, B], A) -> Dict[A, B]
+def _dict_contains_remove(self: Dict[A, B], item: A) -> Dict[A, B]:
     result = self.copy()
     del result[item]
     return result
 
 
 @contains_remove.register(set)
-def _set_contains_remove(self, item):
-    # type (Set[A], A) -> Set[A]
+def _set_contains_remove(self: Set[A], item: A) -> Set[A]:
     return self - {item}
 
 
 @singledispatch
-def to_iter(self):
-    # type: (Any) -> Any
+def to_iter(self: Any) -> Any:
     '''Takes an object and produces an iterable. It is intended as the
     inverse of the ``from_iter`` function.
 
@@ -280,14 +275,12 @@ def to_iter(self):
 
 
 @to_iter.register(dict)
-def _dict_to_iter(self):
-    # type: (Dict[A, B]) -> Iterator[Tuple[A, B]]
+def _dict_to_iter(self: Dict[A, B]) -> Iterator[Tuple[A, B]]:
     return iter(self.items())
 
 
 @singledispatch
-def from_iter(self, iterable):
-    # type: (Any, Any) -> Any
+def from_iter(self: Any, iterable: Any) -> Any:
     '''Takes an object and an iterable and produces a new object that is
     a copy of the original with data from ``iterable`` reincorporated. It
     is intended as the inverse of the ``to_iter`` function. Any state in
@@ -317,20 +310,17 @@ def from_iter(self, iterable):
 
 
 @from_iter.register(bytes)
-def _bytes_from_iter(self, iterable):
-    # type: (bytes, Iterable[int]) -> bytes
+def _bytes_from_iter(self: bytes, iterable: Iterable[int]) -> bytes:
     return bytes(iterable)
 
 
 @from_iter.register(str)
-def _str_from_iter(self, iterable):
-    # type: (str, Iterable[str]) -> str
+def _str_from_iter(self: str, iterable: Iterable[str]) -> str:
     return ''.join(iterable)
 
 
 @from_iter.register(dict)
-def _dict_from_iter(self, iterable):
-    # type: (Dict, Iterable[Tuple[A, B]]) -> Dict[A, B]
+def _dict_from_iter(self: Dict, iterable: Iterable[Tuple[A, B]]) -> Dict[A, B]:
     new = self.copy()
     new.clear()
     new.update(iterable)
@@ -338,20 +328,19 @@ def _dict_from_iter(self, iterable):
 
 
 @from_iter.register(list)
-def _list_from_iter(self, iterable):
-    # type: (List, Iterable[A]) -> List[A]
+def _list_from_iter(self: List, iterable: Iterable[A]) -> List[A]:
     return list(iterable)
 
 
 @from_iter.register(set)
-def _set_from_iter(self, iterable):
-    # type: (Set, Iterable[A]) -> Set[A]
+def _set_from_iter(self: Set, iterable: Iterable[A]) -> Set[A]:
     return set(iterable)
 
 
 @from_iter.register(frozenset)
-def _frozenset_from_iter(self, iterable):
-    # type: (FrozenSet, Iterable[A]) -> FrozenSet[A]
+def _frozenset_from_iter(
+    self: FrozenSet, iterable: Iterable[A]
+) -> FrozenSet[A]:
     return frozenset(iterable)
 
 

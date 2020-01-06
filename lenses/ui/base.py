@@ -42,8 +42,7 @@ def _carry_unary_op(name):
     return operation, 'self.modify(operator.{})'.format(name)
 
 
-def _add_extra_methods(cls):
-    # type: (Type[BaseUiLens]) -> Type[BaseUiLens]
+def _add_extra_methods(cls: Type['BaseUiLens']) -> Type['BaseUiLens']:
     binary = '''__lt__ __le__ __eq__ __ne__ __gt__ __ge__
                 __add__ __sub__ __mul__ __matmul__ __truediv__
                 __floordiv__ __div__ __mod__ __divmod__ __pow__
@@ -72,8 +71,7 @@ class BaseUiLens(Generic[S, T, A, B]):
 
     __slots__ = ()
 
-    def call(self, method_name, *args, **kwargs):
-        # type: (str, *Any, **Any) -> T
+    def call(self, method_name: str, *args: Any, **kwargs: Any) -> T:
         '''Call a method on the focus. The method must return a new
         value for the focus.
 
@@ -90,8 +88,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         caller = operator.methodcaller(method_name, *args, **kwargs)
         return self.modify(caller)
 
-    def call_mut(self, method_name, *args, **kwargs):
-        # type: (str, *Any, **Any) -> T
+    def call_mut(self, method_name: str, *args: Any, **kwargs: Any) -> T:
         '''Call a method on the focus that will mutate it in place.
         Works by making a deep copy of the focus before calling the
         mutating method on it. The return value of that method is ignored.
@@ -113,16 +110,14 @@ class BaseUiLens(Generic[S, T, A, B]):
             shallow = kwargs['shallow']
             del kwargs['shallow']
 
-        def func(a):
-            # type: (A) -> B
+        def func(a: A) -> B:
             a = copy.copy(a) if shallow else copy.deepcopy(a)
             getattr(a, method_name)(*args, **kwargs)
             return cast(B, a)
 
         return self.modify(func)
 
-    def bitwise_and(self, other):
-        # type: (Any) -> T
+    def bitwise_and(self, other: Any) -> T:
         '''Uses the bitwise and operator on the focus. A convenience
         method since lenses use __and__ for doing composition.
 
@@ -131,14 +126,12 @@ class BaseUiLens(Generic[S, T, A, B]):
             [1, 0, 1, 4]
         '''
 
-        def func(a):
-            # type: (A) -> B
+        def func(a: A) -> B:
             return a & other
 
         return self.modify(func)
 
-    def Contains(self, item):
-        # type: (A) -> BaseUiLens[S, S, bool, bool]
+    def Contains(self, item: A) -> 'BaseUiLens[S, S, bool, bool]':
         '''A lens that focuses a boolean that tells you whether the
         state contains some item.
 
@@ -159,8 +152,9 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.ContainsLens(item))
 
-    def Decode(self, encoding='utf-8', errors='strict'):
-        # type: (str, str) -> BaseUiLens[S, T, X, Y]
+    def Decode(
+        self, encoding: str = 'utf-8', errors: str = 'strict'
+    ) -> 'BaseUiLens[S, T, bytes, str]':
         '''An isomorphism that decodes and encodes its focus on the
         fly. Lets you focus a byte string as a unicode string. The
         arguments have the same meanings as `bytes.decode`. Analogous to
@@ -176,8 +170,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.DecodeIso(encoding, errors))
 
-    def Each(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
+    def Each(self) -> 'BaseUiLens[S, T, X, Y]':
         '''A traversal that iterates over its state, focusing everything
         it iterates over. It uses `lenses.hooks.fromiter` to reform
         the state afterwards so it should work with any iterable that
@@ -203,8 +196,9 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.EachTraversal())
 
-    def Error(self, exception, message=None):
-        # type: (Exception, Optional[str]) -> BaseUiLens[S, T, X, Y]
+    def Error(
+        self, exception: Exception, message: Optional[str] = None
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''An optic that raises an exception whenever it tries to focus
         something. If `message is None` then the exception will be
         raised unmodified. If `message is not None` then when the lens
@@ -232,8 +226,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.ErrorIso(exception, message))
 
-    def F(self, getter):
-        # type: (Callable[[A], X]) -> BaseUiLens[S, T, X, Y]
+    def F(self, getter: Callable[[A], X]) -> 'BaseUiLens[S, T, X, Y]':
         '''An optic that wraps a getter function. A getter function is
         one that takes a state and returns a value derived from that
         state. The function is called on the focus before it is returned.
@@ -250,8 +243,9 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.Getter(getter))
 
-    def Filter(self, predicate):
-        # type: (Callable[[A], bool]) -> BaseUiLens[S, T, X, Y]
+    def Filter(
+        self, predicate: Callable[[A], bool]
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''A prism that only focuses a value if the predicate returns
         `True` when called with that value as an argument. Best used
         when composed after a traversal. It only prevents the traversal
@@ -276,8 +270,9 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.FilteringPrism(predicate))
 
-    def Fold(self, func):
-        # type: (Callable[[A], Iterable[X]]) -> BaseUiLens[S, T, X, Y]
+    def Fold(
+        self, func: Callable[[A], Iterable[X]]
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''A fold that takes a function that returns an iterable and
         focuses all the values in that iterable.
 
@@ -290,8 +285,9 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.Fold(func))
 
-    def Fork(self, *lenses):
-        # type: (*BaseUiLens[A, B, X, Y])-> BaseUiLens[S, T, X, Y]
+    def Fork(
+        self, *lenses: 'BaseUiLens[A, B, X, Y]'
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''A setter representing the parallel composition of several
         sub-lenses.
 
@@ -304,8 +300,9 @@ class BaseUiLens(Generic[S, T, A, B]):
         true_lenses = [l._optic for l in lenses]
         return self._compose_optic(optics.ForkedSetter(*true_lenses))
 
-    def Get(self, key, default=None):
-        # type: (Any, Optional[Y]) -> BaseUiLens[S, T, X, Y]
+    def Get(
+        self, key: Any, default: Optional[Y] = None
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''A lens that focuses an item inside a container by calling
         its `get` method, allowing you to specify a default value for
         missing keys.  Analogous to `dict.get`.
@@ -322,8 +319,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.GetitemOrElseLens(key, default))
 
-    def GetAttr(self, name):
-        # type: (str) -> BaseUiLens[S, T, X, Y]
+    def GetAttr(self, name: str) -> 'BaseUiLens[S, T, X, Y]':
         '''A lens that focuses an attribute of an object. Analogous to
         `getattr`.
 
@@ -339,8 +335,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.GetattrLens(name))
 
-    def GetItem(self, key):
-        # type: (Any) -> BaseUiLens[S, T, X, Y]
+    def GetItem(self, key: Any) -> 'BaseUiLens[S, T, X, Y]':
         '''A lens that focuses an item inside a container. Analogous to
         `operator.itemgetter`.
 
@@ -360,8 +355,9 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.GetitemLens(key))
 
-    def Lens(self, getter, setter):
-        # type: (Callable[[A], X], Callable[[A, Y], B]) -> BaseUiLens[S, T, X, Y]
+    def Lens(
+        self, getter: Callable[[A], X], setter: Callable[[A, Y], B]
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''An optic that wraps a pair of getter and setter functions. A
         getter function is one that takes a state and returns a value
         derived from that state. A setter function takes an old state
@@ -390,8 +386,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.Lens(getter, setter))
 
-    def GetZoomAttr(self, name):
-        # type: (str) -> BaseUiLens[S, T, X, Y]
+    def GetZoomAttr(self, name: str) -> 'BaseUiLens[S, T, X, Y]':
         '''A traversal that focuses an attribute of an object, though if
         that attribute happens to be a lens it will zoom the lens. This
         is used internally to make lenses that are attributes of objects
@@ -416,8 +411,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.GetZoomAttrTraversal(name))
 
-    def Instance(self, type_):
-        # type: (Type) -> BaseUiLens[S, T, X, Y]
+    def Instance(self, type_: Type) -> 'BaseUiLens[S, T, X, Y]':
         '''A prism that focuses a value only when that value is an
         instance of `type_`.
 
@@ -435,8 +429,9 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.InstancePrism(type_))
 
-    def Iso(self, forwards, backwards):
-        # type: (Callable[[A], X], Callable[[Y], B]) -> BaseUiLens[S, T, X, Y]
+    def Iso(
+        self, forwards: Callable[[A], X], backwards: Callable[[Y], B]
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''A lens based on an isomorphism. An isomorphism can be
         formed by two functions that mirror each other; they can convert
         forwards and backwards between a state and a focus without losing
@@ -475,8 +470,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.Isomorphism(forwards, backwards))
 
-    def Item(self, key):
-        # type: (Any) -> BaseUiLens[S, T, X, Y]
+    def Item(self, key: Any) -> 'BaseUiLens[S, T, X, Y]':
         '''A lens that focuses a single item (key-value pair) in a
         dictionary by its key. Set an item to `None` to remove it from
         the dictionary.
@@ -497,8 +491,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.ItemLens(key))
 
-    def ItemByValue(self, value):
-        # type: (Any) -> BaseUiLens[S, T, X, Y]
+    def ItemByValue(self, value: Any) -> 'BaseUiLens[S, T, X, Y]':
         '''A lens that focuses a single item (key-value pair) in a
         dictionary by its value. Set an item to `None` to remove it
         from the dictionary. This lens assumes that there will only be
@@ -521,8 +514,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.ItemByValueLens(value))
 
-    def Items(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
+    def Items(self) -> 'BaseUiLens[S, T, X, Y]':
         '''A traversal focusing key-value tuples that are the items of
         a dictionary. Analogous to `dict.items`.
 
@@ -538,8 +530,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.ItemsTraversal())
 
-    def Iter(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
+    def Iter(self) -> 'BaseUiLens[S, T, X, Y]':
         '''A fold that can get values from any iterable object in python
         by iterating over it. Like any fold, you cannot set values.
 
@@ -564,8 +555,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.IterableFold())
 
-    def Json(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
+    def Json(self) -> 'BaseUiLens[S, T, X, Y]':
         '''An isomorphism that focuses a string containing json data as
         its parsed equivalent. Analogous to `json.loads`.
 
@@ -580,8 +570,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.JsonIso())
 
-    def Just(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
+    def Just(self) -> 'BaseUiLens[S, T, X, Y]':
         '''A prism that focuses the value inside a `lenses.maybe.Just`
         object.
 
@@ -600,8 +589,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.JustPrism())
 
-    def Keys(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
+    def Keys(self) -> 'BaseUiLens[S, T, X, Y]':
         '''A traversal focusing the keys of a dictionary. Analogous to
         `dict.keys`.
 
@@ -619,8 +607,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             optics.ItemsTraversal() & optics.GetitemLens(0)
         )
 
-    def Norm(self, setter):
-        # type: (Callable[[A], X]) -> BaseUiLens[S, T, X, Y]
+    def Norm(self, setter: Callable[[A], X]) -> 'BaseUiLens[S, T, X, Y]':
         '''An isomorphism that applies a function as it sets a new
         focus without regard to the old state. It will get foci without
         transformation. This lens allows you to pre-process values before
@@ -656,8 +643,13 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.NormalisingIso(setter))
 
-    def Prism(self, unpack, pack, ignore_none=False, ignore_errors=None):
-        # type: (Callable[[A], mJust[X]], Callable[[Y], B], bool, Optional[tuple]) -> BaseUiLens[S, T, X, Y]
+    def Prism(
+        self,
+        unpack: Callable[[A], mJust[X]],
+        pack: Callable[[Y], B],
+        ignore_none: bool = False,
+        ignore_errors: Optional[tuple] = None,
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''A prism is an optic made from a pair of functions that pack and
         unpack a state where the unpacking process can potentially fail.
 
@@ -760,8 +752,11 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.RecurTraversal(cls))
 
-    def Traversal(self, folder, builder):
-        # type: (Callable[[A], Iterable[X]], Callable[[A, Iterable[Y]], B]) -> BaseUiLens[S, T, X, Y]
+    def Traversal(
+        self,
+        folder: Callable[[A], Iterable[X]],
+        builder: Callable[[A, Iterable[Y]], B],
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''An optic that wraps folder and builder functions.
 
         The folder function is a function that takes a single argument -
@@ -797,8 +792,9 @@ class BaseUiLens(Generic[S, T, A, B]):
 
         return self._compose_optic(optics.Traversal(folder, builder))
 
-    def Tuple(self, *lenses):
-        # type: (*BaseUiLens[A, B, X, Y]) -> BaseUiLens[S, T, X, Y]
+    def Tuple(
+        self, *lenses: 'BaseUiLens[A, B, X, Y]'
+    ) -> 'BaseUiLens[S, T, X, Y]':
         '''A lens that combines the focuses of other lenses into a
         single tuple. The sublenses must be optics of kind Lens; this
         means no Traversals.
@@ -827,8 +823,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         true_lenses = [l._optic for l in lenses]
         return self._compose_optic(optics.TupleLens(*true_lenses))
 
-    def Values(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
+    def Values(self) -> 'BaseUiLens[S, T, X, Y]':
         '''A traversal focusing the values of a dictionary. Analogous to
         `dict.values`.
 
@@ -846,8 +841,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             optics.ItemsTraversal() & optics.GetitemLens(1)
         )
 
-    def Zoom(self):
-        # type: () -> BaseUiLens[S, T, X, Y]
+    def Zoom(self) -> 'BaseUiLens[S, T, X, Y]':
         '''Follows its state as if it were a `BoundLens` object.
 
             >>> from lenses import lens, bind
@@ -861,8 +855,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.ZoomTraversal())
 
-    def ZoomAttr(self, name):
-        # type: (str) -> BaseUiLens[S, T, X, Y]
+    def ZoomAttr(self, name: str) -> 'BaseUiLens[S, T, X, Y]':
         '''A lens that looks up an attribute on its target and follows
         it as if were a `BoundLens` object. Ignores the state, if any,
         of the lens that is being looked up.
@@ -885,29 +878,25 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.ZoomAttrTraversal(name))
 
-    def __getattr__(self, name):
-        # type: (str) -> Any
+    def __getattr__(self, name: str) -> Any:
         if name.startswith('__') and name.endswith('__'):
             raise AttributeError('no attribute {}'.format(name))
 
         if name.startswith('call_mut_'):
 
-            def caller(*args, **kwargs):
-                # type: (*Any, **Any) -> T
+            def caller(*args: Any, **kwargs: Any) -> T:
                 return self.call_mut(name[9:], *args, **kwargs)
 
             return caller
 
         if name.startswith('call_'):
 
-            def caller(*args, **kwargs):
-                # type: (*Any, **Any) -> T
+            def caller(*args: Any, **kwargs: Any) -> T:
                 return self.call(name[5:], *args, **kwargs)
 
             return caller
 
         return self.GetZoomAttr(name)
 
-    def __getitem__(self, name):
-        # type: (Any) -> BaseUiLens[S, T, X, Y]
+    def __getitem__(self, name: Any) -> 'BaseUiLens[S, T, X, Y]':
         return self.GetItem(name)

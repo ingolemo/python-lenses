@@ -16,8 +16,9 @@ class DecodeIso(Isomorphism):
         b'world'
     '''
 
-    def __init__(self, encoding='utf-8', errors='strict'):
-        # type: (str, str) -> None
+    def __init__(
+        self, encoding: str = 'utf-8', errors: str = 'strict'
+    ) -> None:
         self.encoding = encoding
         self.errors = errors
 
@@ -45,8 +46,7 @@ class JsonIso(Isomorphism):
         '[{"points": [3]}]'
     '''
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self)->None:
         self.json_mod = __import__('json')
 
     def forwards(self, state):

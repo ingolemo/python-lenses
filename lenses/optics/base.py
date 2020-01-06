@@ -135,8 +135,7 @@ class LensLike(object):
         '''
         return self.func(Functorisor(pure, f), state)
 
-    def preview(self, state):
-        # type: (S) -> Just[B]
+    def preview(self, state: S) -> Just[B]:
         '''Previews a potentially non-existant focus within
         `state`. Returns `Just(focus)` if it exists, Nothing otherwise.
 
@@ -145,12 +144,15 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError('Must be an instance of Fold to .preview()')
 
-        pure = lambda a: Const(Nothing()) # type: Callable[[X], Const[Just[X], Y]]
-        func = lambda a: Const(Just(a)) # type: Callable[[X], Const[Just[X], Y]]
+        pure = lambda a: Const(
+            Nothing()
+        )  # type: Callable[[X], Const[Just[X], Y]]
+        func = lambda a: Const(
+            Just(a)
+        )  # type: Callable[[X], Const[Just[X], Y]]
         return self.apply(func, pure, state).unwrap()
 
-    def view(self, state):
-        # type: (S) -> B
+    def view(self, state: S) -> B:
         '''Returns the focus within `state`. If multiple items are
         focused then it will attempt to join them together as a monoid.
         See `lenses.typeclass.mappend`.
@@ -171,8 +173,7 @@ class LensLike(object):
             raise ValueError('No focus to view')
         return cast(B, result)
 
-    def to_list_of(self, state):
-        # type: (S) -> List[B]
+    def to_list_of(self, state: S) -> List[B]:
         '''Returns a list of all the foci within `state`.
 
         Requires kind Fold. This method will raise TypeError if the
@@ -181,12 +182,11 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError('Must be an instance of Fold to .to_list_of()')
 
-        pure = lambda a: Const([]) # type: Callable[[X], Const[List[X], Y]]
-        func = lambda a: Const([a]) # type: Callable[[X], Const[List[X], Y]]
+        pure = lambda a: Const([])  # type: Callable[[X], Const[List[X], Y]]
+        func = lambda a: Const([a])  # type: Callable[[X], Const[List[X], Y]]
         return self.apply(func, pure, state).unwrap()
 
-    def over(self, state, fn):
-        # type: (S, Callable[[A], B]) -> T
+    def over(self, state: S, fn: Callable[[A], B]) -> T:
         '''Applies a function `fn` to all the foci within `state`.
 
         Requires kind Setter. This method will raise TypeError when the
@@ -199,8 +199,7 @@ class LensLike(object):
         func = lambda a: Identity(fn(a))
         return self.apply(func, pure, state).unwrap()
 
-    def set(self, state, value):
-        # type: (S, B) -> T
+    def set(self, state: S, value: B) -> T:
         '''Sets all the foci within `state` to `value`.
 
         Requires kind Setter. This method will raise TypeError when the
@@ -213,8 +212,7 @@ class LensLike(object):
         func = lambda a: Identity(value)
         return self.apply(func, pure, state).unwrap()
 
-    def iterate(self, state, iterable):
-        # type: (S, Iterable[B]) -> T
+    def iterate(self, state: S, iterable: Iterable[B]) -> T:
         '''Sets all the foci within `state` to values taken from `iterable`.
 
         Requires kind Setter. This method will raise TypeError when the
@@ -228,15 +226,13 @@ class LensLike(object):
         func = lambda a: Identity(next(i))
         return self.apply(func, pure, state).unwrap()
 
-    def compose(self, other):
-        # type: (LensLike) -> LensLike
+    def compose(self, other: 'LensLike') -> 'LensLike':
         '''Composes another lens with this one. The result is a lens
         that feeds the foci of `self` into the state of `other`.
         '''
         return ComposedLens([self]).compose(other)
 
-    def re(self):
-        # type: () -> LensLike
+    def re(self) -> 'LensLike':
         raise TypeError('Must be an instance of Review to .re()')
 
     def kind(self):
@@ -312,8 +308,7 @@ class Getter(Fold):
         1
     '''
 
-    def __init__(self, getter):
-        # type: (Callable[[S], A]) -> None
+    def __init__(self, getter: Callable[[S], A]) -> None:
         self.getter = getter
 
     def func(self, f, state):
@@ -399,8 +394,9 @@ class Lens(Getter, Traversal):
         [1, 2, 9]
     '''
 
-    def __init__(self, getter, setter):
-        # type: (Callable[[S], A], Callable[[S, B], T]) -> None
+    def __init__(
+        self, getter: Callable[[S], A], setter: Callable[[S, B], T]
+    ) -> None:
         self.getter = getter
         self.setter = setter
 
@@ -423,8 +419,7 @@ class Review(LensLike):
         1
     '''
 
-    def __init__(self, pack):
-        # type: (Callable[[B], T]) -> None
+    def __init__(self, pack: Callable[[B], T]) -> None:
         self.pack = pack
 
     def re(self):
@@ -539,8 +534,9 @@ class Isomorphism(Lens, Prism):
         65
     '''
 
-    def __init__(self, forwards, backwards):
-        # type: (Callable[[S], A], Callable[[B], T]) -> None
+    def __init__(
+        self, forwards: Callable[[S], A], backwards: Callable[[B], T]
+    ) -> None:
         self.forwards = forwards
         self.backwards = backwards
 
@@ -586,8 +582,7 @@ class ComposedLens(LensLike):
 
     __slots__ = ('lenses',)
 
-    def __init__(self, lenses=()):
-        # type: (Iterable[LensLike]) -> None
+    def __init__(self, lenses: Iterable[LensLike] = ()) -> None:
         self.lenses = list(self._filter_lenses(lenses))
 
     @staticmethod
@@ -658,8 +653,9 @@ class ErrorIso(Isomorphism):
         ValueError: applied to True
     '''
 
-    def __init__(self, exception, message=None):
-        # type: (Exception, Optional[str]) -> None
+    def __init__(
+        self, exception: Exception, message: Optional[str] = None
+    ) -> None:
         self.exception = exception
         self.message = message
 
@@ -687,8 +683,7 @@ class TrivialIso(Isomorphism):
         False
     '''
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
         pass
 
     def forwards(self, state):
