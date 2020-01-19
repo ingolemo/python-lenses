@@ -26,8 +26,12 @@ optional_dependencies = [
 ]
 
 test_dependencies = optional_dependencies + [
-    'pytest', 'coverage', 'pytest-coverage', 'hypothesis',
-    'mypy;implementation_name=="cpython"'
+    'pytest',
+    'pytest-sugar',
+    'coverage',
+    'pytest-coverage',
+    'hypothesis',
+    'mypy;implementation_name=="cpython"',
 ]
 
 setuptools.setup(
