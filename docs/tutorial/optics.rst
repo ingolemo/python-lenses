@@ -6,7 +6,19 @@ Lenses are just one in a whole family of related objects called
 
 The heirarchy of optics looks like this:
 
-.. image:: ../_static/optics_family.png
+.. graphviz::
+
+	digraph {
+		"Fold" -> "Getter";
+		"Fold" -> "Traversal";
+		"Getter" -> "Lens";
+		"Lens" -> "Isomorphism";
+		"Prism" -> "Isomorphism";
+		"Review" -> "Prism";
+		"Setter" -> "Traversal";
+		"Traversal" -> "Lens";
+		"Traversal" -> "Prism";
+	}
 
 An arrow pointing from A to B here means that all B are also A. For
 example, all Lenses are also Getters, and all Getters are also Folds.
