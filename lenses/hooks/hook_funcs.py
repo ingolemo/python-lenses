@@ -42,6 +42,7 @@ import sys
 
 from ..typevars import A, B
 
+import dataclasses
 from functools import singledispatch
 from builtins import setattr as builtin_setattr
 
@@ -129,6 +130,9 @@ def setattr(self: Any, name: Any, value: Any) -> Any:
     ``copy.copy`` and then mutates the new object by calling python's
     built in ``setattr`` on it.
     '''
+    if dataclasses.is_dataclass(self) and not isinstance(self, type):
+        return dataclasses.replace(self, **{name: value})
+
     try:
         self._lens_setattr
     except AttributeError:

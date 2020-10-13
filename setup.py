@@ -13,6 +13,7 @@ except IOError:
     long_desc = None
 
 dependencies = [
+    'dataclasses;python_version=="3.6"',
     'singledispatch',
     'typing',
 ]

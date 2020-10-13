@@ -1,4 +1,5 @@
 import collections
+import dataclasses
 
 import pytest
 
@@ -333,6 +334,24 @@ def test_type_custom_class_immutable():
 
     with pytest.raises(AttributeError):
         bind(C(9)).a.set(7)
+
+
+def test_type_custom_class_dataclass():
+    @dataclasses.dataclass
+    class C:
+        a: int
+        b: str
+
+    assert bind(C(1, "hello")).a.set(2) == C(2, "hello")
+
+
+def test_type_custom_class_frozen_dataclass():
+    @dataclasses.dataclass(frozen=True)
+    class C:
+        a: int
+        b: str
+
+    assert bind(C(1, "hello")).a.set(2) == C(2, "hello")
 
 
 def test_type_unsupported_no_setitem():
