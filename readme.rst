@@ -99,6 +99,33 @@ line is the equivalent of this code:
             results.append(result)
         return results
 
+Now, this code can be simplified using comprehensions. But comprehensions
+only work with lists, dictionaries, and sets, whereas the lenses library
+can work with arbitrary python objects.
+
+Here's an example that shows off the full power of this library:
+
+.. code:: pycon
+
+    >>> from lenses import lens
+    >>> state = (("foo", "bar"), "!", 2, ())
+    >>> lens.Recur(str).Each().Filter(lambda c: c <= 'm').Parts().call_mut_reverse()(state)
+    (('!oo', 'abr'), 'f', 2, ())
+
+This is an example from the `Putting Lenses to Work`__ talk about the
+haskell lenses library by John Wiegley. We extract all the strings inside
+of ``state``, extract the characters, filter out any characters that
+come after ``'m'`` in the alphabet, treat these characters as if they
+were a list, reverse that list, before finally placing these characters
+back into the state in their new positions.
+
+.. _putting_lenses_to_work: https://www.youtube.com/watch?v=QZy4Yml3LTY&t=2250
+
+__ putting_lenses_to_work_
+
+This example is obviously very contrived, but I can't even begin to
+imagine how you would do this in python code without lenses.
+
 
 License
 -------
