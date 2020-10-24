@@ -24,6 +24,7 @@ from .true_lenses import (
     GetitemOrElseLens,
     ItemLens,
     ItemByValueLens,
+    PartsLens,
     TupleLens,
 )
 from .traversals import (

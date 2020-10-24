@@ -3,7 +3,7 @@ from typing import Any
 from .. import hooks
 from .. import typeclass
 
-from .base import Lens
+from .base import Fold, Getter, Lens, Traversal
 
 
 class ContainsLens(Lens):
@@ -212,6 +212,31 @@ class ItemByValueLens(Lens):
 
     def __repr__(self):
         return 'ItemByValueLens({!r})'.format(self.value)
+
+
+class PartsLens(Lens):
+    """An optic that takes the foci of a fold and packs them up together
+    as a single list. The kind of this foci depends on what optic you
+    give it.
+    """
+
+    def __init__(self, optic):
+        self.optic = optic
+
+    def getter(self, state):
+        return self.optic.to_list_of(state)
+
+    def setter(self, old_state, value):
+        return self.optic.iterate(old_state, value)
+
+    def __repr__(self) -> str:
+        return "PartsLens({!r})".format(self.optic)
+
+    def kind(self):
+        if self.optic.kind() == base.Traversal:
+            return base.Lens
+        elif self.optic.kind() == base.Fold:
+            return base.Getter
 
 
 class TupleLens(Lens):

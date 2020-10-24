@@ -643,6 +643,24 @@ class BaseUiLens(Generic[S, T, A, B]):
         '''
         return self._compose_optic(optics.NormalisingIso(setter))
 
+    def Parts(self) -> 'BaseUiLens[S, T, X, Y]':
+        '''Takes a Fold and turns it into a Getter by focusing a list
+        of all the foci. If you use this method on a Traversal you will
+        get back a Lens.
+
+            >>> from lenses import lens
+            >>> lens.Parts()
+            UnboundLens(PartsLens(TrivialIso()))
+            >>> lens.Each().Each().Parts()[0]
+            UnboundLens(PartsLens(EachTraversal() & EachTraversal()) & GetitemLens(0))
+            >>> state = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+            >>> lens.Each().Each().Parts()[0].get()(state)
+            0
+            >>> lens.Each().Each().Parts()[0].set(9)(state)
+            [[9, 1, 2], [3, 4, 5], [6, 7, 8]]
+        '''
+        return self._wrap_optic(optics.PartsLens)
+
     def Prism(
         self,
         unpack: Callable[[A], mJust[X]],
