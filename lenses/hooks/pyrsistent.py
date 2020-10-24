@@ -6,9 +6,9 @@ import pyrsistent
 
 from . import hook_funcs
 
-pvector_type = type(pyrsistent.pvector()) # type: Type[pyrsistent.PVector]
-pmap_type = type(pyrsistent.pmap()) # type: Type[pyrsistent.PMap]
-pset_type = type(pyrsistent.pset()) # type: Type[pyrsistent.PSet]
+pvector_type = type(pyrsistent.pvector())  # type: Type[pyrsistent.PVector]
+pmap_type = type(pyrsistent.pmap())  # type: Type[pyrsistent.PMap]
+pset_type = type(pyrsistent.pset())  # type: Type[pyrsistent.PSet]
 
 
 @hook_funcs.setitem.register(pvector_type)

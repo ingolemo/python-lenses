@@ -5,7 +5,7 @@ from .base import Prism
 
 
 class FilteringPrism(Prism):
-    '''A prism that only focuses a value if the predicate returns `True`
+    """A prism that only focuses a value if the predicate returns `True`
     when called with that value as an argument. Best used when composed
     after a traversal. It only prevents the traversal from visiting foci,
     it does not filter out values the way that python's regular `filter`
@@ -27,7 +27,7 @@ class FilteringPrism(Prism):
 
         >>> (each & FilteringPrism(bool)).set(['', 2, ''], None)
         ['', None, '']
-    '''
+    """
 
     def __init__(self, predicate):
         self.predicate = predicate
@@ -41,11 +41,11 @@ class FilteringPrism(Prism):
         return focus
 
     def __repr__(self):
-        return 'FilteringPrism({!r})'.format(self.predicate)
+        return "FilteringPrism({!r})".format(self.predicate)
 
 
 class InstancePrism(FilteringPrism):
-    '''A prism that focuses a value only when that value is an instance
+    """A prism that focuses a value only when that value is an instance
     of `type_`.
 
         >>> InstancePrism(int)
@@ -58,7 +58,7 @@ class InstancePrism(FilteringPrism):
         2
         >>> InstancePrism(float).set(1, 2)
         1
-    '''
+    """
 
     def __init__(self, type_):
         self.type = type_
@@ -67,11 +67,11 @@ class InstancePrism(FilteringPrism):
         return isinstance(value, self.type)
 
     def __repr__(self):
-        return 'InstancePrism({!r})'.format(self.type)
+        return "InstancePrism({!r})".format(self.type)
 
 
 class JustPrism(Prism):
-    '''A prism that focuses the value inside a `lenses.maybe.Just`
+    """A prism that focuses the value inside a `lenses.maybe.Just`
     object.
 
         >>> from lenses.maybe import Just, Nothing
@@ -85,7 +85,7 @@ class JustPrism(Prism):
         Just(2)
         >>> JustPrism().set(Nothing(), 2)
         Nothing()
-    '''
+    """
 
     def __init__(self):
         pass
@@ -97,4 +97,4 @@ class JustPrism(Prism):
         return Just(a)
 
     def __repr__(self):
-        return 'JustPrism()'
+        return "JustPrism()"

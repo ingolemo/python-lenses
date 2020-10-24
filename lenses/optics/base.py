@@ -9,14 +9,14 @@ from ..typevars import S, T, A, B, X, Y
 
 
 def multiap(func, *args):
-    '''Applies `func` to the data inside the `args` functors
+    """Applies `func` to the data inside the `args` functors
     incrementally. `func` must be a curried function that takes
     `len(args)` arguments.
 
         >>> func = lambda a: lambda b: a + b
         >>> multiap(func, [1, 10], [100])
         [101, 110]
-    '''
+    """
     functor = typeclass.fmap(args[0], func)
     for arg in args[1:]:
         functor = typeclass.apply(arg, functor)
@@ -24,14 +24,14 @@ def multiap(func, *args):
 
 
 def collect_args(n):
-    '''Returns a function that can be called `n` times with a single
+    """Returns a function that can be called `n` times with a single
     argument before returning all the args that have been passed to it
     in a tuple. Useful as a substitute for functions that can't easily be
     curried.
 
         >>> collect_args(3)(1)(2)(3)
         (1, 2, 3)
-    '''
+    """
     args = []
 
     def arg_collector(arg):
@@ -45,7 +45,7 @@ def collect_args(n):
 
 
 class LensLike(object):
-    '''A LensLike. Serves as the backbone of the lenses library. Acts as an
+    """A LensLike. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function (`LensLike.func`) that
     does all the hard work. This function is an uncurried form of the
     van Laarhoven lens and has the following type (in ML-style
@@ -115,45 +115,41 @@ class LensLike(object):
     an invalid optic. Optics of this kind may exist internally, but if
     you manage to create a None optic through normal means then this
     represents a bug in the library.
-    '''
+    """
 
     __slots__ = ()
 
     def func(self, f, state):
-        '''Intended to be overridden by subclasses. Raises
-        NotImplementedError.'''
-        message = 'Tried to use unimplemented lens {}.'
+        """Intended to be overridden by subclasses. Raises
+        NotImplementedError."""
+        message = "Tried to use unimplemented lens {}."
         raise NotImplementedError(message.format(type(self)))
 
     def apply(self, f, pure, state):
-        '''Runs the lens over the `state` applying `f` to all the foci
+        """Runs the lens over the `state` applying `f` to all the foci
         collecting the results together using the applicative functor
         functions defined in `lenses.typeclass`. `f` must return an
         applicative functor. For the case when no focus exists you must
         also provide a `pure` which should take a focus and return the
         pure form of the functor returned by `f`.
-        '''
+        """
         return self.func(Functorisor(pure, f), state)
 
     def preview(self, state: S) -> Just[B]:
-        '''Previews a potentially non-existant focus within
+        """Previews a potentially non-existant focus within
         `state`. Returns `Just(focus)` if it exists, Nothing otherwise.
 
         Requires kind Fold.
-        '''
+        """
         if not self._is_kind(Fold):
-            raise TypeError('Must be an instance of Fold to .preview()')
+            raise TypeError("Must be an instance of Fold to .preview()")
 
-        pure = lambda a: Const(
-            Nothing()
-        )  # type: Callable[[X], Const[Just[X], Y]]
-        func = lambda a: Const(
-            Just(a)
-        )  # type: Callable[[X], Const[Just[X], Y]]
+        pure = lambda a: Const(Nothing())  # type: Callable[[X], Const[Just[X], Y]]
+        func = lambda a: Const(Just(a))  # type: Callable[[X], Const[Just[X], Y]]
         return self.apply(func, pure, state).unwrap()
 
     def view(self, state: S) -> B:
-        '''Returns the focus within `state`. If multiple items are
+        """Returns the focus within `state`. If multiple items are
         focused then it will attempt to join them together as a monoid.
         See `lenses.typeclass.mappend`.
 
@@ -163,80 +159,80 @@ class LensLike(object):
         For technical reasons, this method requires there to be at least
         one foci at the end of the view. It will raise ValueError when
         there is none.
-        '''
+        """
         if not self._is_kind(Fold):
-            raise TypeError('Must be an instance of Fold to .view()')
+            raise TypeError("Must be an instance of Fold to .view()")
 
         guard = object()
         result = self.preview(state).maybe(guard)
         if result is guard:
-            raise ValueError('No focus to view')
+            raise ValueError("No focus to view")
         return cast(B, result)
 
     def to_list_of(self, state: S) -> List[B]:
-        '''Returns a list of all the foci within `state`.
+        """Returns a list of all the foci within `state`.
 
         Requires kind Fold. This method will raise TypeError if the
         optic has no way to get any foci.
-        '''
+        """
         if not self._is_kind(Fold):
-            raise TypeError('Must be an instance of Fold to .to_list_of()')
+            raise TypeError("Must be an instance of Fold to .to_list_of()")
 
         pure = lambda a: Const([])  # type: Callable[[X], Const[List[X], Y]]
         func = lambda a: Const([a])  # type: Callable[[X], Const[List[X], Y]]
         return self.apply(func, pure, state).unwrap()
 
     def over(self, state: S, fn: Callable[[A], B]) -> T:
-        '''Applies a function `fn` to all the foci within `state`.
+        """Applies a function `fn` to all the foci within `state`.
 
         Requires kind Setter. This method will raise TypeError when the
         optic has no way to set foci.
-        '''
+        """
         if not self._is_kind(Setter):
-            raise TypeError('Must be an instance of Setter to .over()')
+            raise TypeError("Must be an instance of Setter to .over()")
 
         pure = lambda a: Identity(a)
         func = lambda a: Identity(fn(a))
         return self.apply(func, pure, state).unwrap()
 
     def set(self, state: S, value: B) -> T:
-        '''Sets all the foci within `state` to `value`.
+        """Sets all the foci within `state` to `value`.
 
         Requires kind Setter. This method will raise TypeError when the
         optic has no way to set foci.
-        '''
+        """
         if not self._is_kind(Setter):
-            raise TypeError('Must be an instance of Setter to .set()')
+            raise TypeError("Must be an instance of Setter to .set()")
 
         pure = lambda a: Identity(a)
         func = lambda a: Identity(value)
         return self.apply(func, pure, state).unwrap()
 
     def iterate(self, state: S, iterable: Iterable[B]) -> T:
-        '''Sets all the foci within `state` to values taken from `iterable`.
+        """Sets all the foci within `state` to values taken from `iterable`.
 
         Requires kind Setter. This method will raise TypeError when the
         optic has no way to set foci.
-        '''
+        """
         if not self._is_kind(Setter):
-            raise TypeError('Must be an instance of Setter to .iterate()')
+            raise TypeError("Must be an instance of Setter to .iterate()")
 
         i = iter(iterable)
         pure = lambda a: Identity(a)
         func = lambda a: Identity(next(i))
         return self.apply(func, pure, state).unwrap()
 
-    def compose(self, other: 'LensLike') -> 'LensLike':
-        '''Composes another lens with this one. The result is a lens
+    def compose(self, other: "LensLike") -> "LensLike":
+        """Composes another lens with this one. The result is a lens
         that feeds the foci of `self` into the state of `other`.
-        '''
+        """
         return ComposedLens([self]).compose(other)
 
-    def re(self) -> 'LensLike':
-        raise TypeError('Must be an instance of Review to .re()')
+    def re(self) -> "LensLike":
+        raise TypeError("Must be an instance of Review to .re()")
 
     def kind(self):
-        '''Returns a class representing the 'kind' of optic.'''
+        """Returns a class representing the 'kind' of optic."""
         optics = [
             Equality,
             Isomorphism,
@@ -259,7 +255,7 @@ class LensLike(object):
 
 
 class Fold(LensLike):
-    '''An optic that wraps a folder function. A folder function is a
+    """An optic that wraps a folder function. A folder function is a
     function that takes a single argument - the state - and returns
     an iterable containing all the foci that can be found in that
     state. Generator functions work particularly well here.
@@ -276,7 +272,7 @@ class Fold(LensLike):
         [1, 2, 3, 4, 5, 6]
 
     Folds are incapable of setting anything.
-    '''
+    """
 
     def __init__(self, folder):
         self.folder = folder
@@ -290,7 +286,7 @@ class Fold(LensLike):
         return applied
 
     def __repr__(self):
-        return 'Fold({!r})'.format(self.folder)
+        return "Fold({!r})".format(self.folder)
 
 
 class Setter(LensLike):
@@ -298,7 +294,7 @@ class Setter(LensLike):
 
 
 class Getter(Fold):
-    '''An optic that wraps a getter function. A getter function is one
+    """An optic that wraps a getter function. A getter function is one
     that takes a state and returns a value derived from that state. The
     function is called on the focus before it is returned.
 
@@ -306,7 +302,7 @@ class Getter(Fold):
         Getter(<built-in function abs>)
         >>> Getter(abs).view(-1)
         1
-    '''
+    """
 
     def __init__(self, getter: Callable[[S], A]) -> None:
         self.getter = getter
@@ -318,11 +314,11 @@ class Getter(Fold):
         yield self.getter(state)
 
     def __repr__(self):
-        return 'Getter({!r})'.format(self.getter)
+        return "Getter({!r})".format(self.getter)
 
 
 class Traversal(Fold, Setter):
-    '''An optic that wraps folder and builder functions. The folder
+    """An optic that wraps folder and builder functions. The folder
     function is a function that takes a single argument - the state -
     and returns an iterable containing all the foci that exist in that
     state. Generators are a good option for writing folder functions.
@@ -350,7 +346,7 @@ class Traversal(Fold, Setter):
         [1, 4]
         >>> both_ends.set([1, 2, 3, 4], 5)
         [5, 2, 3, 5]
-    '''
+    """
 
     def __init__(self, folder, builder):
         self.folder = folder
@@ -366,11 +362,11 @@ class Traversal(Fold, Setter):
         return typeclass.fmap(applied, apbuilder)
 
     def __repr__(self):
-        return 'Traversal({!r}, {!r})'.format(self.folder, self.builder)
+        return "Traversal({!r}, {!r})".format(self.folder, self.builder)
 
 
 class Lens(Getter, Traversal):
-    '''An optic that wraps a pair of getter and setter functions. A getter
+    """An optic that wraps a pair of getter and setter functions. A getter
     function is one that takes a state and returns a value derived from
     that state. A setter function takes an old state and a new value
     and uses them to construct a new state.
@@ -392,11 +388,9 @@ class Lens(Getter, Traversal):
         3
         >>> average.set([1, 2, 3], 4)
         [1, 2, 9]
-    '''
+    """
 
-    def __init__(
-        self, getter: Callable[[S], A], setter: Callable[[S, B], T]
-    ) -> None:
+    def __init__(self, getter: Callable[[S], A], setter: Callable[[S, B], T]) -> None:
         self.getter = getter
         self.setter = setter
 
@@ -406,18 +400,18 @@ class Lens(Getter, Traversal):
         return typeclass.fmap(fa, lambda a: self.setter(state, a))
 
     def __repr__(self):
-        return 'Lens({!r}, {!r})'.format(self.getter, self.setter)
+        return "Lens({!r}, {!r})".format(self.getter, self.setter)
 
 
 class Review(LensLike):
-    '''A review is an optic that is capable of constructing states from
+    """A review is an optic that is capable of constructing states from
     a focus.
 
         >>> Review(abs)
         Review(<built-in function abs>)
         >>> Review(abs).re().view(-1)
         1
-    '''
+    """
 
     def __init__(self, pack: Callable[[B], T]) -> None:
         self.pack = pack
@@ -426,11 +420,11 @@ class Review(LensLike):
         return Getter(self.pack)
 
     def __repr__(self):
-        return 'Review({!r})'.format(self.pack)
+        return "Review({!r})".format(self.pack)
 
 
 class Prism(Traversal, Review):
-    '''A prism is an optic made from a pair of functions that pack and
+    """A prism is an optic made from a pair of functions that pack and
     unpack a state where the unpacking process can potentially fail.
 
     `pack` is a function that takes a focus and returns that focus
@@ -457,7 +451,7 @@ class Prism(Traversal, Review):
         Nothing()
 
     All prisms are also traversals that have exactly zero or one foci.
-    '''
+    """
 
     def __init__(self, unpack, pack):
         self.unpack = unpack
@@ -475,7 +469,7 @@ class Prism(Traversal, Review):
         return typeclass.fmap(f(result.unwrap()), self.pack)
 
     def has(self, state):
-        '''Returns `True` when the state would be successfully focused
+        """Returns `True` when the state would be successfully focused
         by this prism, otherwise `False`.
 
             >>> from lenses.maybe import Nothing, Just
@@ -490,15 +484,15 @@ class Prism(Traversal, Review):
             False
             >>> positive.has(1)
             True
-        '''
+        """
         return not self.unpack(state).is_nothing()
 
     def __repr__(self):
-        return 'Prism({!r}, {!r})'.format(self.unpack, self.pack)
+        return "Prism({!r}, {!r})".format(self.unpack, self.pack)
 
 
 class Isomorphism(Lens, Prism):
-    '''A lens based on an isomorphism. An isomorphism can be formed by
+    """A lens based on an isomorphism. An isomorphism can be formed by
     two functions that mirror each other; they can convert forwards
     and backwards between a state and a focus without losing
     information. The difference between this and a regular Lens is
@@ -532,11 +526,9 @@ class Isomorphism(Lens, Prism):
         Isomorphism(<built-in function ord>, <built-in function chr>)
         >>> flipped.view('A')
         65
-    '''
+    """
 
-    def __init__(
-        self, forwards: Callable[[S], A], backwards: Callable[[B], T]
-    ) -> None:
+    def __init__(self, forwards: Callable[[S], A], backwards: Callable[[B], T]) -> None:
         self.forwards = forwards
         self.backwards = backwards
 
@@ -559,7 +551,7 @@ class Isomorphism(Lens, Prism):
         return typeclass.fmap(f(self.forwards(state)), self.backwards)
 
     def __repr__(self):
-        return 'Isomorphism({!r}, {!r})'.format(self.forwards, self.backwards)
+        return "Isomorphism({!r}, {!r})".format(self.forwards, self.backwards)
 
 
 class Equality(Isomorphism):
@@ -567,7 +559,7 @@ class Equality(Isomorphism):
 
 
 class ComposedLens(LensLike):
-    '''A lenses representing the composition of several sub-lenses. This
+    """A lenses representing the composition of several sub-lenses. This
     class tries to just pass operations down to the sublenses without
     imposing any constraints on what can happen. The sublenses are in
     charge of what capabilities they support.
@@ -578,9 +570,9 @@ class ComposedLens(LensLike):
         GetitemLens(0) & GetitemLens(1)
 
     (The ComposedLens is represented above by the `&` symbol)
-    '''
+    """
 
-    __slots__ = ('lenses',)
+    __slots__ = ("lenses",)
 
     def __init__(self, lenses: Iterable[LensLike] = ()) -> None:
         self.lenses = list(self._filter_lenses(lenses))
@@ -617,18 +609,18 @@ class ComposedLens(LensLike):
         elif len(result.lenses) == 1:
             return result.lenses[0]
         if result.kind() is None:
-            raise RuntimeError('Optic has no valid type')
+            raise RuntimeError("Optic has no valid type")
         return result
 
     def __repr__(self):
-        return ' & '.join(str(l) for l in self.lenses)
+        return " & ".join(str(l) for l in self.lenses)
 
     def _is_kind(self, cls):
         return all(lens._is_kind(cls) for lens in self.lenses)
 
 
 class ErrorIso(Isomorphism):
-    '''An optic that raises an exception whenever it tries to focus
+    """An optic that raises an exception whenever it tries to focus
     something. If `message is None` then the exception will be raised
     unmodified. If `message is not None` then when the lens is asked
     to focus something it will run `message.format(state)` and the
@@ -651,11 +643,9 @@ class ErrorIso(Isomorphism):
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?
         ValueError: applied to True
-    '''
+    """
 
-    def __init__(
-        self, exception: Exception, message: Optional[str] = None
-    ) -> None:
+    def __init__(self, exception: Exception, message: Optional[str] = None) -> None:
         self.exception = exception
         self.message = message
 
@@ -666,12 +656,12 @@ class ErrorIso(Isomorphism):
 
     def __repr__(self):
         if self.message is None:
-            return 'ErrorIso({!r})'.format(self.exception)
-        return 'ErrorIso({!r}, {!r})'.format(self.exception, self.message)
+            return "ErrorIso({!r})".format(self.exception)
+        return "ErrorIso({!r}, {!r})".format(self.exception, self.message)
 
 
 class TrivialIso(Isomorphism):
-    '''A trivial isomorphism that focuses the whole state. It doesn't
+    """A trivial isomorphism that focuses the whole state. It doesn't
     manipulate the state in any way. Mostly used as a "null" lens.
     Analogous to `lambda a: a`.
 
@@ -681,7 +671,7 @@ class TrivialIso(Isomorphism):
         True
         >>> TrivialIso().set(True, False)
         False
-    '''
+    """
 
     def __init__(self) -> None:
         pass
@@ -693,4 +683,4 @@ class TrivialIso(Isomorphism):
         return focus
 
     def __repr__(self):
-        return 'TrivialIso()'
+        return "TrivialIso()"

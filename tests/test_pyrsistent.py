@@ -17,7 +17,7 @@ def test_pvector_iter():
 
 def test_pmap_setitem():
     state = pyr.m(a=1, b=2, c=3)
-    assert (lens['a'] + 10)(state) == pyr.m(a=11, b=2, c=3)
+    assert (lens["a"] + 10)(state) == pyr.m(a=11, b=2, c=3)
 
 
 def test_pmap_iter():

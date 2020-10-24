@@ -2,7 +2,7 @@ from .typeclass import fmap
 
 
 class Functorisor(object):
-    '''A Functorisor is a wrapper around an ordinary function that carries
+    """A Functorisor is a wrapper around an ordinary function that carries
     information about the return type of that function. Specifically
     it wraps functions that return an applicative functor. In haskell
     notation:
@@ -15,9 +15,9 @@ class Functorisor(object):
     which the Python implementation requires).
 
     The Functorisor solves this problem by carrying around a `pure`
-    function. It's a hack, but it works well enough.'''
+    function. It's a hack, but it works well enough."""
 
-    __slots__ = ('pure', 'func')
+    __slots__ = ("pure", "func")
 
     def __init__(self, pure_func, func):
         self.pure = pure_func

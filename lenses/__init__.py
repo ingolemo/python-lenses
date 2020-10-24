@@ -1,4 +1,4 @@
-'''A python module for manipulating deeply nested data structures
+"""A python module for manipulating deeply nested data structures
 without mutating them.
 
 A simple overview for this module is available in the readme or
@@ -17,7 +17,7 @@ You can also obtain a bound lens with the `bind` function.
     >>> from lenses import bind
     >>> bind([1, 2, 3])
     BoundLens([1, 2, 3], TrivialIso())
-'''
+"""
 
 from .typevars import S, T
 from . import optics
@@ -28,10 +28,10 @@ from .ui import UnboundLens
 
 
 def bind(state: S) -> ui.BoundLens[S, S, S, S]:
-    'Returns a simple BoundLens object bound to `state`.'
+    "Returns a simple BoundLens object bound to `state`."
     return ui.BoundLens(state, optics.TrivialIso())
 
 
 lens = ui.UnboundLens(optics.TrivialIso())  # type: ui.UnboundLens
 
-__all__ = ['lens', 'bind', 'optics']
+__all__ = ["lens", "bind", "optics"]

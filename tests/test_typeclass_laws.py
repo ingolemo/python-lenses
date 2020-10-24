@@ -11,10 +11,12 @@ def objects():
 
 def maybes(substrat):
     return substrat.flatmap(
-        lambda a: strat.sampled_from([
-            lenses.maybe.Nothing(),
-            lenses.maybe.Just(a),
-        ])
+        lambda a: strat.sampled_from(
+            [
+                lenses.maybe.Nothing(),
+                lenses.maybe.Just(a),
+            ]
+        )
     )
 
 
@@ -58,6 +60,7 @@ def test_monoid_law_left_identity(m):
 def test_monoid_law_right_identity(m):
     # a + mempty = a
     assert tc.mappend(m, tc.mempty(m)) == m
+
 
 @hypothesis.given(functors(objects()))
 def test_functor_law_identity(data):

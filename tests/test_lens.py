@@ -31,31 +31,31 @@ def test_lens_modify():
 
 
 def test_lens_call():
-    assert lens.call('upper')('hello') == 'HELLO'
+    assert lens.call("upper")("hello") == "HELLO"
 
 
 def test_lens_call_implicitly():
-    assert lens.call_upper()('hello') == 'HELLO'
+    assert lens.call_upper()("hello") == "HELLO"
 
 
 def test_lens_call_args():
-    assert lens.call('center', 5)('h') == '  h  '
+    assert lens.call("center", 5)("h") == "  h  "
 
 
 def test_lens_call_args_implicitly():
-    assert lens.call_center(5)('h') == '  h  '
+    assert lens.call_center(5)("h") == "  h  "
 
 
 def test_lens_call_kwargs():
-    assert lens.call('encode', encoding='utf-8')('h') == b'h'
+    assert lens.call("encode", encoding="utf-8")("h") == b"h"
 
 
 def test_lens_call_kwargs_implicitly():
-    assert lens.call_encode(encoding='utf-8')('h') == b'h'
+    assert lens.call_encode(encoding="utf-8")("h") == b"h"
 
 
 def test_lens_call_mut():
-    assert lens.call_mut('sort')([3, 1, 2]) == [1, 2, 3]
+    assert lens.call_mut("sort")([3, 1, 2]) == [1, 2, 3]
 
 
 def test_lens_call_mut_implicitly():
@@ -63,7 +63,7 @@ def test_lens_call_mut_implicitly():
 
 
 def test_lens_call_mut_args():
-    assert lens.call_mut('append', 3)([1, 2]) == [1, 2, 3]
+    assert lens.call_mut("append", 3)([1, 2]) == [1, 2, 3]
 
 
 def test_lens_call_mut_args_implicitly():
@@ -71,24 +71,24 @@ def test_lens_call_mut_args_implicitly():
 
 
 def test_lens_call_mut_kwargs():
-    result = lens.call_mut('sort', key=len)(['eine', 'un', 'one'])
-    assert result == ['un', 'one', 'eine']
+    result = lens.call_mut("sort", key=len)(["eine", "un", "one"])
+    assert result == ["un", "one", "eine"]
 
 
 def test_lens_call_mut_kwargs_implicitly():
-    result = lens.call_mut_sort(key=len)(['eine', 'un', 'one'])
-    assert result == ['un', 'one', 'eine']
+    result = lens.call_mut_sort(key=len)(["eine", "un", "one"])
+    assert result == ["un", "one", "eine"]
 
 
 def test_lens_call_mut_deep():
     state = [object(), object()]
-    result = lens.call_mut('append', object())(state)
+    result = lens.call_mut("append", object())(state)
     assert result[0] is not state[0]
 
 
 def test_lens_call_mut_shallow():
     state = [object(), object()]
-    result = lens.call_mut('append', object(), shallow=True)(state)
+    result = lens.call_mut("append", object(), shallow=True)(state)
     assert result[0] is state[0]
 
 
@@ -149,12 +149,12 @@ def test_lens_add_lens_bad_lens():
 
 def test_lens_flip():
     l = lens.Iso(str, int).flip()
-    assert l.get()('1') == 1
+    assert l.get()("1") == 1
 
 
 def test_lens_flip_composed():
     l = lens.Decode().Json().flip()
-    assert l.get()([1, 2, 3]) == b'[1, 2, 3]'
+    assert l.get()([1, 2, 3]) == b"[1, 2, 3]"
 
 
 def test_lens_flip_composed_not_isomorphism():
@@ -191,6 +191,7 @@ def test_lens_descriptor_doesnt_bind_from_class():
         first = lens._private_items[0]
 
     import lenses
+
     assert isinstance(MyClass.first, lenses.ui.UnboundLens)
 
 
@@ -203,7 +204,7 @@ def test_lens_descriptor_zoom():
             return self._private_items == other._private_items
 
         def __repr__(self):
-            return 'M({!r})'.format(self._private_items)
+            return "M({!r})".format(self._private_items)
 
         first = lens._private_items[0]
 
@@ -261,12 +262,12 @@ def test_lens_getitem_direct():
 
 
 def test_lens_getattr():
-    nt = collections.namedtuple('nt', 'attr')
-    assert bind(nt(3)).GetAttr('attr').get() == 3
+    nt = collections.namedtuple("nt", "attr")
+    assert bind(nt(3)).GetAttr("attr").get() == 3
 
 
 def test_lens_getattr_direct():
-    nt = collections.namedtuple('nt', 'attr')
+    nt = collections.namedtuple("nt", "attr")
     assert bind(nt(3)).attr.get() == 3
 
 
@@ -276,7 +277,7 @@ def test_type_tuple():
 
 
 def test_type_namedtuple():
-    Tup = collections.namedtuple('Tup', 'attr')
+    Tup = collections.namedtuple("Tup", "attr")
     assert bind(Tup(0)).attr.set(1) == Tup(1)
 
 
@@ -317,7 +318,7 @@ def test_type_custom_class_lens_setattr():
             return self.a == other.a
 
         def _lens_setattr(self, key, value):
-            if key == 'a':
+            if key == "a":
                 return C(value)
 
     assert bind(C(C(9))).a.a.set(4) == C(C(4))
@@ -366,27 +367,27 @@ def test_type_unsupported_no_setattr():
 
 # test various kinds
 def test_trivial_kind():
-    assert lens.kind() == 'Isomorphism'
+    assert lens.kind() == "Isomorphism"
 
 
 def test_compose_iso_and_lens_kind():
-    assert (lens & lens[0]).kind() == 'Lens'
+    assert (lens & lens[0]).kind() == "Lens"
 
 
 def test_compose_iso_and_fold_kind():
-    assert (lens & lens.Iter()).kind() == 'Fold'
+    assert (lens & lens.Iter()).kind() == "Fold"
 
 
 def test_compose_lens_and_fold_kind():
-    assert (lens[0] & lens.Iter()).kind() == 'Fold'
+    assert (lens[0] & lens.Iter()).kind() == "Fold"
 
 
 def test_compose_iso_and_setter_kind():
-    assert (lens & lens.Fork(lens, lens)) == 'Setter'
+    assert (lens & lens.Fork(lens, lens)) == "Setter"
 
 
 def test_compose_lens_and_setter_kind():
-    assert (lens[0] & lens.Fork(lens, lens)) == 'Setter'
+    assert (lens[0] & lens.Fork(lens, lens)) == "Setter"
 
 
 def test_compose_fold_and_setter_kind_errors():
@@ -395,7 +396,7 @@ def test_compose_fold_and_setter_kind_errors():
 
 
 def test_bound_iso_kind():
-    assert bind(True).kind() == 'Isomorphism'
+    assert bind(True).kind() == "Isomorphism"
 
 
 # misc Lens tests

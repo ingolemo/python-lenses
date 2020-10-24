@@ -39,7 +39,7 @@ def test_setitem_imm_custom_class():
 
 
 def test_setitem_imm_bytes():
-    assert s.setitem(b'hello', 0, ord(b'j')) == b'jello'
+    assert s.setitem(b"hello", 0, ord(b"j")) == b"jello"
 
 
 def test_setitem_imm_list():
@@ -47,7 +47,7 @@ def test_setitem_imm_list():
 
 
 def test_setitem_imm_str():
-    assert s.setitem(u'hello', 0, u'j') == u'jello'
+    assert s.setitem(u"hello", 0, u"j") == u"jello"
 
 
 def test_setitem_imm_tuple():
@@ -63,12 +63,12 @@ def test_setattr_imm_custom_class():
             return self.attr == other.attr
 
         def _lens_setattr(self, name, value):
-            if name == 'fake_attr':
+            if name == "fake_attr":
                 return C(value)
             else:
                 raise AttributeError(name)
 
-    assert s.setattr(C(1), 'fake_attr', 2) == C(2)
+    assert s.setattr(C(1), "fake_attr", 2) == C(2)
 
 
 def test_setattr_imm_custom_class_raw():
@@ -79,12 +79,12 @@ def test_setattr_imm_custom_class_raw():
         def __eq__(self, other):
             return self.attr == other.attr
 
-    assert s.setattr(C(1), 'attr', 2) == C(2)
+    assert s.setattr(C(1), "attr", 2) == C(2)
 
 
 def test_setattr_imm_namedtuple():
-    Tup = collections.namedtuple('Tup', 'attr')
-    assert s.setattr(Tup(1), 'attr', 2) == Tup(2)
+    Tup = collections.namedtuple("Tup", "attr")
+    assert s.setattr(Tup(1), "attr", 2) == Tup(2)
 
 
 @hypothesis.given(
@@ -145,7 +145,7 @@ def test_from_iter_custom_class():
 
 
 def test_from_iter_bytes():
-    assert s.from_iter(b'', s.to_iter(b'123')) == b'123'
+    assert s.from_iter(b"", s.to_iter(b"123")) == b"123"
 
 
 def test_from_iter_list():
@@ -157,7 +157,7 @@ def test_from_iter_set():
 
 
 def test_from_iter_str():
-    assert s.from_iter(u'', ['1', '2', '3']) == u'123'
+    assert s.from_iter(u"", ["1", "2", "3"]) == u"123"
 
 
 def test_from_iter_tuple():
@@ -165,16 +165,16 @@ def test_from_iter_tuple():
 
 
 def test_from_iter_namedtuple():
-    Tup = collections.namedtuple('Tup', 'attr1 attr2 attr3')
+    Tup = collections.namedtuple("Tup", "attr1 attr2 attr3")
     iterTup = s.from_iter(Tup(1, 2, 3), [4, 5, 6])
     assert iterTup == Tup(4, 5, 6)
     assert type(iterTup) is Tup
 
 
 def test_from_iter_dict():
-    data = {'jane': 5, 'jim': 6, 'joanne': 8}
+    data = {"jane": 5, "jim": 6, "joanne": 8}
     new_keys = [(k.capitalize(), v) for k, v in s.to_iter(data)]
-    assert s.from_iter(data, new_keys) == {'Jane': 5, 'Jim': 6, 'Joanne': 8}
+    assert s.from_iter(data, new_keys) == {"Jane": 5, "Jim": 6, "Joanne": 8}
 
 
 def test_from_iter_unknown():

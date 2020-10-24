@@ -8,7 +8,7 @@ import sys
 
 
 class Just(Generic[A]):
-    '''A class that can contain a value or not. If it contains a value
+    """A class that can contain a value or not. If it contains a value
     then it will be an instance of Just. If it doesn't then it will be
     an instance of Nothing. You can wrap an existing value By calling
     the Just constructor:
@@ -21,19 +21,19 @@ class Just(Generic[A]):
 
         >>> Just(1).maybe()
         1
-    '''
+    """
 
     # The typing module in 3.5.2 is broken when using Generic with __slots__,
     # see https://github.com/python/typing/issues/332
     # We can just skip defining __slots__ and this will work fine for that
     # version, at a slight overhead expense.
     if sys.version_info[:3] != (3, 5, 2):
-        __slots__ = ('item',)
+        __slots__ = ("item",)
 
     def __init__(self, item: A) -> None:
         self.item = item
 
-    def __add__(self, other: 'Just[A]') -> 'Just[A]':
+    def __add__(self, other: "Just[A]") -> "Just[A]":
         if other.is_nothing():
             return self
         return Just(typeclass.mappend(self.item, other.item))
@@ -48,15 +48,15 @@ class Just(Generic[A]):
         yield self.item
 
     def __repr__(self) -> str:
-        return 'Just({!r})'.format(self.item)
+        return "Just({!r})".format(self.item)
 
-    def map(self, fn: Callable[[A], B]) -> 'Just[B]':
-        '''Apply a function to the value inside the Maybe.'''
+    def map(self, fn: Callable[[A], B]) -> "Just[B]":
+        """Apply a function to the value inside the Maybe."""
         return Just(fn(self.item))
 
     def maybe(self, guard: B = None) -> Union[None, A, B]:
-        '''Unwraps the value, returning it is there is one, else
-        returning the guard.'''
+        """Unwraps the value, returning it is there is one, else
+        returning the guard."""
         return self.item
 
     def unwrap(self) -> A:
@@ -82,19 +82,19 @@ class Nothing(Just[A]):
         return iter([])
 
     def __repr__(self) -> str:
-        return 'Nothing()'
+        return "Nothing()"
 
     def map(self, fn: Callable[[A], B]) -> Just[B]:
-        '''Apply a function to the value inside the Maybe.'''
+        """Apply a function to the value inside the Maybe."""
         return Nothing()
 
     def maybe(self, guard: B = None) -> Union[None, A, B]:
-        '''Unwraps the value, returning it is there is one, else
-        returning the guard.'''
+        """Unwraps the value, returning it is there is one, else
+        returning the guard."""
         return guard
 
     def unwrap(self) -> A:
-        raise ValueError('Cannot unwrap Nothing')
+        raise ValueError("Cannot unwrap Nothing")
 
     def is_nothing(self) -> bool:
         return True

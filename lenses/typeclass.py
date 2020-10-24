@@ -25,7 +25,7 @@ def _mempty_int(self: int) -> int:
 
 @mempty.register(str)
 def _mempty_str(string: str) -> str:
-    return ''
+    return ""
 
 
 @mempty.register(list)
@@ -39,11 +39,9 @@ def _mempty_tuple(tup: Tuple[Any, ...]) -> Tuple[Any, ...]:
 
 
 @mappend.register(tuple)
-def _mappend_tuple(
-    tup: Tuple[Any, ...], other: Tuple[Any, ...]
-) -> Tuple[Any, ...]:
+def _mappend_tuple(tup: Tuple[Any, ...], other: Tuple[Any, ...]) -> Tuple[Any, ...]:
     if len(tup) != len(other):
-        raise ValueError('Cannot mappend tuples of differing lengths')
+        raise ValueError("Cannot mappend tuples of differing lengths")
     result = ()  # type: Tuple[Any, ...]
     for x, y in zip(tup, other):
         result += (mappend(x, y),)
@@ -66,10 +64,10 @@ def _mappend_dict(dct: dict, other: dict) -> dict:
 # functor
 @singledispatch
 def fmap(functor: Any, func: Callable[[Any], Any]) -> Any:
-    '''Applies a function to the data 'inside' a functor.
+    """Applies a function to the data 'inside' a functor.
 
     Uses functools.singledispatch so you can write your own functors
-    for use with the library.'''
+    for use with the library."""
     return functor.map(func)
 
 

@@ -1,4 +1,4 @@
-'''This module contains functions that you can hook into to allow various
+"""This module contains functions that you can hook into to allow various
 lenses to operate on your own custom data structures.
 
 You can hook into them by defining a method that starts with
@@ -24,7 +24,7 @@ All of these hooks operate in the following order:
 * Use a default implementation that is likely to work for most python
   objects, if one exists.
 * Raise ``NotImplementedError``.
-'''
+"""
 
 from typing import (
     Any,
@@ -49,7 +49,7 @@ from builtins import setattr as builtin_setattr
 
 @singledispatch
 def setitem(self: Any, key: Any, value: Any) -> Any:
-    '''Takes an object, a key, and a value and produces a new object
+    """Takes an object, a key, and a value and produces a new object
     that is a copy of the original but with ``value`` as the new value of
     ``key``.
 
@@ -73,7 +73,7 @@ def setitem(self: Any, key: Any, value: Any) -> Any:
     The default implementation makes a copy of the object using
     ``copy.copy`` and then mutates the new object by setting the item
     on it in the conventional way.
-    '''
+    """
     try:
         self._lens_setitem
     except AttributeError:
@@ -95,7 +95,7 @@ def _bytes_setitem(self: bytes, key: int, value: int) -> bytes:
 def _str_setitem(self: str, key: int, value: str) -> str:
     data = list(self)
     data[key] = value
-    return ''.join(data)
+    return "".join(data)
 
 
 @setitem.register(tuple)
@@ -105,7 +105,7 @@ def _tuple_setitem(self: Tuple[A, ...], key: int, value: A) -> Tuple[A, ...]:
 
 @singledispatch
 def setattr(self: Any, name: Any, value: Any) -> Any:
-    '''Takes an object, a string, and a value and produces a new object
+    """Takes an object, a string, and a value and produces a new object
     that is a copy of the original but with the attribute called ``name``
     set to ``value``.
 
@@ -129,7 +129,7 @@ def setattr(self: Any, name: Any, value: Any) -> Any:
     The default implementation makes a copy of the object using
     ``copy.copy`` and then mutates the new object by calling python's
     built in ``setattr`` on it.
-    '''
+    """
     if dataclasses.is_dataclass(self) and not isinstance(self, type):
         return dataclasses.replace(self, **{name: value})
 
@@ -144,21 +144,16 @@ def setattr(self: Any, name: Any, value: Any) -> Any:
 
 
 @setattr.register(tuple)
-def _tuple_setattr_immutable(
-    self: NamedTuple, name: str, value: A
-) -> NamedTuple:
+def _tuple_setattr_immutable(self: NamedTuple, name: str, value: A) -> NamedTuple:
     # setting attributes on a tuple probably means we really have a
     # namedtuple so we can use self._fields to understand the names
-    data = (
-        value if field == name else item
-        for field, item in zip(self._fields, self)
-    )
+    data = (value if field == name else item for field, item in zip(self._fields, self))
     return type(self)(*data)
 
 
 @singledispatch
 def contains_add(self: Any, item: Any) -> Any:
-    '''Takes a collection and an item and returns a new collection
+    """Takes a collection and an item and returns a new collection
     of the same type that contains the item. The notion of "contains"
     is defined by the object itself; The following must be ``True``:
 
@@ -173,11 +168,11 @@ def contains_add(self: Any, item: Any) -> Any:
     ``obj._lens_contains_add(item)``.
 
     There is no default implementation.
-    '''
+    """
     try:
         self._lens_contains_add
     except AttributeError:
-        message = 'Don\'t know how to add an item to {}'
+        message = "Don't know how to add an item to {}"
         raise NotImplementedError(message.format(type(self)))
     else:
         return self._lens_contains_add(item)
@@ -207,7 +202,7 @@ def _set_contains_add(self: Set[A], item: A) -> Set[A]:
 
 @singledispatch
 def contains_remove(self: Any, item: Any) -> Any:
-    '''Takes a collection and an item and returns a new collection
+    """Takes a collection and an item and returns a new collection
     of the same type with that item removed. The notion of "contains"
     is defined by the object itself; the following must be ``True``:
 
@@ -222,11 +217,11 @@ def contains_remove(self: Any, item: Any) -> Any:
     ``obj._lens_contains_remove(item)``.
 
     There is no default implementation.
-    '''
+    """
     try:
         self._lens_contains_remove
     except AttributeError:
-        message = 'Don\'t know how to remove an item from {}'
+        message = "Don't know how to remove an item from {}"
         raise NotImplementedError(message.format(type(self)))
     else:
         return self._lens_contains_remove(item)
@@ -256,7 +251,7 @@ def _set_contains_remove(self: Set[A], item: A) -> Set[A]:
 
 @singledispatch
 def to_iter(self: Any) -> Any:
-    '''Takes an object and produces an iterable. It is intended as the
+    """Takes an object and produces an iterable. It is intended as the
     inverse of the ``from_iter`` function.
 
     The reason this hook exists is to customise how dictionaries are
@@ -269,7 +264,7 @@ def to_iter(self: Any) -> Any:
 
     The default implementation is to call python's built in ``iter``
     function.
-    '''
+    """
     try:
         self._lens_to_iter
     except AttributeError:
@@ -285,7 +280,7 @@ def _dict_to_iter(self: Dict[A, B]) -> Iterator[Tuple[A, B]]:
 
 @singledispatch
 def from_iter(self: Any, iterable: Any) -> Any:
-    '''Takes an object and an iterable and produces a new object that is
+    """Takes an object and an iterable and produces a new object that is
     a copy of the original with data from ``iterable`` reincorporated. It
     is intended as the inverse of the ``to_iter`` function. Any state in
     ``self`` that is not modelled by the iterable should remain unchanged.
@@ -303,11 +298,11 @@ def from_iter(self: Any, iterable: Any) -> Any:
     ``obj._lens_from_iter(iterable)``.
 
     There is no default implementation.
-    '''
+    """
     try:
         self._lens_from_iter
     except AttributeError:
-        message = 'Don\'t know how to create instance of {} from iterable'
+        message = "Don't know how to create instance of {} from iterable"
         raise NotImplementedError(message.format(type(self)))
     else:
         return self._lens_from_iter(iterable)
@@ -320,7 +315,7 @@ def _bytes_from_iter(self: bytes, iterable: Iterable[int]) -> bytes:
 
 @from_iter.register(str)
 def _str_from_iter(self: str, iterable: Iterable[str]) -> str:
-    return ''.join(iterable)
+    return "".join(iterable)
 
 
 @from_iter.register(dict)
@@ -342,9 +337,7 @@ def _set_from_iter(self: Set, iterable: Iterable[A]) -> Set[A]:
 
 
 @from_iter.register(frozenset)
-def _frozenset_from_iter(
-    self: FrozenSet, iterable: Iterable[A]
-) -> FrozenSet[A]:
+def _frozenset_from_iter(self: FrozenSet, iterable: Iterable[A]) -> FrozenSet[A]:
     return frozenset(iterable)
 
 
@@ -352,9 +345,9 @@ def _frozenset_from_iter(
 def _tuple_from_iter(self, iterable):
     if type(self) is tuple:
         return tuple(iterable)
-    elif hasattr(self, '_make'):
+    elif hasattr(self, "_make"):
         # this is probably a namedtuple
         return self._make(iterable)
     else:
-        message = 'Don\'t know how to create instance of {} from iterable'
+        message = "Don't know how to create instance of {} from iterable"
         raise NotImplementedError(message.format(type(self)))

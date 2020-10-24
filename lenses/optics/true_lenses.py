@@ -7,7 +7,7 @@ from .base import Fold, Getter, Lens, Traversal
 
 
 class ContainsLens(Lens):
-    '''A lens that takes an item and focuses a bool based on whether
+    """A lens that takes an item and focuses a bool based on whether
     the state contains that item. It's most useful when used with
     sets, but it can be used with other collections like lists and
     dictionaries. Analogous to the ``in`` operator.
@@ -27,7 +27,7 @@ class ContainsLens(Lens):
 
     In order to use this lens on custom data-types you must implement
     ``lenses.hooks.contains_add`` and ``lens.hooks.contains_remove``.
-    '''
+    """
 
     def __init__(self, item):
         self.item = item
@@ -45,11 +45,11 @@ class ContainsLens(Lens):
             return state
 
     def __repr__(self):
-        return 'ContainsLens({!r})'.format(self.item)
+        return "ContainsLens({!r})".format(self.item)
 
 
 class GetattrLens(Lens):
-    '''A lens that focuses an attribute of an object. Analogous to
+    """A lens that focuses an attribute of an object. Analogous to
     `getattr`.
 
         >>> GetattrLens('left')
@@ -60,7 +60,7 @@ class GetattrLens(Lens):
         1
         >>> GetattrLens('right').set(Pair(1, 2), 3)
         Pair(left=1, right=3)
-    '''
+    """
 
     def __init__(self, name: str) -> None:
         self.name = name
@@ -72,11 +72,11 @@ class GetattrLens(Lens):
         return hooks.setattr(state, self.name, focus)
 
     def __repr__(self):
-        return 'GetattrLens({!r})'.format(self.name)
+        return "GetattrLens({!r})".format(self.name)
 
 
 class GetitemLens(Lens):
-    '''A lens that focuses an item inside a container. Analogous to
+    """A lens that focuses an item inside a container. Analogous to
     `operator.itemgetter`.
 
         >>> GetitemLens('foo')
@@ -85,7 +85,7 @@ class GetitemLens(Lens):
         1
         >>> GetitemLens('foo').set({'foo': 1}, 2)
         {'foo': 2}
-    '''
+    """
 
     def __init__(self, key: Any) -> None:
         self.key = key
@@ -97,11 +97,11 @@ class GetitemLens(Lens):
         return hooks.setitem(state, self.key, focus)
 
     def __repr__(self):
-        return 'GetitemLens({!r})'.format(self.key)
+        return "GetitemLens({!r})".format(self.key)
 
 
 class GetitemOrElseLens(GetitemLens):
-    '''A lens that focuses an item inside a container by calling its `get`
+    """A lens that focuses an item inside a container by calling its `get`
     method, allowing you to specify a default value for missing keys.
     Analogous to `dict.get`.
 
@@ -116,7 +116,7 @@ class GetitemOrElseLens(GetitemLens):
         {'foo': 2}
         >>> GetitemOrElseLens('baz', 0).over({}, lambda a: a + 10)
         {'baz': 10}
-    '''
+    """
 
     def __init__(self, key: Any, default: Any = None) -> None:
         self.key = key
@@ -126,12 +126,12 @@ class GetitemOrElseLens(GetitemLens):
         return state.get(self.key, self.default)
 
     def __repr__(self):
-        message = 'GetitemOrElseLens({!r}, default={!r})'
+        message = "GetitemOrElseLens({!r}, default={!r})"
         return message.format(self.key, self.default)
 
 
 class ItemLens(Lens):
-    '''A lens that focuses a single item (key-value pair) in a
+    """A lens that focuses a single item (key-value pair) in a
     dictionary by its key. Set an item to `None` to remove it from the
     dictionary.
 
@@ -147,7 +147,7 @@ class ItemLens(Lens):
         OrderedDict([(1, 11), (2, 20)])
         >>> ItemLens(1).set(state, None)
         OrderedDict([(2, 20)])
-    '''
+    """
 
     def __init__(self, key: Any) -> None:
         self.key = key
@@ -169,11 +169,11 @@ class ItemLens(Lens):
         return data
 
     def __repr__(self):
-        return 'ItemLens({!r})'.format(self.key)
+        return "ItemLens({!r})".format(self.key)
 
 
 class ItemByValueLens(Lens):
-    '''A lens that focuses a single item (key-value pair) in a
+    """A lens that focuses a single item (key-value pair) in a
     dictionary by its value. Set an item to `None` to remove it from the
     dictionary. This lens assumes that there will only be a single key
     with that particular value. If you violate that assumption then
@@ -191,7 +191,7 @@ class ItemByValueLens(Lens):
         OrderedDict([(2, 20), (3, 10)])
         >>> ItemByValueLens(10).set(state, None)
         OrderedDict([(2, 20)])
-    '''
+    """
 
     def __init__(self, value):
         self.value = value
@@ -211,7 +211,7 @@ class ItemByValueLens(Lens):
         return data
 
     def __repr__(self):
-        return 'ItemByValueLens({!r})'.format(self.value)
+        return "ItemByValueLens({!r})".format(self.value)
 
 
 class PartsLens(Lens):
@@ -240,7 +240,7 @@ class PartsLens(Lens):
 
 
 class TupleLens(Lens):
-    '''A lens that combines the focuses of other lenses into a single
+    """A lens that combines the focuses of other lenses into a single
     tuple. The sublenses must be optics of kind Lens; this means no
     Traversals.
 
@@ -262,13 +262,13 @@ class TupleLens(Lens):
         >>> state = ([1, 2, 3], 4, [5, 6])
         >>> tee.to_list_of(state)
         [1, 2, 3, 5, 6]
-    '''
+    """
 
     def __init__(self, *lenses):
         self.lenses = lenses
         for lens in self.lenses:
             if not lens._is_kind(Lens):
-                raise TypeError('TupleLens only works with lenses')
+                raise TypeError("TupleLens only works with lenses")
 
     def getter(self, state):
         return tuple(lens.view(state) for lens in self.lenses)
@@ -279,5 +279,5 @@ class TupleLens(Lens):
         return state
 
     def __repr__(self):
-        args = ', '.join(repr(lens) for lens in self.lenses)
-        return 'TupleLens({})'.format(args)
+        args = ", ".join(repr(lens) for lens in self.lenses)
+        return "TupleLens({})".format(args)

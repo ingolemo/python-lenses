@@ -7,7 +7,7 @@ from .base import Traversal, collect_args, multiap
 
 
 class EachTraversal(Traversal):
-    '''A traversal that iterates over its state, focusing everything it
+    """A traversal that iterates over its state, focusing everything it
     iterates over. It uses `lenses.hooks.fromiter` to reform the state
     afterwards so it should work with any iterable that function
     supports. Analogous to `iter`.
@@ -27,7 +27,7 @@ class EachTraversal(Traversal):
         >>> state = {'one': 1}
         >>> EachTraversal().to_list_of(state)
         [('one', 1)]
-    '''
+    """
 
     def __init__(self):
         pass
@@ -39,17 +39,17 @@ class EachTraversal(Traversal):
         return hooks.from_iter(state, values)
 
     def __repr__(self):
-        return 'EachTraversal()'
+        return "EachTraversal()"
 
 
 class GetZoomAttrTraversal(Traversal):
-    '''A traversal that focuses an attribute of an object, though if
+    """A traversal that focuses an attribute of an object, though if
     that attribute happens to be a lens it will zoom the lens. This
     is used internally to make lenses that are attributes of objects
     transparent. If you already know whether you are focusing a lens or
     a non-lens you should be explicit and use a ZoomAttrTraversal or a
     GetAttrLens respectively.
-    '''
+    """
 
     def __init__(self, name):
         from lenses.optics import GetattrLens
@@ -66,11 +66,11 @@ class GetZoomAttrTraversal(Traversal):
         return sublens.func(f, state)
 
     def __repr__(self):
-        return 'GetZoomAttrTraversal({!r})'.format(self.name)
+        return "GetZoomAttrTraversal({!r})".format(self.name)
 
 
 class ItemsTraversal(Traversal):
-    '''A traversal focusing key-value tuples that are the items of a
+    """A traversal focusing key-value tuples that are the items of a
     dictionary. Analogous to `dict.items`.
 
         >>> from collections import OrderedDict
@@ -81,7 +81,7 @@ class ItemsTraversal(Traversal):
         [(1, 10), (2, 20)]
         >>> ItemsTraversal().over(state, lambda n: (n[0], n[1] + 1))
         OrderedDict([(1, 11), (2, 21)])
-    '''
+    """
 
     def __init__(self):
         pass
@@ -96,11 +96,11 @@ class ItemsTraversal(Traversal):
         return data
 
     def __repr__(self):
-        return 'ItemsTraversal()'
+        return "ItemsTraversal()"
 
 
 class RecurTraversal(Traversal):
-    '''A traversal that recurses through an object focusing everything it
+    """A traversal that recurses through an object focusing everything it
     can find of a particular type. This traversal will probe arbitrarily
     deep into the contents of the state looking for sub-objects. It
     uses some naughty tricks to do this including looking at an object's
@@ -125,7 +125,7 @@ class RecurTraversal(Traversal):
         [Container(1), Container(Container(3))]
 
     Be careful with this; it can focus things you might not expect.
-    '''
+    """
 
     def __init__(self, cls):
         self.cls = cls
@@ -138,7 +138,7 @@ class RecurTraversal(Traversal):
             for substate in hooks.to_iter(state):
                 for focus in self.folder(substate):
                     yield focus
-        elif hasattr(state, '__dict__'):
+        elif hasattr(state, "__dict__"):
             for attr in sorted(state.__dict__):
                 substate = getattr(state, attr)
                 for focus in self.folder(substate):
@@ -168,7 +168,7 @@ class RecurTraversal(Traversal):
             return values[0]
         elif self.can_iter(state):
             return self.build_from_iter(state, values)
-        elif hasattr(state, '__dict__'):
+        elif hasattr(state, "__dict__"):
             return self.build_dunder_dict(state, values)
         else:
             return state
@@ -221,14 +221,14 @@ class RecurTraversal(Traversal):
             return True
 
     def __repr__(self):
-        return 'RecurTraversal({!r})'.format(self.cls)
+        return "RecurTraversal({!r})".format(self.cls)
 
 
 class ZoomAttrTraversal(Traversal):
-    '''A lens that looks up an attribute on its target and follows it as
+    """A lens that looks up an attribute on its target and follows it as
     if were a bound `Lens` object. Ignores the state, if any, of the
     lens that is being looked up.
-    '''
+    """
 
     def __init__(self, name: str) -> None:
         self.name = name
@@ -238,21 +238,21 @@ class ZoomAttrTraversal(Traversal):
         return optic.func(f, state)
 
     def __repr__(self):
-        return 'ZoomAttrTraversal({!r})'.format(self.name)
+        return "ZoomAttrTraversal({!r})".format(self.name)
 
 
 class ZoomTraversal(Traversal):
-    '''Follows its state as if it were a bound `Lens` object.
+    """Follows its state as if it were a bound `Lens` object.
 
-        >>> from lenses import bind
-        >>> ZoomTraversal()
-        ZoomTraversal()
-        >>> state = bind([1, 2])[1]
-        >>> ZoomTraversal().view(state)
-        2
-        >>> ZoomTraversal().set(state, 3)
-        [1, 3]
-    '''
+    >>> from lenses import bind
+    >>> ZoomTraversal()
+    ZoomTraversal()
+    >>> state = bind([1, 2])[1]
+    >>> ZoomTraversal().view(state)
+    2
+    >>> ZoomTraversal().set(state, 3)
+    [1, 3]
+    """
 
     def __init__(self):
         pass
@@ -261,4 +261,4 @@ class ZoomTraversal(Traversal):
         return state._optic.func(f, state._state)
 
     def __repr__(self):
-        return 'ZoomTraversal()'
+        return "ZoomTraversal()"

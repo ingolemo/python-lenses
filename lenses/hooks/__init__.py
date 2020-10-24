@@ -8,7 +8,7 @@ from .hook_funcs import (
     from_iter,
 )
 
-supported_modules = ['pyrsistent']
+supported_modules = ["pyrsistent"]
 
 for _hook in supported_modules:
     try:
@@ -16,5 +16,5 @@ for _hook in supported_modules:
     except ImportError:
         pass
     else:
-        _subname = '{}.{}'.format(__name__, _hook)
+        _subname = "{}.{}".format(__name__, _hook)
         __import__(_subname)

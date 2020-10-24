@@ -4,7 +4,7 @@ from .base import Isomorphism
 
 
 class DecodeIso(Isomorphism):
-    '''An isomorphism that decodes and encodes its focus on the fly.
+    """An isomorphism that decodes and encodes its focus on the fly.
     Lets you focus a byte string as a unicode string. The arguments have
     the same meanings as `bytes.decode`. Analogous to `bytes.decode`.
 
@@ -14,11 +14,9 @@ class DecodeIso(Isomorphism):
         'hello'
         >>> DecodeIso().set(b'hello', 'world')  # doctest: +SKIP
         b'world'
-    '''
+    """
 
-    def __init__(
-        self, encoding: str = 'utf-8', errors: str = 'strict'
-    ) -> None:
+    def __init__(self, encoding: str = "utf-8", errors: str = "strict") -> None:
         self.encoding = encoding
         self.errors = errors
 
@@ -29,12 +27,12 @@ class DecodeIso(Isomorphism):
         return focus.encode(self.encoding, self.errors)
 
     def __repr__(self):
-        repr = 'DecodeIso({!r}, {!r})'
+        repr = "DecodeIso({!r}, {!r})"
         return repr.format(self.encoding, self.errors)
 
 
 class JsonIso(Isomorphism):
-    '''An isomorphism that focuses a string containing json data as its
+    """An isomorphism that focuses a string containing json data as its
     parsed equivalent. Analogous to `json.loads`.
 
         >>> JsonIso()
@@ -44,10 +42,10 @@ class JsonIso(Isomorphism):
         [{'points': [4, 7]}]
         >>> JsonIso().set(state, [{'points': [3]}])
         '[{"points": [3]}]'
-    '''
+    """
 
-    def __init__(self)->None:
-        self.json_mod = __import__('json')
+    def __init__(self) -> None:
+        self.json_mod = __import__("json")
 
     def forwards(self, state):
         return self.json_mod.loads(state)
@@ -56,11 +54,11 @@ class JsonIso(Isomorphism):
         return self.json_mod.dumps(focus)
 
     def __repr__(self):
-        return 'JsonIso()'
+        return "JsonIso()"
 
 
 class NormalisingIso(Isomorphism):
-    '''An isomorphism that applies a function as it sets a new focus
+    """An isomorphism that applies a function as it sets a new focus
     without regard to the old state. It will get foci without
     transformation. This lens allows you to pre-process values before
     you set them, but still get values as they exist in the state.
@@ -88,7 +86,7 @@ class NormalisingIso(Isomorphism):
 
         >>> NormalisingIso(int).set(1, '4')
         4
-    '''
+    """
 
     def __init__(self, setter):
         self.backwards = setter
@@ -97,4 +95,4 @@ class NormalisingIso(Isomorphism):
         return state
 
     def __repr__(self):
-        return 'NormalisingIso({!r})'.format(self.backwards)
+        return "NormalisingIso({!r})".format(self.backwards)

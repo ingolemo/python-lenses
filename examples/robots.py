@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+"""
 robots.py
 
 You (`@`) are a person surrounded by killer robots (`O`). Dodge the
@@ -8,7 +8,7 @@ and try to make them crash into each other. You win if all robots crash.
 You lose if a robot lands on your square. If you find yourself stuck you
 can press `t` to teleport to a new position. If you teleport next to a
 robot then they will kill you, so watch out.
-'''
+"""
 
 import sys
 import tty
@@ -43,7 +43,7 @@ def duplicates(items):
 class Vector(tuple):
     @classmethod
     def random(cls):
-        'produces a random vector inside the play area.'
+        "produces a random vector inside the play area."
 
         return cls((randint(0, MAXX), randint(0, MAXY)))
 
@@ -51,13 +51,13 @@ class Vector(tuple):
         return Vector((self[0] + other[0], self[1] + other[1]))
 
     def inside(self):
-        'checks if the vector is inside the play area.'
+        "checks if the vector is inside the play area."
 
         return all([0 <= self[0] <= MAXX, 0 <= self[1] <= MAXY])
 
     def step_towards(self, other):
-        '''returns the vector moved one step in the direction of the
-        other, potentially diagonally.'''
+        """returns the vector moved one step in the direction of the
+        other, potentially diagonally."""
 
         return self + Vector(
             (
@@ -79,20 +79,20 @@ class GameState:
             self.robots.append(Vector.random())
 
     def handle_input(self, input):
-        '''Takes a single character string as input and alters the game
+        """Takes a single character string as input and alters the game
         state according to that input. Mostly, this means moving the
         player around. Returns a new game state and boolean indicating
-        whether the input had an effect on the state.'''
+        whether the input had an effect on the state."""
 
         dirs = {
-            'h': (-1, 0),
-            'j': (0, 1),
-            'k': (0, -1),
-            'l': (1, 0),
-            'y': (-1, -1),
-            'u': (1, -1),
-            'n': (1, 1),
-            'b': (-1, 1),
+            "h": (-1, 0),
+            "j": (0, 1),
+            "k": (0, -1),
+            "l": (1, 0),
+            "y": (-1, -1),
+            "u": (1, -1),
+            "n": (1, 1),
+            "b": (-1, 1),
         }
 
         if input in dirs:
@@ -100,20 +100,20 @@ class GameState:
             if not new_self.player.inside():
                 return self, False
             return new_self, True
-        elif input == '.':
+        elif input == ".":
             return self, True
-        elif input == 'q':
+        elif input == "q":
             return self.end_game(), False
-        elif input == 't':
+        elif input == "t":
             self = lens.player.set(Vector.random())(self)
             return self, True
         else:
             return self, False
 
     def advance_robots(self):
-        '''Produces a new game state in which the robots have advanced
+        """Produces a new game state in which the robots have advanced
         towards the player by one step. Handles the robots crashing into
-        one another too.'''
+        one another too."""
 
         # move the robots towards the player
         self = lens.robots.Each().call_step_towards(self.player)(self)
@@ -125,21 +125,21 @@ class GameState:
         return self
 
     def check_game_end(self):
-        '''Checks for the game's win/lose conditions and 'alters' the
+        """Checks for the game's win/lose conditions and 'alters' the
         game state to reflect the condition found. If the game has not
         been won or lost then it just returns the game state
-        unaltered.'''
+        unaltered."""
 
         if self.player in self.crashes.union(self.robots):
-            return self.end_game('You Died!')
+            return self.end_game("You Died!")
         elif not self.robots:
-            return self.end_game('You Win!')
+            return self.end_game("You Win!")
         else:
             return self
 
-    def end_game(self, message=''):
-        '''Returns a completed game state object, setting an optional
-        message to display after the game is over.'''
+    def end_game(self, message=""):
+        """Returns a completed game state object, setting an optional
+        message to display after the game is over."""
 
         return lens.running.set(False)(lens.message.set(message)(self))
 
@@ -150,22 +150,22 @@ class GameState:
             for x in range(0, MAXX + 1):
                 coord = Vector((x, y))
                 if coord == self.player:
-                    ch = '@'
+                    ch = "@"
                 elif coord in self.crashes:
-                    ch = '#'
+                    ch = "#"
                 elif coord in self.robots:
-                    ch = 'O'
+                    ch = "O"
                 else:
-                    ch = '.'
+                    ch = "."
                 chars.append(ch)
-            rows.append(''.join(chars))
-        return '\n'.join(rows) + '\n'
+            rows.append("".join(chars))
+        return "\n".join(rows) + "\n"
 
 
 def main():
-    '''The main function. Instantiates a GameState object and then
+    """The main function. Instantiates a GameState object and then
     enters a REPL-like main loop, waiting for input, updating the state
-    based on the input, then outputting the new state.'''
+    based on the input, then outputting the new state."""
 
     state = GameState()
     print(state)
@@ -182,5 +182,5 @@ def main():
     print(state.message)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
