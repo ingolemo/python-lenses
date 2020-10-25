@@ -1,11 +1,17 @@
-from typing import Callable, Generic, Iterable, List, Optional, cast
+from typing import Callable, Generic, Iterable, List, Optional, TypeVar, cast
 
 from ..const import Const
 from ..functorisor import Functorisor
 from ..identity import Identity
 from .. import typeclass
 from ..maybe import Just, Nothing
-from ..typevars import S, T, A, B, X, Y
+
+S = TypeVar("S")
+T = TypeVar("T")
+A = TypeVar("A")
+B = TypeVar("B")
+X = TypeVar("X")
+Y = TypeVar("Y")
 
 
 def multiap(func, *args):

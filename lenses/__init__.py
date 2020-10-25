@@ -19,12 +19,15 @@ You can also obtain a bound lens with the `bind` function.
     BoundLens([1, 2, 3], TrivialIso())
 """
 
-from .typevars import S, T
+from typing import TypeVar
+
 from . import optics
 from . import ui
 
 # included so you can run pydoc lenses.UnboundLens
 from .ui import UnboundLens
+
+S = TypeVar("S")
 
 
 def bind(state: S) -> ui.BoundLens[S, S, S, S]:

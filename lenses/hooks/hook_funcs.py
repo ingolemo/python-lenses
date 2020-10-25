@@ -36,15 +36,18 @@ from typing import (
     NamedTuple,
     Set,
     Tuple,
+    TypeVar,
 )
 import copy
 import sys
 
-from ..typevars import A, B
 
 import dataclasses
 from functools import singledispatch
 from builtins import setattr as builtin_setattr
+
+A = TypeVar("A")
+B = TypeVar("B")
 
 
 @singledispatch

@@ -1,7 +1,9 @@
-from typing import Callable, Generic
+from typing import Callable, Generic, TypeVar
 
 from .typeclass import apply, pure
-from .typevars import A, B
+
+A = TypeVar("A")
+B = TypeVar("B")
 
 
 class Identity(Generic[A]):

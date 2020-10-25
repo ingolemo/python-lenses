@@ -1,4 +1,4 @@
-from typing import Any, Callable, Generic, Iterable, Optional, Type, cast
+from typing import Any, Callable, Generic, Iterable, Optional, Type, TypeVar, cast
 
 import copy
 import functools
@@ -6,7 +6,13 @@ import operator
 
 from .. import optics
 from ..maybe import Just as mJust, Nothing as mNothing
-from ..typevars import S, T, A, B, X, Y
+
+S = TypeVar("S")
+T = TypeVar("T")
+A = TypeVar("A")
+B = TypeVar("B")
+X = TypeVar("X")
+Y = TypeVar("Y")
 
 
 def _carry_binary_op(name):

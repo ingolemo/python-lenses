@@ -1,7 +1,11 @@
-from typing import Callable, Generic
+from typing import Callable, Generic, TypeVar
 
 from .typeclass import mempty, mappend
-from .typevars import A, B, C, D
+
+A = TypeVar("A")
+B = TypeVar("B")
+C = TypeVar("C")
+D = TypeVar("D")
 
 
 class Const(Generic[C, A]):

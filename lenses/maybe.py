@@ -1,10 +1,12 @@
-from typing import Callable, Generic, Iterator, Optional, Union
+from typing import Callable, Generic, Iterator, Optional, Union, TypeVar
 
 from . import hooks
 from . import typeclass
-from .typevars import A, B
 
 import sys
+
+A = TypeVar("A")
+B = TypeVar("B")
 
 
 class Just(Generic[A]):

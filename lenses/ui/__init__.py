@@ -1,9 +1,15 @@
-from typing import Callable, Iterable, List, Optional, Type
+from typing import Callable, Iterable, List, Optional, Type, TypeVar
 
 from .. import optics
-from ..typevars import S, T, A, B, X, Y
 
 from .base import BaseUiLens
+
+S = TypeVar("S")
+T = TypeVar("T")
+A = TypeVar("A")
+B = TypeVar("B")
+X = TypeVar("X")
+Y = TypeVar("Y")
 
 
 class UnboundLens(BaseUiLens[S, T, A, B]):

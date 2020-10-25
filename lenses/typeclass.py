@@ -1,11 +1,11 @@
-from typing import Any, Callable, Generic, List, Tuple, Dict
+from typing import Any, Callable, Generic, List, Tuple, Dict, TypeVar
 
 
 import sys
 from functools import singledispatch
 
-from .typevars import A, B
-
+A = TypeVar("A")
+B = TypeVar("B")
 
 # monoid
 @singledispatch
