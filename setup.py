@@ -14,8 +14,6 @@ except IOError:
 
 dependencies = [
     'dataclasses;python_version=="3.6"',
-    "singledispatch",
-    "typing",
 ]
 
 documentation_dependencies = [
