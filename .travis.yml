@@ -6,7 +6,7 @@ python:
   - "3.9"
   - "pypy3"
 install:
-  - pip install --upgrade pytest>=3.0.0
+  - pip install --upgrade pytest>=3.0.0 pip>=21.0.0
   - pip install tox-travis codecov
 script: tox
 after_success:
