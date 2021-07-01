@@ -31,6 +31,7 @@ test_dependencies = optional_dependencies + [
     "pytest-coverage",
     "hypothesis",
     'mypy;implementation_name=="cpython"',
+    'types-dataclasses;python_version=="3.6"',
 ]
 
 setuptools.setup(
