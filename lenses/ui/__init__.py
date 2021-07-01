@@ -3,6 +3,7 @@ from typing import Callable, Iterable, List, Optional, Type, TypeVar
 from .. import optics
 
 from .base import BaseUiLens
+from .state_func import StateFunction
 
 S = TypeVar("S")
 T = TypeVar("T")
@@ -23,7 +24,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
     def __repr__(self) -> str:
         return "UnboundLens({!r})".format(self._optic)
 
-    def get(self) -> Callable[[S], B]:
+    def get(self) -> StateFunction[S, B]:
         """Get the first value focused by the lens.
 
         >>> from lenses import lens
@@ -38,9 +39,9 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         def getter(state):
             return self._optic.to_list_of(state)[0]
 
-        return getter
+        return StateFunction(getter)
 
-    def collect(self) -> Callable[[S], List[B]]:
+    def collect(self) -> StateFunction[S, List[B]]:
         """Get multiple values focused by the lens. Returns them as
         a list.
 
@@ -53,9 +54,9 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         def getter(state):
             return self._optic.to_list_of(state)
 
-        return getter
+        return StateFunction(getter)
 
-    def get_monoid(self) -> Callable[[S], B]:
+    def get_monoid(self) -> StateFunction[S, B]:
         """Get the values focused by the lens, merging them together by
         treating them as a monoid. See `lenses.typeclass.mappend`.
 
@@ -68,9 +69,9 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         def getter(state):
             return self._optic.view(state)
 
-        return getter
+        return StateFunction(getter)
 
-    def set(self, newvalue: B) -> Callable[[S], T]:
+    def set(self, newvalue: B) -> StateFunction[S, T]:
         """Set the focus to `newvalue`.
 
         >>> from lenses import lens
@@ -82,9 +83,9 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         def setter(state):
             return self._optic.set(state, newvalue)
 
-        return setter
+        return StateFunction(setter)
 
-    def set_many(self, new_values: Iterable[B]) -> Callable[[S], T]:
+    def set_many(self, new_values: Iterable[B]) -> StateFunction[S, T]:
         """Set many foci to values taken by iterating over `new_values`.
 
         >>> from lenses import lens
@@ -95,9 +96,9 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         def setter_many(state):
             return self._optic.iterate(state, new_values)
 
-        return setter_many
+        return StateFunction(setter_many)
 
-    def modify(self, func: Callable[[A], B]) -> Callable[[S], T]:
+    def modify(self, func: Callable[[A], B]) -> StateFunction[S, T]:
         """Apply a function to the focus.
 
         >>> from lenses import lens
@@ -112,7 +113,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         def modifier(state):
             return self._optic.over(state, func)
 
-        return modifier
+        return StateFunction(modifier)
 
     def construct(self, focus: A) -> S:
         """Construct a state given a focus."""

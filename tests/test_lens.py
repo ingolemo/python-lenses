@@ -25,9 +25,31 @@ def test_lens_set():
     assert lens[1].set(5)([1, 2, 3]) == [1, 5, 3]
 
 
+def test_lens_set_and():
+    assert (10 & lens.set(5)) == 5
+    assert ([1, 2, 3] & lens[1].set(5)) == [1, 5, 3]
+
+
+def test_lens_set_and_assign():
+    state = [1, 2, 3]
+    state &= lens[1].set(5)
+    assert state == [1, 5, 3]
+
+
 def test_lens_modify():
     assert lens.modify(lambda a: a + 1)(10) == 11
     assert lens[0].modify(lambda a: a + 5)([1, 2, 3]) == [6, 2, 3]
+
+
+def test_lens_modify_and():
+    assert (10 & lens.modify(lambda a: a + 1)) == 11
+    assert ([1, 2, 3] & lens[0].modify(lambda a: a + 5)) == [6, 2, 3]
+
+
+def test_lens_modify_and_assign():
+    state = [1, -2, -3]
+    state &= lens[1].modify(abs)
+    assert state == [1, 2, -3]
 
 
 def test_lens_call():

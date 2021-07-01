@@ -35,9 +35,76 @@ When we need to do more than two operations on the same lens we will
 often refer to this as "composing" two lenses even though the ``&`` operator
 is nowhere in sight.
 
+State-first Syntax
+------------------
 
-Binding
--------
+You may have noticed that lenses split up the passing of state away from
+the action that is going to be applied to that state. For example, when
+you call `lens.set` you must first call it with a value to set and then
+later call the result with the state that you want to set that value on:
+
+>>> data = [1, 2, 3]
+>>> lens[0].set(4)(data)
+[4, 2, 3]
+
+This separation is a useful thing for a few reasons, but it does have
+the downside of a verbose syntax; two pairs of brackets. One remedy for
+this is that the "function" returned by `lens.set` and friends supports
+using the `&` operator to call it:
+
+>>> data & lens[1].set(5)
+[1, 5, 3]
+
+This syntax may look peculiar to you if you're not used to it, especially
+since the function and the state have swapped positions. But this operator
+is taken directly from haskell library.
+
+On it's own this operator is a minor improvement, but as with any operator
+python allows you to use it in an augmented assignment, so you don't
+have to write "data" twice. The following two code blocks do the same thing:
+
+>>> data = [1, 2, 3]
+>>> data = lens[0].set(6)(data)
+>>> data
+[6, 2, 3]
+
+>>> data = [1, 2, 3]
+>>> data &= lens[0].set(6)
+>>> data
+[6, 2, 3]
+
+This operator works on any of the lens methods that claim to return a function;
+`lens.get`, `lens.set`, `lens.modify`, `lens.call` and more.
+
+>>> data = [1, 2, 3, 4, 5]
+>>> data & lens[0].get()
+1
+>>> data &= lens[1].set(7)
+>>> data
+[1, 7, 3, 4, 5]
+>>> data &= lens[2].modify(str)
+>>> data
+[1, 7, '3', 4, 5]
+>>> data &= lens[3] * 100
+>>> data
+[1, 7, '3', 400, 5]
+
+There are a couple of caveats. Firstly, it's important not to confuse
+this function-calling `&` operator with the lens-composition `&` operator
+in the previous section. I regret the similarity, but coming up with a
+syntax that is both readable to newbies and familiar to polyglots is hard.
+
+Secondly, the `&` operator is only defined with the "function" on
+the right hand side and so follows normal python rules for custom
+operators. When you write `state & setter` python will try to run
+`state.__and__(setter)` before it tries `setter.__rand__(state)`. If
+your `state` object defines the `__and__` method in an inflexable way
+then the lenses library can't do anything and the result you get will
+not be what you want.
+
+
+Early Binding
+-------------
 
 The lenses library also exports a ``bind`` function:
 

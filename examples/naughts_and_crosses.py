@@ -43,7 +43,7 @@ class Board:
         """Return a board with a cell filled in by the current player. If
         the cell is already occupied then return the board unchanged."""
         if self.board[y][x] == " ":
-            return lens.board[y][x].set(self.player)(self)
+            return self & lens.board[y][x].set(self.player)
         return self
 
     @property
