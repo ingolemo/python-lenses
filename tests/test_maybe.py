@@ -1,8 +1,8 @@
 import pytest
 
-from lenses.maybe import Nothing, Just
-from lenses.typeclass import mempty
 import lenses
+from lenses.maybe import Just, Nothing
+from lenses.typeclass import mempty
 
 
 def test_Nothing_map():

@@ -1,6 +1,6 @@
 from typing import Callable, Generic, TypeVar
 
-from .typeclass import mempty, mappend
+from .typeclass import mappend, mempty
 
 A = TypeVar("A")
 B = TypeVar("B")

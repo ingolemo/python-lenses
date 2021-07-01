@@ -1,8 +1,6 @@
 import copy
 
-from .. import hooks
-from .. import typeclass
-
+from .. import hooks, typeclass
 from .base import Traversal, collect_args, multiap
 
 

@@ -1,11 +1,11 @@
 from .hook_funcs import (
     __doc__,
-    setitem,
-    setattr,
     contains_add,
     contains_remove,
-    to_iter,
     from_iter,
+    setattr,
+    setitem,
+    to_iter,
 )
 
 supported_modules = ["pyrsistent"]

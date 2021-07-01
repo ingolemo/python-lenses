@@ -1,9 +1,9 @@
 from typing import Callable, Generic, Iterable, List, Optional, TypeVar, cast
 
+from .. import typeclass
 from ..const import Const
 from ..functorisor import Functorisor
 from ..identity import Identity
-from .. import typeclass
 from ..maybe import Just, Nothing
 
 S = TypeVar("S")

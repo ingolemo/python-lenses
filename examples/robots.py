@@ -11,8 +11,8 @@ robot then they will kill you, so watch out.
 """
 
 import sys
-import tty
 import termios
+import tty
 from random import randint
 
 from lenses import lens

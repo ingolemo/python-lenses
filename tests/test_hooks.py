@@ -1,7 +1,7 @@
 import collections
 
-import pytest
 import hypothesis
+import pytest
 from hypothesis import strategies as strats
 
 import lenses.hooks as s

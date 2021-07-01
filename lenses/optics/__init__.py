@@ -1,32 +1,22 @@
 from .base import (
-    LensLike,
-    Fold,
-    Setter,
-    Getter,
-    Traversal,
-    Lens,
-    Review,
-    Prism,
-    Isomorphism,
-    Equality,
     ComposedLens,
-    TrivialIso,
+    Equality,
     ErrorIso,
+    Fold,
+    Getter,
+    Isomorphism,
+    Lens,
+    LensLike,
+    Prism,
+    Review,
+    Setter,
+    Traversal,
+    TrivialIso,
 )
 from .folds import IterableFold
 from .isomorphisms import DecodeIso, JsonIso, NormalisingIso
 from .prisms import FilteringPrism, InstancePrism, JustPrism
 from .setters import ForkedSetter
-from .true_lenses import (
-    ContainsLens,
-    GetattrLens,
-    GetitemLens,
-    GetitemOrElseLens,
-    ItemLens,
-    ItemByValueLens,
-    PartsLens,
-    TupleLens,
-)
 from .traversals import (
     EachTraversal,
     GetZoomAttrTraversal,
@@ -34,4 +24,14 @@ from .traversals import (
     RecurTraversal,
     ZoomAttrTraversal,
     ZoomTraversal,
+)
+from .true_lenses import (
+    ContainsLens,
+    GetattrLens,
+    GetitemLens,
+    GetitemOrElseLens,
+    ItemByValueLens,
+    ItemLens,
+    PartsLens,
+    TupleLens,
 )

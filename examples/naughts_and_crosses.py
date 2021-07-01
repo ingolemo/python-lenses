@@ -8,8 +8,8 @@ letter of that cell. Your input must be exactly two characters long;
 do not include any spacing or punctionation.
 """
 
-import random
 import enum
+import random
 
 from lenses import lens
 

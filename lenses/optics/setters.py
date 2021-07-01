@@ -1,5 +1,4 @@
 from ..identity import Identity
-
 from .base import LensLike, Setter
 
 __all__ = ["ForkedSetter"]

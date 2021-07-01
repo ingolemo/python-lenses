@@ -1,8 +1,6 @@
-from typing import Any, Callable, Generic, List, Tuple, Dict, TypeVar
-
-
 import sys
 from functools import singledispatch
+from typing import Any, Callable, Dict, Generic, List, Tuple, TypeVar
 
 A = TypeVar("A")
 B = TypeVar("B")

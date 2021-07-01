@@ -26,6 +26,11 @@ All of these hooks operate in the following order:
 * Raise ``NotImplementedError``.
 """
 
+import copy
+import dataclasses
+import sys
+from builtins import setattr as builtin_setattr
+from functools import singledispatch
 from typing import (
     Any,
     Dict,
@@ -38,13 +43,6 @@ from typing import (
     Tuple,
     TypeVar,
 )
-import copy
-import sys
-
-
-import dataclasses
-from functools import singledispatch
-from builtins import setattr as builtin_setattr
 
 A = TypeVar("A")
 B = TypeVar("B")

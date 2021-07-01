@@ -1,0 +1,4 @@
+[tool.isort]
+profile = "black"
+order_by_type = false
+case_sensitive = true

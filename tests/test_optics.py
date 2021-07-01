@@ -2,11 +2,12 @@ import collections
 
 import pytest
 
+from lenses import bind, lens
+from lenses import optics as b
+from lenses.maybe import Just, Nothing
+
 # import hypothesis
 # import hypothesis.strategies as strat
-
-from lenses import lens, bind, optics as b
-from lenses.maybe import Just, Nothing
 
 
 class CustomException(Exception):

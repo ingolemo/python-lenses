@@ -1,7 +1,6 @@
 from typing import Callable, Iterable, List, Optional, Type, TypeVar
 
 from .. import optics
-
 from .base import BaseUiLens
 from .state_func import StateFunction
 

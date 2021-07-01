@@ -1,8 +1,6 @@
 from typing import Any
 
-from .. import hooks
-from .. import typeclass
-
+from .. import hooks, typeclass
 from .base import Fold, Getter, Lens, Traversal
 
 

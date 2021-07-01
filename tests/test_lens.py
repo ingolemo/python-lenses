@@ -3,7 +3,7 @@ import dataclasses
 
 import pytest
 
-from lenses import lens, bind, optics, maybe
+from lenses import bind, lens, maybe, optics
 
 
 # Tests for using Lens' standard methods

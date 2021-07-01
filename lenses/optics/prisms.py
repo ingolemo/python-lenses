@@ -1,6 +1,5 @@
 from .. import typeclass
 from ..maybe import Just, Nothing
-
 from .base import Prism
 
 

@@ -21,8 +21,7 @@ You can also obtain a bound lens with the `bind` function.
 
 from typing import TypeVar
 
-from . import optics
-from . import ui
+from . import optics, ui
 
 # included so you can run pydoc lenses.UnboundLens
 from .ui import UnboundLens

@@ -1,9 +1,7 @@
-from typing import Callable, Generic, Iterator, Optional, Union, TypeVar
-
-from . import hooks
-from . import typeclass
-
 import sys
+from typing import Callable, Generic, Iterator, Optional, TypeVar, Union
+
+from . import hooks, typeclass
 
 A = TypeVar("A")
 B = TypeVar("B")

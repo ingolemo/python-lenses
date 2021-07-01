@@ -1,11 +1,11 @@
-from typing import Any, Callable, Generic, Iterable, Optional, Type, TypeVar, cast
-
 import copy
 import functools
 import operator
+from typing import Any, Callable, Generic, Iterable, Optional, Type, TypeVar, cast
 
 from .. import optics
-from ..maybe import Just as mJust, Nothing as mNothing
+from ..maybe import Just as mJust
+from ..maybe import Nothing as mNothing
 
 S = TypeVar("S")
 T = TypeVar("T")

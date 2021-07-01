@@ -1,8 +1,8 @@
 import pyrsistent as pyr
 import pytest
 
-from lenses import lens
 import lenses.hooks.pyrsistent
+from lenses import lens
 
 
 def test_pvector_setitem():
