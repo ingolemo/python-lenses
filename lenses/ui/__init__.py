@@ -153,11 +153,13 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         return BoundLens(instance, self._optic)
 
     def _compose_optic(self, optic: optics.LensLike) -> "UnboundLens[S, T, X, Y]":
+        """Internal method. Do not use."""
         return UnboundLens(self._optic.compose(optic))
 
     def _wrap_optic(
         self, optic: Callable[[optics.LensLike], optics.LensLike]
     ) -> "UnboundLens[S, T, X, Y]":
+        """Internal method. Do not use."""
         return UnboundLens(optic(self._optic))
 
     def kind(self) -> str:
