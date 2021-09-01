@@ -1,3 +1,5 @@
+from typing import Pattern
+
 from .. import hooks
 from .base import Traversal
 
@@ -218,6 +220,29 @@ class RecurTraversal(Traversal):
 
     def __repr__(self):
         return "RecurTraversal({!r})".format(self.cls)
+
+
+class RegexTraversal(Traversal):
+    """A traversal that uses a regex to focus parts of a string."""
+
+    def __init__(self, pattern: Pattern, flags: int) -> None:
+        self.pattern = pattern
+        self.flags = flags
+
+    def folder(self, state):
+        import re
+
+        for match in re.finditer(self.pattern, state, flags=self.flags):
+            yield match.group(0)
+
+    def builder(self, state, values):
+        import re
+
+        iterator = iter(values)
+        return re.sub(self.pattern, lambda _: next(iterator), state, flags=self.flags)
+
+    def __repr__(self) -> str:
+        return f"RegexTraversal({self.pattern}, flags={self.flags})"
 
 
 class ZoomAttrTraversal(Traversal):

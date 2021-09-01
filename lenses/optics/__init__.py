@@ -23,6 +23,7 @@ from .traversals import (
     GetZoomAttrTraversal,
     ItemsTraversal,
     RecurTraversal,
+    RegexTraversal,
     ZoomAttrTraversal,
     ZoomTraversal,
 )

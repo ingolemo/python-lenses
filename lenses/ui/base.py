@@ -1,7 +1,18 @@
 import copy
 import functools
 import operator
-from typing import Any, Callable, Generic, Iterable, Optional, Type, TypeVar, cast
+from typing import (
+    Any,
+    Callable,
+    Generic,
+    Iterable,
+    Optional,
+    Pattern,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from .. import optics
 from ..maybe import Just as mJust
@@ -765,6 +776,32 @@ class BaseUiLens(Generic[S, T, A, B]):
         Be careful with this; it can focus things you might not expect.
         """
         return self._compose_optic(optics.RecurTraversal(cls))
+
+    def Regex(
+        self,
+        pattern: Union[str, Pattern],
+        flags: int = 0,
+    ) -> "BaseUiLens[S, T, str, str]":
+        r"""A traversal that uses a regex to focus parts of a
+        string. `flags` has the same meaning as it does in the `re`
+        module.
+
+            >>> from lenses import lens
+            >>> words = lens.Regex(r'\w+')
+            >>> words
+            UnboundLens(RegexTraversal(re.compile('\\w+'), flags=0))
+            >>> state = "First thou pullest the Holy Pin"
+            >>> words.collect()(state)
+            ['First', 'thou', 'pullest', 'the', 'Holy', 'Pin']
+            >>> state & words + '!'
+            'First! thou! pullest! the! Holy! Pin!'
+        """
+        if isinstance(pattern, str):
+            import re
+
+            pattern = re.compile(pattern)
+
+        return self._compose_optic(optics.RegexTraversal(pattern, flags))
 
     def Traversal(
         self,
