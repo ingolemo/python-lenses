@@ -135,12 +135,10 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         ...
 
     @overload
-    def __and__(self, other: "Callable[[A], B]") -> "StateFunction[A, B]":
+    def __and__(self, other: Callable[[A], B]) -> StateFunction[A, B]:
         ...
 
-    def __and__(
-        self, other: "Union[UnboundLens[A, B, X, Y], Callable[[A], B]]"
-    ) -> "Union[UnboundLens[S, T, X, Y], StateFunction[A, B]]":
+    def __and__(self, other):
         """Refine the current focus of this lens by composing it with
         another lens object. The other lens must be unbound.
 
@@ -152,8 +150,8 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> get_second_then_first([[0, 1], [2, 3]])
             2
         """
-        if isinstance(other, Callable):
-            return StateFunction(self.modify(other))
+        if callable(other):
+            return self.modify(other)
         if not isinstance(other, UnboundLens):
             message = "Cannot compose lens of type {!r}."
             raise TypeError(message.format(type(other)))
@@ -259,12 +257,10 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         ...
 
     @overload
-    def __and__(self, other: "Callable[[A], B]") -> "B":
+    def __and__(self, other: Callable[[A], B]) -> B:
         ...
 
-    def __and__(
-        self, other: Union[UnboundLens[A, B, X, Y], Callable[[A], B]]
-    ) -> "Union[BoundLens[S, T, X, Y], B]":
+    def __and__(self, other):
         """Refine the current focus of this lens by composing it with
         another lens object. The other lens must be unbound.
 
@@ -274,7 +270,7 @@ class BoundLens(BaseUiLens[S, T, A, B]):
             >>> (second & first).get()
             2
         """
-        if isinstance(other, Callable):
+        if callable(other):
             return self.modify(other)
         if not isinstance(other, UnboundLens):
             message = "Cannot compose lens of type {!r}."
