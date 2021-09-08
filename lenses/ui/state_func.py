@@ -4,7 +4,7 @@ Argument = TypeVar("Argument")
 Result = TypeVar("Result")
 
 
-class StateFunction(Generic[Argument, Result]):
+class StateFunction(Callable[[Argument], Result]):
     """A wrapper around a function that takes a state and returns a
     transformed state. This wrapper can be called directly `self(state)`
     or you can use the bitwise and operator `state & self`. This syntax is common in haskell code. It also allows reassignments to be more pleasant; instead of
