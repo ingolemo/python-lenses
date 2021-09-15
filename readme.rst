@@ -2,12 +2,6 @@
 Lenses
 ======
 
-.. image:: https://travis-ci.org/ingolemo/python-lenses.svg
-    :target: https://travis-ci.org/ingolemo/python-lenses
-
-.. image:: https://codecov.io/gh/ingolemo/python-lenses/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/ingolemo/python-lenses
-
 Lenses is a python library that helps you to manipulate large
 data-structures without mutating them. It is inspired by the lenses in
 Haskell, although it's much less principled and the api is more suitable
