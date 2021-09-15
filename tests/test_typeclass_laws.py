@@ -74,7 +74,9 @@ def test_functor_law_identity(data):
 @hypothesis.given(functors(objects()))
 def test_functor_law_distributive(functor):
     # fmap (g . f) = fmap g . fmap f
-    f1 = lambda a: [a]
+    def f1(a):
+        return [a]
+
     f2 = str
 
     def composed(a):

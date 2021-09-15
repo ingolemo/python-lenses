@@ -297,7 +297,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens.Fork(lens[0][1], lens[2]).set(1)([[0, 0], 0, 0])
             [[0, 1], 0, 1]
         """
-        true_lenses = [l._optic for l in lenses]
+        true_lenses = [lens._optic for lens in lenses]
         return self._compose_optic(optics.ForkedSetter(*true_lenses))
 
     def Get(self, key: Any, default: Optional[Y] = None) -> "BaseUiLens[S, T, X, Y]":
@@ -832,7 +832,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> (tl.Each().Each() + 10)(state)
             ([11, 12, 13], 4, [15, 16])
         """
-        true_lenses = [l._optic for l in lenses]
+        true_lenses = [lens._optic for lens in lenses]
         return self._compose_optic(optics.TupleLens(*true_lenses))
 
     def Values(self) -> "BaseUiLens[S, T, X, Y]":

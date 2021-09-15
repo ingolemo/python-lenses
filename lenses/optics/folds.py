@@ -1,5 +1,4 @@
-from ..const import Const
-from .base import Fold, collect_args, multiap
+from .base import Fold
 
 
 class IterableFold(Fold):

@@ -1,7 +1,5 @@
 from typing import Callable, Generic, TypeVar
 
-from .typeclass import apply, pure
-
 A = TypeVar("A")
 B = TypeVar("B")
 

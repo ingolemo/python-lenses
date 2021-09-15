@@ -1,11 +1,10 @@
-import sys
 from functools import singledispatch
-from typing import Any, Callable, Dict, Generic, List, Tuple, TypeVar
+from typing import Any, Callable, List, Tuple, TypeVar
 
 A = TypeVar("A")
 B = TypeVar("B")
 
-# monoid
+
 @singledispatch
 def mempty(monoid: Any) -> Any:
     return monoid.mempty()

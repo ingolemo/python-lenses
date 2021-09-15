@@ -1,4 +1,5 @@
-from typing import Callable, Generic, Iterable, List, Optional, TypeVar, cast
+import functools
+from typing import Callable, Iterable, List, Optional, TypeVar, cast
 
 from .. import typeclass
 from ..const import Const
@@ -150,8 +151,12 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError("Must be an instance of Fold to .preview()")
 
-        pure = lambda a: Const(Nothing())  # type: Callable[[X], Const[Just[X], Y]]
-        func = lambda a: Const(Just(a))  # type: Callable[[X], Const[Just[X], Y]]
+        def pure(a: X) -> Const[Just[X], Y]:
+            return Const(Nothing())
+
+        def func(a: X) -> Const[Just[X], Y]:
+            return Const(Just(a))
+
         return self.apply(func, pure, state).unwrap()
 
     def view(self, state: S) -> B:
@@ -184,8 +189,12 @@ class LensLike(object):
         if not self._is_kind(Fold):
             raise TypeError("Must be an instance of Fold to .to_list_of()")
 
-        pure = lambda a: Const([])  # type: Callable[[X], Const[List[X], Y]]
-        func = lambda a: Const([a])  # type: Callable[[X], Const[List[X], Y]]
+        def pure(a: X) -> Const[List[X], Y]:
+            return Const([])
+
+        def func(a: X) -> Const[List[X], Y]:
+            return Const([a])
+
         return self.apply(func, pure, state).unwrap()
 
     def over(self, state: S, fn: Callable[[A], B]) -> T:
@@ -197,8 +206,12 @@ class LensLike(object):
         if not self._is_kind(Setter):
             raise TypeError("Must be an instance of Setter to .over()")
 
-        pure = lambda a: Identity(a)
-        func = lambda a: Identity(fn(a))
+        def pure(a):
+            return Identity(a)
+
+        def func(a):
+            return Identity(fn(a))
+
         return self.apply(func, pure, state).unwrap()
 
     def set(self, state: S, value: B) -> T:
@@ -210,8 +223,12 @@ class LensLike(object):
         if not self._is_kind(Setter):
             raise TypeError("Must be an instance of Setter to .set()")
 
-        pure = lambda a: Identity(a)
-        func = lambda a: Identity(value)
+        def pure(a):
+            return Identity(a)
+
+        def func(a):
+            return Identity(value)
+
         return self.apply(func, pure, state).unwrap()
 
     def iterate(self, state: S, iterable: Iterable[B]) -> T:
@@ -224,8 +241,13 @@ class LensLike(object):
             raise TypeError("Must be an instance of Setter to .iterate()")
 
         i = iter(iterable)
-        pure = lambda a: Identity(a)
-        func = lambda a: Identity(next(i))
+
+        def pure(a):
+            return Identity(a)
+
+        def func(a):
+            return Identity(next(i))
+
         return self.apply(func, pure, state).unwrap()
 
     def compose(self, other: "LensLike") -> "LensLike":
@@ -364,7 +386,7 @@ class Traversal(Fold, Setter):
             return f.pure(state)
         collector = collect_args(len(foci))
         applied = multiap(collector, *map(f, foci))
-        apbuilder = lambda values: self.builder(state, values)
+        apbuilder = functools.partial(self.builder, state)
         return typeclass.fmap(applied, apbuilder)
 
     def __repr__(self):
@@ -606,7 +628,7 @@ class ComposedLens(LensLike):
         return res(state)
 
     def re(self):
-        return ComposedLens([l.re() for l in reversed(self.lenses)])
+        return ComposedLens([lens.re() for lens in reversed(self.lenses)])
 
     def compose(self, other):
         result = ComposedLens(self.lenses + [other])
@@ -619,7 +641,7 @@ class ComposedLens(LensLike):
         return result
 
     def __repr__(self):
-        return " & ".join(str(l) for l in self.lenses)
+        return " & ".join(str(lens) for lens in self.lenses)
 
     def _is_kind(self, cls):
         return all(lens._is_kind(cls) for lens in self.lenses)

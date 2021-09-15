@@ -1,7 +1,5 @@
-import copy
-
-from .. import hooks, typeclass
-from .base import Traversal, collect_args, multiap
+from .. import hooks
+from .base import Traversal
 
 
 class EachTraversal(Traversal):

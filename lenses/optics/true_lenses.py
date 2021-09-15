@@ -1,6 +1,6 @@
 from typing import Any
 
-from .. import hooks, typeclass
+from .. import hooks
 from .base import Fold, Getter, Lens, Traversal
 
 
@@ -231,10 +231,10 @@ class PartsLens(Lens):
         return "PartsLens({!r})".format(self.optic)
 
     def kind(self):
-        if self.optic.kind() == base.Traversal:
-            return base.Lens
-        elif self.optic.kind() == base.Fold:
-            return base.Getter
+        if self.optic.kind() == Traversal:
+            return Lens
+        elif self.optic.kind() == Fold:
+            return Getter
 
 
 class TupleLens(Lens):

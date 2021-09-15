@@ -3,7 +3,7 @@ import dataclasses
 
 import pytest
 
-from lenses import bind, lens, maybe, optics
+from lenses import bind, lens, maybe
 
 
 # Tests for using Lens' standard methods
@@ -170,13 +170,13 @@ def test_lens_add_lens_bad_lens():
 
 
 def test_lens_flip():
-    l = lens.Iso(str, int).flip()
-    assert l.get()("1") == 1
+    flipped = lens.Iso(str, int).flip()
+    assert flipped.get()("1") == 1
 
 
 def test_lens_flip_composed():
-    l = lens.Decode().Json().flip()
-    assert l.get()([1, 2, 3]) == b"[1, 2, 3]"
+    flipped = lens.Decode().Json().flip()
+    assert flipped.get()([1, 2, 3]) == b"[1, 2, 3]"
 
 
 def test_lens_flip_composed_not_isomorphism():

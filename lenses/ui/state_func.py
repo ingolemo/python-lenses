@@ -7,8 +7,10 @@ Result = TypeVar("Result")
 class StateFunction(Generic[Argument, Result]):
     """A wrapper around a function that takes a state and returns a
     transformed state. This wrapper can be called directly `self(state)`
-    or you can use the bitwise and operator `state & self`. This syntax is common in haskell code. It also allows reassignments to be more pleasant; instead of
-    `state = self(state)` you can write `state &= self`."""
+    or you can use the bitwise and operator `state & self`. This syntax
+    is common in haskell code. It also allows reassignments to be more
+    pleasant; instead of `state = self(state)` you can write `state &=
+    self`."""
 
     def __init__(self, func: Callable[[Argument], Result]):
         self.func = func

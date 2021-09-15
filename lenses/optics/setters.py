@@ -1,5 +1,5 @@
 from ..identity import Identity
-from .base import LensLike, Setter
+from .base import Setter
 
 __all__ = ["ForkedSetter"]
 
@@ -27,5 +27,5 @@ class ForkedSetter(Setter):
         return Identity(state)
 
     def __repr__(self):
-        args = ", ".join(repr(l) for l in self.lenses)
+        args = ", ".join(repr(lens) for lens in self.lenses)
         return "ForkedSetter({})".format(args)

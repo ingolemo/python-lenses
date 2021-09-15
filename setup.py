@@ -31,6 +31,11 @@ test_dependencies = optional_dependencies + [
     "coverage",
     "pytest-coverage",
     "hypothesis",
+]
+
+lint_dependencies = optional_dependencies + [
+    "black",
+    "flake8",
     'mypy;implementation_name=="cpython"',
     'types-dataclasses;python_version=="3.6"',
 ]
@@ -67,5 +72,6 @@ setuptools.setup(
         "docs": documentation_dependencies,
         "optional": optional_dependencies,
         "tests": test_dependencies,
+        "lints": lint_dependencies,
     },
 )

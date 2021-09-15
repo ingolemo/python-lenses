@@ -35,8 +35,7 @@ def test_Nothing_not_equals_Just():
 
 
 def test_Nothing_maybe():
-    obj = object()
-    assert Nothing().maybe() == None
+    assert Nothing().maybe() is None
 
 
 def test_Nothing_unwrap():

@@ -1,5 +1,5 @@
 import sys
-from typing import Callable, Generic, Iterator, Optional, TypeVar, Union
+from typing import Callable, Generic, Iterator, TypeVar, Union
 
 from . import hooks, typeclass
 

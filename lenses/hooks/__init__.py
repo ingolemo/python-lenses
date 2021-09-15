@@ -8,6 +8,16 @@ from .hook_funcs import (
     to_iter,
 )
 
+__all__ = [
+    "__doc__",
+    "contains_add",
+    "contains_remove",
+    "from_iter",
+    "setattr",
+    "setitem",
+    "to_iter",
+]
+
 supported_modules = ["pyrsistent"]
 
 for _hook in supported_modules:

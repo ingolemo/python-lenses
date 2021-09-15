@@ -36,4 +36,4 @@ def bind(state: S) -> ui.BoundLens[S, S, S, S]:
 
 lens = ui.UnboundLens(optics.TrivialIso())  # type: ui.UnboundLens
 
-__all__ = ["lens", "bind", "optics"]
+__all__ = ["lens", "bind", "optics", "UnboundLens"]

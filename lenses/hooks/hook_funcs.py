@@ -28,7 +28,6 @@ All of these hooks operate in the following order:
 
 import copy
 import dataclasses
-import sys
 from builtins import setattr as builtin_setattr
 from functools import singledispatch
 from typing import (

@@ -1,7 +1,6 @@
 import pyrsistent as pyr
-import pytest
 
-import lenses.hooks.pyrsistent
+import lenses.hooks.pyrsistent  # noqa: F401
 from lenses import lens
 
 

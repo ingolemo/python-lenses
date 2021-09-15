@@ -135,8 +135,8 @@ def test_ComposedLens_nesting_simplifies():
 
 
 def test_ComposedLens_compose_simplifies():
-    l = b.ComposedLens([])
-    assert isinstance(l & l, b.TrivialIso)
+    composition = b.ComposedLens([])
+    assert isinstance(composition & composition, b.TrivialIso)
 
 
 def test_DecodeIso_view():
@@ -195,13 +195,13 @@ def test_ErrorLens_repr_with_seperate_message():
 
 
 def test_FilteringPrism_to_list_of():
-    l = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
-    assert l.to_list_of([1, -1, 1]) == [1, 1]
+    each_filter = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
+    assert each_filter.to_list_of([1, -1, 1]) == [1, 1]
 
 
 def test_FilteringPrism_set():
-    l = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
-    assert l.set([1, -1, 1], 3) == [3, -1, 3]
+    each_filter = b.EachTraversal() & b.FilteringPrism(lambda a: a > 0)
+    assert each_filter.set([1, -1, 1], 3) == [3, -1, 3]
 
 
 def test_GetattrLens_view():
@@ -267,11 +267,15 @@ def test_Lens_over():
 
 
 def test_Lens_meaningful_repr():
-    getter = lambda s: s
-    setter = lambda s, f: f
-    l = b.Lens(getter, setter)
-    assert repr(getter) in repr(l)
-    assert repr(setter) in repr(l)
+    def getter(s):
+        return s
+
+    def setter(s, f):
+        return f
+
+    test_lens = b.Lens(getter, setter)
+    assert repr(getter) in repr(test_lens)
+    assert repr(setter) in repr(test_lens)
 
 
 def test_Isomorphism_view():
@@ -318,8 +322,8 @@ def test_ItemLens_view_nonexistent():
 
 def test_ItemLens_set():
     data = {0: "hello", 1: "world"}
-    l = b.ItemLens(1)
-    assert l.set(data, (2, "everyone")) == {0: "hello", 2: "everyone"}
+    itemlens = b.ItemLens(1)
+    assert itemlens.set(data, (2, "everyone")) == {0: "hello", 2: "everyone"}
 
 
 def test_ItemByValueLens_view():
@@ -370,15 +374,15 @@ def test_ItemsTraversal_over_empty():
 
 
 def test_JsonIso_view():
-    l = b.JsonIso()
+    iso = b.JsonIso()
     data = '{"numbers":[1, 2, 3]}'
-    assert l.view(data) == {"numbers": [1, 2, 3]}
+    assert iso.view(data) == {"numbers": [1, 2, 3]}
 
 
 def test_JsonIso_set():
-    l = b.JsonIso()
+    iso = b.JsonIso()
     data = '{"numbers":[1, 2, 3]}'
-    assert l.set(data, {"numbers": []}) == '{"numbers": []}'
+    assert iso.set(data, {"numbers": []}) == '{"numbers": []}'
 
 
 def test_RecurTraversal_to_list_of():
@@ -484,12 +488,12 @@ def test_TupleLens_only_works_with_lenses():
 
 
 def test_ZoomTraversal_view():
-    l = b.GetitemLens(0) & b.ZoomTraversal()
+    zoomer = b.GetitemLens(0) & b.ZoomTraversal()
     data = [bind([1, 2, 3])[1]]
-    assert l.view(data) == 2
+    assert zoomer.view(data) == 2
 
 
 def test_ZoomTraversal_set():
-    l = b.GetitemLens(0) & b.ZoomTraversal()
+    zoomer = b.GetitemLens(0) & b.ZoomTraversal()
     data = [bind([1, 2, 3])[1]]
-    assert l.set(data, 7) == [[1, 7, 3]]
+    assert zoomer.set(data, 7) == [[1, 7, 3]]
