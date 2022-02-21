@@ -807,16 +807,15 @@ class BaseUiLens(Generic[S, T, A, B]):
         return self._compose_optic(optics.Traversal(folder, builder))
 
     def Tuple(self, *lenses: "BaseUiLens[A, B, X, Y]") -> "BaseUiLens[S, T, X, Y]":
-        """A lens that combines the focuses of other lenses into a
-        single tuple. The sublenses must be optics of kind Lens; this
-        means no Traversals.
+        """An optic that combines the focuses of other optics into a
+        single tuple. The suboptics must not be Folds or Traversals.
 
             >>> from lenses import lens
             >>> lens.Tuple()
-            UnboundLens(TupleLens())
+            UnboundLens(TupleOptic())
             >>> tl = lens.Tuple(lens[0], lens[2])
             >>> tl
-            UnboundLens(TupleLens(GetitemLens(0), GetitemLens(2)))
+            UnboundLens(TupleOptic(GetitemLens(0), GetitemLens(2)))
             >>> tl.get()([1, 2, 3, 4])
             (1, 3)
             >>> tl.set((5, 6))([1, 2, 3, 4])
@@ -833,7 +832,7 @@ class BaseUiLens(Generic[S, T, A, B]):
             ([11, 12, 13], 4, [15, 16])
         """
         true_lenses = [lens._optic for lens in lenses]
-        return self._compose_optic(optics.TupleLens(*true_lenses))
+        return self._compose_optic(optics.TupleOptic(*true_lenses))
 
     def Values(self) -> "BaseUiLens[S, T, X, Y]":
         """A traversal focusing the values of a dictionary. Analogous to

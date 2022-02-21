@@ -12,6 +12,7 @@ from .base import (
     Setter,
     Traversal,
     TrivialIso,
+    TupleOptic,
 )
 from .folds import IterableFold
 from .isomorphisms import DecodeIso, JsonIso, NormalisingIso
@@ -33,7 +34,6 @@ from .true_lenses import (
     ItemByValueLens,
     ItemLens,
     PartsLens,
-    TupleLens,
 )
 
 __all__ = [
@@ -71,5 +71,5 @@ __all__ = [
     "ItemByValueLens",
     "ItemLens",
     "PartsLens",
-    "TupleLens",
+    "TupleOptic",
 ]

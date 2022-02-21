@@ -712,3 +712,61 @@ class TrivialIso(Isomorphism):
 
     def __repr__(self):
         return "TrivialIso()"
+
+
+class TupleOptic(Lens):
+    """An optic that combines the focuses of other optics into a single
+    tuple. The suboptics must not be Folds or Traversals. The kind of this
+    optic depends on the kinds that it is supplied with.
+
+        >>> from lenses.optics import GetitemLens
+        >>> tl = TupleOptic(GetitemLens(0), GetitemLens(2))
+        >>> tl
+        TupleOptic(GetitemLens(0), GetitemLens(2))
+        >>> tl.view([1, 2, 3, 4])
+        (1, 3)
+        >>> tl.set([1, 2, 3, 4], (5, 6))
+        [5, 2, 6, 4]
+        >>> tl.kind()
+        <class 'lenses.optics.base.Lens'>
+
+        >>> tg = TupleOptic(Getter(lambda a: a[0]), GetitemLens(2))
+        >>> tg
+        TupleOptic(Getter(...), GetitemLens(2))
+        >>> tl.view([1, 2, 3, 4])
+        (1, 3)
+        >>> tg.kind()
+        <class 'lenses.optics.base.Getter'>
+
+    This lens is particularly useful when immediately followed by
+    an EachLens, allowing you to traverse data even when it comes
+    from disparate locations within the state.
+
+        >>> import lenses
+        >>> each = lenses.optics.EachTraversal()
+        >>> tee = tl & each & each
+        >>> state = ([1, 2, 3], 4, [5, 6])
+        >>> tee.to_list_of(state)
+        [1, 2, 3, 5, 6]
+    """
+
+    def __init__(self, *lenses) -> None:
+        self.lenses = lenses
+        for lens in self.lenses:
+            if lens._is_kind(Fold) and not lens._is_kind(Getter):
+                raise TypeError("TupleOptic doesn't work with folds")
+
+    def getter(self, state):
+        return tuple(lens.view(state) for lens in self.lenses)
+
+    def setter(self, state, focus):
+        for lens, new_value in zip(self.lenses, focus):
+            state = lens.set(state, new_value)
+        return state
+
+    def _is_kind(self, cls):
+        return all(lens._is_kind(cls) for lens in self.lenses)
+
+    def __repr__(self):
+        args = ", ".join(repr(lens) for lens in self.lenses)
+        return "TupleOptic({})".format(args)

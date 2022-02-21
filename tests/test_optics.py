@@ -468,23 +468,29 @@ def test_TrivialIso_set():
     assert b.TrivialIso().set(obj1, obj2) is obj2
 
 
-def test_TupleLens_view_with_LensLike():
+def test_TupleOptic_view_with_LensLike():
     data = {"hello": 0, "world": 1}
     get = b.GetitemLens
-    my_lens = b.TupleLens(get("hello"), get("world"))
+    my_lens = b.TupleOptic(get("hello"), get("world"))
     assert my_lens.view(data) == (0, 1)
 
 
-def test_TupleLens_set_with_LensLike():
+def test_TupleOptic_set_with_LensLike():
     data = {"hello": 0, "world": 1}
     get = b.GetitemLens
-    my_lens = b.TupleLens(get("hello"), get("world"))
+    my_lens = b.TupleOptic(get("hello"), get("world"))
     assert my_lens.set(data, (3, 4)) == {"hello": 3, "world": 4}
 
 
-def test_TupleLens_only_works_with_lenses():
+def test_TupleOptic_does_not_work_with_folds():
     with pytest.raises(TypeError):
-        b.TupleLens(b.EachTraversal())
+        b.TupleOptic(b.EachTraversal())
+
+
+def test_TupleOptic_kind_varies():
+    assert b.TupleOptic(b.GetitemLens(0)).kind() is b.Lens
+    assert b.TupleOptic(b.Getter(lambda a: a)).kind() is b.Getter
+    assert b.TupleOptic(b.ForkedSetter()).kind() is b.Setter
 
 
 def test_ZoomTraversal_view():
