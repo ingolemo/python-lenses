@@ -1,5 +1,5 @@
 import functools
-from typing import Callable, Iterable, List, Optional, TypeVar, cast
+from typing import Callable, cast, Iterable, List, Optional, TypeVar
 
 from .. import typeclass
 from ..const import Const

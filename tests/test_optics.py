@@ -2,8 +2,7 @@ import collections
 
 import pytest
 
-from lenses import bind, lens
-from lenses import optics as b
+from lenses import bind, lens, optics as b
 from lenses.maybe import Just, Nothing
 
 # import hypothesis
@@ -144,11 +143,11 @@ def test_DecodeIso_view():
 
 
 def test_DecodeIso_view_with_args():
-    assert b.DecodeIso("utf-8").view(b"caf\xc3\xa9") == u"caf\xe9"
+    assert b.DecodeIso("utf-8").view(b"caf\xc3\xa9") == "caf\xe9"
 
 
 def test_DecodeIso_set():
-    assert b.DecodeIso("ascii", "replace").set(b"", u"\xe9") == b"?"
+    assert b.DecodeIso("ascii", "replace").set(b"", "\xe9") == b"?"
 
 
 def test_EachTraversal_to_list_of():

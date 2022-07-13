@@ -1,4 +1,4 @@
-from typing import Callable, Iterable, List, Optional, Type, TypeVar, overload
+from typing import Callable, Iterable, List, Optional, overload, Type, TypeVar
 
 from .. import optics
 from .base import BaseUiLens

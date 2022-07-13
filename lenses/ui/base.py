@@ -4,6 +4,7 @@ import operator
 from typing import (
     Any,
     Callable,
+    cast,
     Generic,
     Iterable,
     Optional,
@@ -11,12 +12,10 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
 )
 
 from .. import optics
-from ..maybe import Just as mJust
-from ..maybe import Nothing as mNothing
+from ..maybe import Just as mJust, Nothing as mNothing
 
 S = TypeVar("S")
 T = TypeVar("T")

@@ -32,7 +32,7 @@ test_dependencies = optional_dependencies + [
 ]
 
 lint_dependencies = optional_dependencies + [
-    "black",
+    "ufmt",
     "flake8",
     'mypy;implementation_name=="cpython"',
 ]
