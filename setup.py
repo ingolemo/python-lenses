@@ -13,9 +13,7 @@ except IOError:
     # the long_description when installing from the source tarball.
     long_desc = None
 
-dependencies = [
-    'dataclasses;python_version=="3.6"',
-]
+dependencies = []
 
 documentation_dependencies = [
     "sphinx",
@@ -37,7 +35,6 @@ lint_dependencies = optional_dependencies + [
     "black",
     "flake8",
     'mypy;implementation_name=="cpython"',
-    'types-dataclasses;python_version=="3.6"',
 ]
 
 setuptools.setup(
@@ -50,22 +47,22 @@ setuptools.setup(
     author_email="ingolemo@gmail.com",
     license="GPLv3+",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Libraries",
     ],
     keywords="lens lenses immutable functional optics",
     packages=setuptools.find_packages(exclude=["tests"]),
-    python_requires=">=3.5, <4",
+    python_requires=">=3.7, <4",
     install_requires=dependencies,
     tests_require=test_dependencies,
     extras_require={
