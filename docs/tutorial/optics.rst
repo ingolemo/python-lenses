@@ -193,15 +193,9 @@ compose them with other optics.
 Getters allow you to *inject* arbitrary behaviour into the middle of an
 optic at the cost of not being able to set anything:
 
->>> def log(focus):
-...     print('logged: {!r}'.format(focus))
-...     return focus
 >>> data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
->>> lens.Each().F(log).Each().collect()(data)
-logged: [1, 2, 3]
-logged: [4, 5, 6]
-logged: [7, 8, 9]
-[1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> lens.Each().F(reversed).Each().collect()(data)
+[3, 2, 1, 6, 5, 4, 9, 8, 7]
 
 
 Folds
@@ -223,11 +217,12 @@ for making Folds.
 >>> lens.Fold(ends).collect()(data)
 [1, 3]
 
-A useful Fold is ``Iter``. This Fold just iterates over the state directly.
-It's very similar to the ``Each`` Traversal, but while ``Each`` has the
-ability set foci as well as get them, ``Iter`` does not need any special
-support; it will work on any iterable python object. ``lens.Iter()``
-is equivalent to ``lens.Fold(iter)``
+A useful Fold is ``Iter``. This Fold just iterates over the state
+directly.  It's very similar to the ``Each`` Traversal, but ``Each``
+needs explicit support for custom types precisely because it needs to
+know how to set new values on objects of that type. ``Iter`` is a Fold,
+so doesn't need to set anything, and so can just use python's built-in
+iterator protocol. ``lens.Iter()`` is equivalent to ``lens.Fold(iter)``
 
 Just as with Getters, Folds don't do much on their own; you will want
 to compose them:
@@ -242,7 +237,8 @@ Setters
 
 If a Getter is like a Lens that lacks the ability to set, then a Setter
 is like a Lens that lacks the ability to get. You cannot call ``get``
-on a setter, though you can use ``set``, ``modify``, ``call``, and ``call_mut``.
+on a setter, though you can use ``set``, ``modify``, ``call``, and
+``call_mut``.
 
 The only setter available is the ForkedSetter which you can create with
 the ``Fork`` method. This method allows you to create a setter that can
@@ -272,11 +268,10 @@ pair of functions::
 Notice the asymmetry here; the setter function requires access to the
 previous state in order to construct a new state. With an Isomorphism
 the setter function no longer takes this argument; it can construct a
-new state by looking only at the focus (The setter has been renamed to
-"review" for reasons that will become clear later)::
+new state by looking only at the focus::
 
 	def getter(state) -> focus:
-	def review(focus) -> state:
+	def setter(focus) -> state:
 
 These two functions are inverses of one another; converting back and
 forth between a state and a focus without any loss of information. A
@@ -327,7 +322,7 @@ a state and only optionally returns a focus.
 Prisms are often used in other languages to unwrap sum-types, but since
 python does not have native sum-types their use is more limited. Because
 there are no good examples of sum-types in the python standard library
-we will have to simulate them:
+we will have to simulate them.
 
 On your birthday you can recieve two kinds of things; Presents and
 Cards. A present is a wrapper around some other type that represents
@@ -342,7 +337,7 @@ the actual gift, while a card is just a card.
 ...     def __repr__(self):
 ...         return 'Present({!r})'.format(self.contents)
 
-Say we have a list of all the things you got on your birthday:
+Say we have a list of all the things we got on our birthday:
 
 >>> state = [Present('doll'), Card(), Present('train set')]
 
@@ -392,10 +387,13 @@ Reviews
 
 A Review is to a Prism as a Setter is to a Traversal.
 
-When we first looked at isomorphisms we saw that they have a special
-kind of setter that only takes one argument. We called that function
-"review". A Review is any optic that contains a review function, but
-doesn't necessarily have a getter.
+When we first looked at isomorphisms we saw that they have a special kind
+of setter that only takes one argument. Technically that function should
+not be called a "setter function" because it doesn't know about the old
+state and so it can't really set anything. This "setter that looks like
+a backwards getter" is actually called a "review function". A Review is
+any optic that contains a review function, but doesn't necessarily have
+a getter.
 
 There are no supported ways to create Reviews using the lenses library.
 But since all prisms (and isomorphisms) are also reviews, it's important
