@@ -1,20 +1,17 @@
-API reference
+API Reference
 =============
 
-Lenses module
+lenses Module
 -------------
 
 .. automodule:: lenses
-	:members:
-
-Unbound lenses
---------------
 
 .. autoclass:: lenses.UnboundLens
+	:members:
 	:inherited-members:
 
-Hooks
------
+lenses.hooks Module
+-------------------
 
 .. automodule:: lenses.hooks
 	:members:
