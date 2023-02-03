@@ -63,6 +63,7 @@ __all__ = [
     "GetZoomAttrTraversal",
     "ItemsTraversal",
     "RecurTraversal",
+    "RegexTraversal",
     "ZoomAttrTraversal",
     "ZoomTraversal",
     "ContainsLens",
