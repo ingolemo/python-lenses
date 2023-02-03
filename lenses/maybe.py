@@ -19,7 +19,7 @@ class Just(Generic[A]):
 
     To extract it again you can use the `maybe` method:
 
-        >>> Just(1).maybe()
+        >>> Just(1).maybe(0)
         1
     """
 
@@ -54,7 +54,7 @@ class Just(Generic[A]):
         """Apply a function to the value inside the Maybe."""
         return Just(fn(self.item))
 
-    def maybe(self, guard: B = None) -> Union[None, A, B]:
+    def maybe(self, guard: B) -> Union[A, B]:
         """Unwraps the value, returning it is there is one, else
         returning the guard."""
         return self.item
@@ -88,7 +88,7 @@ class Nothing(Just[A]):
         """Apply a function to the value inside the Maybe."""
         return Nothing()
 
-    def maybe(self, guard: B = None) -> Union[None, A, B]:
+    def maybe(self, guard: B) -> Union[A, B]:
         """Unwraps the value, returning it is there is one, else
         returning the guard."""
         return guard

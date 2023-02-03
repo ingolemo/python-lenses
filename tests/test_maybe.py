@@ -1,6 +1,5 @@
-import pytest
-
 import lenses
+import pytest
 from lenses.maybe import Just, Nothing
 from lenses.typeclass import mempty
 
@@ -35,7 +34,7 @@ def test_Nothing_not_equals_Just():
 
 
 def test_Nothing_maybe():
-    assert Nothing().maybe() is None
+    assert Nothing().maybe(None) is None
 
 
 def test_Nothing_unwrap():
@@ -95,7 +94,7 @@ def test_Just_from_iter():
 
 def test_Just_maybe():
     obj = object()
-    assert Just(obj).maybe() is obj
+    assert Just(obj).maybe(None) is obj
 
 
 def test_Just_unwrap():
