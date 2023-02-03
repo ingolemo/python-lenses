@@ -286,22 +286,22 @@ enough, and the bytestring is valid) you can freely convert between the
 two. This isomorphism can be constructed using the ``Decode`` method::
 
 	>>> utf8_decoder = lens.Decode('utf8')
-	>>> utf8_decoder.get()(b'Hello, \xe4\xb8\x96\xe7\x95\x8c') # doctest: +SKIP
+	>>> utf8_decoder.get()(b'Hello, \xe4\xb8\x96\xe7\x95\x8c')
 	'Hello, 世界'
 
 You can use ``set`` with an iso, but it will completely ignore the old
 state that you pass in::
 
-	>>> utf8_decoder.set('Hello, 世界')(b'ignored') # doctest: +SKIP
+	>>> utf8_decoder.set('Hello, 世界')(b'ignored')
 	b'Hello, \xe4\xb8\x96\xe7\x95\x8c'
 
 The value of an isomorphism is that you can flip them; you can turn the
 old getter into a setter and the old setter into a getter::
 
 	>>> utf8_encoder = utf8_decoder.flip()
-	>>> utf8_encoder.get()('Hello, 世界') # doctest: +SKIP
+	>>> utf8_encoder.get()('Hello, 世界')
 	b'Hello, \xe4\xb8\x96\xe7\x95\x8c'
-	>>> utf8_encoder.set(b'Hello, \xe4\xb8\x96\xe7\x95\x8c')('ignored') # doctest: +SKIP
+	>>> utf8_encoder.set(b'Hello, \xe4\xb8\x96\xe7\x95\x8c')('ignored')
 	'Hello, 世界'
 
 The flipped version of an isomorphism is still an isomorphism.

@@ -179,9 +179,9 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> from lenses import lens
             >>> lens.Decode(encoding='utf8')
             UnboundLens(DecodeIso('utf8', 'strict'))
-            >>> lens.Decode().get()(b'hello')  # doctest: +SKIP
+            >>> lens.Decode().get()(b'hello')
             'hello'
-            >>> lens.Decode().set('world')(b'hello')  # doctest: +SKIP
+            >>> lens.Decode().set('world')(b'hello')
             b'world'
         """
         return self._compose_optic(optics.DecodeIso(encoding, errors))

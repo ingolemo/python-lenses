@@ -125,7 +125,7 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
             >>> from lenses import lens
             >>> json_encoder = lens.Decode().Json().flip()
             >>> json_encode = json_encoder.get()
-            >>> json_encode(['hello', 'world'])  # doctest: +SKIP
+            >>> json_encode(['hello', 'world'])
             b'["hello", "world"]'
         """
         return UnboundLens(self._optic.re())

@@ -657,8 +657,8 @@ class ErrorIso(Isomorphism):
 
         >>> ErrorIso(Exception())
         ErrorIso(Exception())
-        >>> ErrorIso(Exception, '{}')  # doctest: +SKIP
-        ErrorLens(<class 'Exception'>, '{}')
+        >>> ErrorIso(Exception, '{}')
+        ErrorIso(<class 'Exception'>, '{}')
         >>> ErrorIso(Exception).view(True)
         Traceback (most recent call last):
           File "<stdin>", line 1, in ?

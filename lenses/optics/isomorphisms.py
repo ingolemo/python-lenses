@@ -8,9 +8,9 @@ class DecodeIso(Isomorphism):
 
         >>> DecodeIso()
         DecodeIso('utf-8', 'strict')
-        >>> DecodeIso().view(b'hello')  # doctest: +SKIP
+        >>> DecodeIso().view(b'hello')
         'hello'
-        >>> DecodeIso().set(b'hello', 'world')  # doctest: +SKIP
+        >>> DecodeIso().set(b'hello', 'world')
         b'world'
     """
 
@@ -36,7 +36,7 @@ class JsonIso(Isomorphism):
         >>> JsonIso()
         JsonIso()
         >>> state = '[{"points": [4, 7]}]'
-        >>> JsonIso().view(state) # doctest: +SKIP
+        >>> JsonIso().view(state)
         [{'points': [4, 7]}]
         >>> JsonIso().set(state, [{'points': [3]}])
         '[{"points": [3]}]'
