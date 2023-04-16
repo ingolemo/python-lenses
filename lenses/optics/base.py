@@ -1,5 +1,5 @@
 import functools
-from typing import Callable, cast, Iterable, List, Optional, TypeVar
+from typing import Callable, cast, Generic, Iterable, List, Optional, TypeVar
 
 from .. import typeclass
 from ..const import Const
@@ -51,7 +51,7 @@ def collect_args(n):
     return arg_collector
 
 
-class LensLike(object):
+class LensLike(Generic[S, T, A, B]):
     """A LensLike. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function (`LensLike.func`) that
     does all the hard work. This function is an uncurried form of the
