@@ -1,3 +1,4 @@
+import abc
 import functools
 from typing import Callable, cast, Generic, Iterable, List, Optional, TypeVar
 
@@ -51,7 +52,7 @@ def collect_args(n):
     return arg_collector
 
 
-class LensLike(Generic[S, T, A, B]):
+class LensLike(abc.ABC, Generic[S, T, A, B]):
     """A LensLike. Serves as the backbone of the lenses library. Acts as an
     object-oriented wrapper around a function (`LensLike.func`) that
     does all the hard work. This function is an uncurried form of the
@@ -126,6 +127,7 @@ class LensLike(Generic[S, T, A, B]):
 
     __slots__ = ()
 
+    @abc.abstractmethod
     def func(self, f, state):
         """Intended to be overridden by subclasses. Raises
         NotImplementedError."""
@@ -443,6 +445,9 @@ class Review(LensLike):
 
     def __init__(self, pack: Callable[[B], T]) -> None:
         self.pack = pack
+
+    def func(self, f, state):
+        return typeclass.fmap(f(state), self.pack)
 
     def re(self):
         return Getter(self.pack)

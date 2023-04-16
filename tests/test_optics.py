@@ -46,12 +46,7 @@ def timer(function, *args, **kwargs):
 
 def test_LensLike():
     with pytest.raises(TypeError):
-        b.LensLike().view(None)
-
-
-def test_LensLike_func_not_implemented():
-    with pytest.raises(NotImplementedError):
-        b.LensLike().func(None, None)
+        b.LensLike()
 
 
 def test_LensLike_no_focus_raises():
