@@ -159,10 +159,16 @@ class ItemLens(Lens):
     def setter(self, state, focus):
         data = state.copy()
         if focus is None:
-            del data[self.key]
+            try:
+                del data[self.key]
+            except KeyError:
+                pass
             return data
         if focus[0] != self.key:
-            del data[self.key]
+            try:
+                del data[self.key]
+            except KeyError:
+                pass
         data[focus[0]] = focus[1]
         return data
 
