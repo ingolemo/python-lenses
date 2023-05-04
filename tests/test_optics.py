@@ -326,6 +326,12 @@ def test_ItemLens_set():
     assert itemlens.set(data, (2, "everyone")) == {0: "hello", 2: "everyone"}
 
 
+def test_ItemLens_unset_nonexistent():
+    data = {0: "hello"}
+    itemlens = b.ItemLens(1)
+    assert itemlens.set(data, None) == data
+
+
 def test_ItemByValueLens_view():
     data = {"hello": 0, "world": 1}
     assert b.ItemByValueLens(1).view(data) == ("world", 1)
