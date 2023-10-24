@@ -39,7 +39,7 @@ lint_dependencies = optional_dependencies + [
 
 setuptools.setup(
     name="lenses",
-    version="1.1.0",
+    version="1.2.0",
     description="A lens library for python",
     long_description=long_desc,
     url="https://github.com/ingolemo/python-lenses",
