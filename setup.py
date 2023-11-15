@@ -17,6 +17,7 @@ dependencies = []
 
 documentation_dependencies = [
     "sphinx",
+    "sphinx_rtd_theme",
 ]
 
 optional_dependencies = [
