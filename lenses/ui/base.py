@@ -321,9 +321,8 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens.Get('baz').get()({'foo': 'bar'})
             >>> lens.Get('baz', []).get()({'foo': 'bar'})
             []
-            >>> from collections import OrderedDict
-            >>> lens.Get('baz').set('qux')(OrderedDict({'foo': 'bar'}))
-            OrderedDict([('foo', 'bar'), ('baz', 'qux')])
+            >>> lens.Get('baz').set('qux')({'foo': 'bar'})
+            {'foo': 'bar', 'baz': 'qux'}
         """
         return self._compose_optic(optics.GetitemOrElseLens(key, default))
 
@@ -484,8 +483,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         the dictionary.
 
             >>> from lenses import lens
-            >>> from collections import OrderedDict
-            >>> data = OrderedDict([(1, 10), (2, 20)])
+            >>> data = {1: 10, 2: 20}
             >>> lens.Item(1)
             UnboundLens(ItemLens(1))
             >>> lens.Item(1).get()(data)
@@ -493,9 +491,9 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens.Item(3).get()(data) is None
             True
             >>> lens.Item(1).set((1, 11))(data)
-            OrderedDict([(1, 11), (2, 20)])
+            {1: 11, 2: 20}
             >>> lens.Item(1).set(None)(data)
-            OrderedDict([(2, 20)])
+            {2: 20}
         """
         return self._compose_optic(optics.ItemLens(key))
 
@@ -507,8 +505,7 @@ class BaseUiLens(Generic[S, T, A, B]):
         assumption then you're on your own.
 
             >>> from lenses import lens
-            >>> from collections import OrderedDict
-            >>> data = OrderedDict([(1, 10), (2, 20)])
+            >>> data = {1: 10, 2: 20}
             >>> lens.ItemByValue(10)
             UnboundLens(ItemByValueLens(10))
             >>> lens.ItemByValue(10).get()(data)
@@ -516,9 +513,9 @@ class BaseUiLens(Generic[S, T, A, B]):
             >>> lens.ItemByValue(30).get()(data) is None
             True
             >>> lens.ItemByValue(10).set((3, 10))(data)
-            OrderedDict([(2, 20), (3, 10)])
+            {2: 20, 3: 10}
             >>> lens.ItemByValue(10).set(None)(data)
-            OrderedDict([(2, 20)])
+            {2: 20}
         """
         return self._compose_optic(optics.ItemByValueLens(value))
 
@@ -527,14 +524,13 @@ class BaseUiLens(Generic[S, T, A, B]):
         a dictionary. Analogous to `dict.items`.
 
             >>> from lenses import lens
-            >>> from collections import OrderedDict
-            >>> data = OrderedDict([(1, 10), (2, 20)])
+            >>> data = {1: 10, 2: 20}
             >>> lens.Items()
             UnboundLens(ItemsTraversal())
             >>> lens.Items().collect()(data)
             [(1, 10), (2, 20)]
             >>> lens.Items()[1].modify(lambda n: n + 1)(data)
-            OrderedDict([(1, 11), (2, 21)])
+            {1: 11, 2: 21}
         """
         return self._compose_optic(optics.ItemsTraversal())
 
@@ -602,14 +598,13 @@ class BaseUiLens(Generic[S, T, A, B]):
         `dict.keys`.
 
             >>> from lenses import lens
-            >>> from collections import OrderedDict
-            >>> data = OrderedDict([(1, 10), (2, 20)])
+            >>> data = {1: 10, 2: 20}
             >>> lens.Keys()
             UnboundLens(ItemsTraversal() & GetitemLens(0))
             >>> lens.Keys().collect()(data)
             [1, 2]
             >>> lens.Keys().modify(lambda n: n + 1)(data)
-            OrderedDict([(2, 10), (3, 20)])
+            {2: 10, 3: 20}
         """
         return self._compose_optic(optics.ItemsTraversal() & optics.GetitemLens(0))
 
@@ -875,14 +870,13 @@ class BaseUiLens(Generic[S, T, A, B]):
         `dict.values`.
 
             >>> from lenses import lens
-            >>> from collections import OrderedDict
-            >>> data = OrderedDict([(1, 10), (2, 20)])
+            >>> data = {1: 10, 2: 20}
             >>> lens.Values()
             UnboundLens(ItemsTraversal() & GetitemLens(1))
             >>> lens.Values().collect()(data)
             [10, 20]
             >>> lens.Values().modify(lambda n: n + 1)(data)
-            OrderedDict([(1, 11), (2, 21)])
+            {1: 11, 2: 21}
         """
         return self._compose_optic(optics.ItemsTraversal() & optics.GetitemLens(1))
 

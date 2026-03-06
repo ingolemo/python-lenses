@@ -135,16 +135,15 @@ class ItemLens(Lens):
 
         >>> ItemLens(1)
         ItemLens(1)
-        >>> from collections import OrderedDict
-        >>> state = OrderedDict([(1, 10), (2, 20)])
+        >>> state = {1: 10, 2: 20}
         >>> ItemLens(1).view(state)
         (1, 10)
         >>> ItemLens(3).view(state) is None
         True
         >>> ItemLens(1).set(state, (1, 11))
-        OrderedDict([(1, 11), (2, 20)])
+        {1: 11, 2: 20}
         >>> ItemLens(1).set(state, None)
-        OrderedDict([(2, 20)])
+        {2: 20}
     """
 
     def __init__(self, key: Any) -> None:
@@ -185,16 +184,15 @@ class ItemByValueLens(Lens):
 
         >>> ItemByValueLens(10)
         ItemByValueLens(10)
-        >>> from collections import OrderedDict
-        >>> state = OrderedDict([(1, 10), (2, 20)])
+        >>> state = {1: 10, 2: 20}
         >>> ItemByValueLens(10).view(state)
         (1, 10)
         >>> ItemByValueLens(30).view(state) is None
         True
         >>> ItemByValueLens(10).set(state, (3, 10))
-        OrderedDict([(2, 20), (3, 10)])
+        {2: 20, 3: 10}
         >>> ItemByValueLens(10).set(state, None)
-        OrderedDict([(2, 20)])
+        {2: 20}
     """
 
     def __init__(self, value):

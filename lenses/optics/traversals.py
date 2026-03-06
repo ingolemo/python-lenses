@@ -71,14 +71,13 @@ class ItemsTraversal(Traversal):
     """A traversal focusing key-value tuples that are the items of a
     dictionary. Analogous to `dict.items`.
 
-        >>> from collections import OrderedDict
-        >>> state = OrderedDict([(1, 10), (2, 20)])
         >>> ItemsTraversal()
         ItemsTraversal()
+        >>> state = {1: 10, 2: 20}
         >>> ItemsTraversal().to_list_of(state)
         [(1, 10), (2, 20)]
         >>> ItemsTraversal().over(state, lambda n: (n[0], n[1] + 1))
-        OrderedDict([(1, 11), (2, 21)])
+        {1: 11, 2: 21}
     """
 
     def __init__(self):
