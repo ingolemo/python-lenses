@@ -1,4 +1,4 @@
-from typing import Callable, Iterable, List, Optional, overload, Type, TypeVar
+from typing import Callable, Iterable, List, Optional, Type, TypeVar, overload
 
 from .. import optics
 from .base import BaseUiLens
@@ -131,12 +131,12 @@ class UnboundLens(BaseUiLens[S, T, A, B]):
         return UnboundLens(self._optic.re())
 
     @overload
-    def __and__(self, other: "UnboundLens[A, B, X, Y]") -> "UnboundLens[S, T, X, Y]":
-        ...
+    def __and__(
+        self, other: "UnboundLens[A, B, X, Y]"
+    ) -> "UnboundLens[S, T, X, Y]": ...
 
     @overload
-    def __and__(self, other: Callable[[A], B]) -> StateFunction[A, B]:
-        ...
+    def __and__(self, other: Callable[[A], B]) -> StateFunction[A, B]: ...
 
     def __and__(self, other):
         """Refine the current focus of this lens by composing it with
@@ -253,12 +253,12 @@ class BoundLens(BaseUiLens[S, T, A, B]):
         return self._optic.over(self._state, func)
 
     @overload
-    def __and__(self, other: "UnboundLens[A, B, X, Y]") -> "UnboundLens[S, T, X, Y]":
-        ...
+    def __and__(
+        self, other: "UnboundLens[A, B, X, Y]"
+    ) -> "UnboundLens[S, T, X, Y]": ...
 
     @overload
-    def __and__(self, other: Callable[[A], B]) -> B:
-        ...
+    def __and__(self, other: Callable[[A], B]) -> B: ...
 
     def __and__(self, other):
         """Refine the current focus of this lens by composing it with
