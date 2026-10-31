@@ -503,3 +503,36 @@ def test_ZoomTraversal_set():
     zoomer = b.GetitemLens(0) & b.ZoomTraversal()
     data = [bind([1, 2, 3])[1]]
     assert zoomer.set(data, 7) == [[1, 7, 3]]
+
+
+@pytest.mark.parametrize(
+    ("optic", "kind"),
+    [
+        pytest.param(lens.Parts(), "Lens", id="identity"),
+        pytest.param(lens[0].Parts(), "Lens", id="lens"),
+        pytest.param(lens.F(abs).Parts(), "Getter", id="getter"),
+        pytest.param(bind([1, 2]).Parts(), "Lens", id="bound-identity"),
+        pytest.param(bind([1, 2])[0].Parts(), "Lens", id="bound-lens"),
+        pytest.param(bind(-3).F(abs).Parts(), "Getter", id="bound-getter"),
+        pytest.param(lens.Each().Parts(), "Lens", id="traversal"),
+        pytest.param(lens.Iter().Parts(), "Getter", id="fold"),
+        pytest.param(bind([1, 2]).Each().Parts(), "Lens", id="bound-traversal"),
+        pytest.param(bind([1, 2]).Iter().Parts(), "Getter", id="bound-fold"),
+        pytest.param(lens.Each().Parts().Parts(), "Lens", id="nested-lens"),
+        pytest.param(lens.Iter().Parts().Parts(), "Getter", id="nested-getter"),
+    ],
+)
+def test_parts_kind_for_supported_optics(optic, kind):
+    assert optic.kind() == kind
+
+
+def test_parts_preserve_read_write_and_input():
+    data = [1, 2]
+    original = data[:]
+    assert lens[0].get()(data) == 1
+    assert lens[0].Parts().get()(data) == [1]
+    assert lens.F(abs).Parts().get()(-3) == [3]
+    assert lens[0].set(9)(data) == [9, 2]
+    assert lens[0].Parts().set([9])(data) == [9, 2]
+    assert bind(data)[0].Parts().set([9]) == [9, 2]
+    assert data == original

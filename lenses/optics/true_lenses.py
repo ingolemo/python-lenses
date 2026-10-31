@@ -237,7 +237,8 @@ class PartsLens(Lens):
         return "PartsLens({!r})".format(self.optic)
 
     def kind(self):
-        if self.optic.kind() == Traversal:
+        kind = self.optic.kind()
+        if kind is not None and issubclass(kind, Traversal):
             return Lens
-        elif self.optic.kind() == Fold:
+        elif kind is not None and issubclass(kind, Fold):
             return Getter
