@@ -100,6 +100,8 @@ def _str_setitem(self: str, key: int, value: str) -> str:
 
 @setitem.register(tuple)
 def _tuple_setitem(self: Tuple[A, ...], key: int, value: A) -> Tuple[A, ...]:
+    if isinstance(key, int) and -len(self) <= key < 0:
+        key += len(self)
     return tuple(value if i == key else item for i, item in enumerate(self))
 
 
