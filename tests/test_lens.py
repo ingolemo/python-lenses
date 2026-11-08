@@ -283,6 +283,43 @@ def test_lens_getitem_direct():
     assert bind([1, 2, 3])[1].get() == 2
 
 
+@pytest.mark.parametrize("explicit", [True, False], ids=["GetItem", "subscript"])
+@pytest.mark.parametrize(
+    ("key", "set_expected", "modify_expected"),
+    [
+        (-3, (9, 2, 3), (11, 2, 3)),
+        (-2, (1, 9, 3), (1, 12, 3)),
+        (-1, (1, 2, 9), (1, 2, 13)),
+    ],
+)
+@pytest.mark.parametrize("operation", ["set", "modify"])
+def test_lens_getitem_tuple_negative_write(
+    explicit, key, set_expected, modify_expected, operation
+):
+    state = (1, 2, 3)
+    optic = lens.GetItem(key) if explicit else lens[key]
+    assert optic.get()(state) == state[key]
+
+    if operation == "set":
+        result = optic.set(9)(state)
+        expected = set_expected
+    else:
+        result = optic.modify(lambda value: value + 10)(state)
+        expected = modify_expected
+
+    assert type(result) is tuple
+    assert result == expected
+    assert state == (1, 2, 3)
+
+
+@pytest.mark.parametrize(
+    ("state", "key"), [((1, 2, 3), -4), ((1, 2, 3), 3), ((), -1), ((), 0)]
+)
+def test_lens_getitem_tuple_out_of_range_raises(state, key):
+    with pytest.raises(IndexError):
+        lens.GetItem(key).set(9)(state)
+
+
 def test_lens_getattr():
     nt = collections.namedtuple("nt", "attr")
     assert bind(nt(3)).GetAttr("attr").get() == 3
