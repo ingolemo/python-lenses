@@ -54,6 +54,64 @@ def test_setitem_imm_tuple():
     assert s.setitem((1, 2, 3), 0, 4) == (4, 2, 3)
 
 
+@pytest.mark.parametrize(
+    ("state", "key", "position"),
+    [
+        ((1, 2, 3), -3, 0),
+        ((1, 2, 3), -2, 1),
+        ((1, 2, 3), -1, 2),
+        ((1, 2, 3), 0, 0),
+        ((1, 2, 3), 1, 1),
+        ((1, 2, 3), 2, 2),
+        ((1,), -1, 0),
+        ((1,), 0, 0),
+    ],
+)
+def test_setitem_imm_tuple_positions(state, key, position):
+    original = state[:]
+    replacement = []
+    expected = list(state)
+    expected[position] = replacement
+
+    result = s.setitem(state, key, replacement)
+
+    assert type(result) is tuple
+    assert result == tuple(expected)
+    assert result[position] is replacement
+    assert state == original
+
+
+@pytest.mark.parametrize(
+    ("state", "key"),
+    [
+        ((1, 2, 3), -4),
+        ((1, 2, 3), 3),
+        ((1, 2, 3), -100),
+        ((1, 2, 3), 100),
+        ((), -1),
+        ((), 0),
+        ((), 1),
+    ],
+)
+def test_setitem_imm_tuple_out_of_range_unchanged(state, key):
+    assert s.setitem(state, key, 9) == state
+
+
+@pytest.mark.parametrize(
+    ("key", "expected"),
+    [
+        (False, (9, 2, 3)),
+        (True, (1, 9, 3)),
+        (1.0, (1, 9, 3)),
+        (-1.0, (1, 2, 3)),
+        ("1", (1, 2, 3)),
+        (slice(0, 1), (1, 2, 3)),
+    ],
+)
+def test_setitem_imm_tuple_preserves_other_key_comparisons(key, expected):
+    assert s.setitem((1, 2, 3), key, 9) == expected
+
+
 def test_setattr_imm_custom_class():
     class C(object):
         def __init__(self, attr):
